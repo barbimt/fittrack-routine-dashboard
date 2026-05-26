@@ -25,3 +25,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Local-only docs & Cursor config (not published to remote)
+/docs/
+/AGENTS.md
+/.cursor/
+/scripts/
