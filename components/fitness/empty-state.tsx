@@ -1,0 +1,56 @@
+import { cn } from "@/lib/utils";
+import { Inbox } from "lucide-react";
+import { Button } from "./button";
+
+interface EmptyStateProps {
+  icon?: React.ReactNode;
+  title: string;
+  description: string;
+  primaryAction?: {
+    label: string;
+    onClick: () => void;
+  };
+  secondaryAction?: {
+    label: string;
+    onClick: () => void;
+  };
+  className?: string;
+}
+
+export function EmptyState({
+  icon,
+  title,
+  description,
+  primaryAction,
+  secondaryAction,
+  className,
+}: EmptyStateProps) {
+  return (
+    <div className={cn("flex flex-col items-center text-center py-12 px-4", className)}>
+      <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-muted mb-4">
+        {icon || <Inbox className="h-8 w-8 text-muted-foreground" />}
+      </div>
+
+      <h3 className="text-lg font-semibold text-foreground mb-2">{title}</h3>
+      <p className="text-sm text-muted-foreground max-w-sm mb-6">{description}</p>
+
+      <div className="flex flex-col gap-3 sm:flex-row">
+        {primaryAction && (
+          <Button type="button" onClick={primaryAction.onClick} className="min-h-11">
+            {primaryAction.label}
+          </Button>
+        )}
+        {secondaryAction && (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={secondaryAction.onClick}
+            className="min-h-11"
+          >
+            {secondaryAction.label}
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+}
