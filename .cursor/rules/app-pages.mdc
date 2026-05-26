@@ -1,0 +1,28 @@
+---
+description: Next.js App Router pages for FitTrack screens
+globs: app/**/*.tsx
+alwaysApply: false
+---
+
+# App pages
+
+## Structure
+
+One route per screen under `app/{route}/page.tsx`. Wrap content in `<AppShell>`.
+
+## Client vs server
+
+Use `"use client"` when the page needs `useState`, events, or browser APIs. Prototype pages are mostly client components.
+
+## Layout
+
+- Default content: `max-w-4xl` or `max-w-5xl mx-auto px-4 py-6 pb-24` (room for mobile bottom nav)
+- Desktop dashboard: pass `aside={<SummaryPanel ... />}` to `AppShell` on `/` only when appropriate
+
+## Navigation
+
+Add new routes to `navItems` in `components/layout/sidebar.tsx` and consider `MobileNavigation` (max 5 bottom tabs — overflow goes to sidebar menu).
+
+## Mock data
+
+Import types and data from `@/lib/mock-data`. When adding state, plan to lift data to context/hook — do not duplicate types in pages.

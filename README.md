@@ -62,16 +62,35 @@ Tailwind usage examples: `bg-background`, `bg-card`, `bg-surface-muted`, `text-m
 ### Data
 - `lib/mock-data.ts` — training days, exercises, sets
 
-## Next steps in Cursor
+## Documentation for Cursor & future chats
 
-1. Add React state for set completion and rep inputs on `/`.
-2. Wire navigation and optional route guards.
-3. Implement Excel upload parsing on `/upload`.
-4. Replace chart placeholders on `/progress`.
-5. Connect routine editor to real CRUD + API.
+| File | Purpose |
+|------|---------|
+| [AGENTS.md](./AGENTS.md) | **Start here** — agent instructions, constraints, paths |
+| [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) | Stack, layering, data flow |
+| [docs/DOMAIN.md](./docs/DOMAIN.md) | Types, progress rules, mock week |
+| [docs/ROADMAP.md](./docs/ROADMAP.md) | Phased implementation checklist |
+| [docs/CURSOR.md](./docs/CURSOR.md) | How rules & skills work |
+| [.cursor/README.md](./.cursor/README.md) | Index of rules and skills |
+
+### Cursor skills (`.cursor/skills/`)
+
+- `fittrack-domain` — types, mock data, progress helpers
+- `fittrack-ui` — screens, components, design tokens
+- `fittrack-workout-state` — dashboard state (sets, reps, reset)
+- `fittrack-excel-import` — `.xlsx` import planning/implementation
+
+### Cursor rules (`.cursor/rules/`)
+
+Auto-attached conventions for the whole project, fitness components, app pages, and design tokens.
+
+## Next steps
+
+See [docs/ROADMAP.md](./docs/ROADMAP.md). Suggested order: workout state → persistence → Excel import → editor → charts.
 
 ## Scripts
 
 - `pnpm dev` — development server
 - `pnpm build` — production build
 - `pnpm lint` — ESLint
+- `./scripts/check.sh` — lint + build

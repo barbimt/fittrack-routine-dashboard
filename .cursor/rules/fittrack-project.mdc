@@ -1,0 +1,31 @@
+---
+description: FitTrack core project context, constraints, and commands
+alwaysApply: true
+---
+
+# FitTrack — project rules
+
+## Identity
+
+FitTrack Routine Dashboard: premium mobile-first workout UI. Progress = **completed sets**, not reps.
+
+## Constraints
+
+- No `any` in TypeScript
+- No backend/auth/DB unless user explicitly requests
+- No real Excel parsing unless user explicitly requests
+- No `localStorage` unless user explicitly requests
+- Minimize scope; reuse `components/fitness/*` and `lib/mock-data` types
+- Calm design: warm stone, sage accent — no neon gym colors
+
+## Commands
+
+`pnpm dev` | `pnpm build` | `pnpm lint`
+
+## Before finishing
+
+Run `pnpm build` on non-trivial changes.
+
+## Docs
+
+Read `AGENTS.md` and `docs/DOMAIN.md` for types and progress rules.
