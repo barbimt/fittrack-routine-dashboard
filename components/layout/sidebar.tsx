@@ -12,6 +12,7 @@ import {
   Dumbbell,
   Home,
 } from "lucide-react";
+import { LogoutButton } from "@/features/auth/components/LogoutButton";
 
 export interface NavItem {
   label: string;
@@ -79,6 +80,10 @@ export function Sidebar({ onNavigate, className }: SidebarProps) {
           </Link>
         ))}
       </nav>
+
+      <div className="px-3 py-3 border-t border-sidebar-border">
+        <LogoutButton />
+      </div>
     </aside>
   );
 }
