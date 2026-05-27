@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 
 interface UploadDropzoneProps {
   onFileSelect?: (file: File) => void;
+  onChangeFile?: () => void;
   isUploading?: boolean;
   uploadedFile?: { name: string; size: number } | null;
   error?: string | null;
@@ -15,16 +16,19 @@ interface UploadDropzoneProps {
 
 export function UploadDropzone({
   onFileSelect,
+  onChangeFile,
   isUploading,
   uploadedFile,
   error,
   className,
 }: UploadDropzoneProps) {
+  const isXlsx = (file: File) => file.name.toLowerCase().endsWith(".xlsx");
+
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault();
       const file = e.dataTransfer.files[0];
-      if (file && file.name.endsWith(".xlsx")) {
+      if (file && isXlsx(file)) {
         onFileSelect?.(file);
       }
     },
@@ -34,9 +38,10 @@ export function UploadDropzone({
   const handleFileInput = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
-      if (file) {
+      if (file && isXlsx(file)) {
         onFileSelect?.(file);
       }
+      e.target.value = "";
     },
     [onFileSelect]
   );
@@ -58,7 +63,7 @@ export function UploadDropzone({
             <p className="font-medium text-card-foreground truncate">{uploadedFile.name}</p>
             <p className="text-sm text-muted-foreground">{formatFileSize(uploadedFile.size)}</p>
           </div>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" type="button" onClick={() => onChangeFile?.()}>
             Change file
           </Button>
         </div>

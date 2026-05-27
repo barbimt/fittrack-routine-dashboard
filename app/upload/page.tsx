@@ -1,32 +1,14 @@
 "use client";
 
-import { useState } from "react";
 import { AppShell } from "@/components/app-shell";
-import { UploadDropzone } from "@/components/fitness/upload-dropzone";
-import { EmptyState } from "@/components/fitness/empty-state";
+import { RoutineImportForm } from "@/features/routine-import/components/RoutineImportForm";
+import { downloadRoutineTemplate } from "@/features/routine-import/utils/downloadRoutineTemplate";
+import { COLUMN_LABELS } from "@/features/routine-import/types";
 import { Button } from "@/components/fitness/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileSpreadsheet, Download, CheckCircle2, AlertTriangle } from "lucide-react";
-import { cn } from "@/lib/utils";
-
-type UploadDemoState = "empty" | "ready" | "uploaded" | "error";
+import { FileSpreadsheet, Download, CheckCircle2 } from "lucide-react";
 
 export default function UploadPage() {
-  const [demoState, setDemoState] = useState<UploadDemoState>("empty");
-  const [uploadedFile, setUploadedFile] = useState<{ name: string; size: number } | null>(
-    null
-  );
-
-  const handleFileSelect = (file: File) => {
-    setUploadedFile({ name: file.name, size: file.size });
-    setDemoState("uploaded");
-  };
-
-  const errorMessage =
-    demoState === "error"
-      ? "Invalid file format. Please upload a .xlsx file with the correct column headers."
-      : null;
-
   return (
     <AppShell>
       <div className="mx-auto max-w-3xl px-4 py-6 pb-24 lg:px-8 lg:py-8 lg:pb-8">
@@ -35,96 +17,22 @@ export default function UploadPage() {
             Upload Routine
           </h1>
           <p className="mt-2 text-muted-foreground">
-            Import your workout routine from Excel — visual prototype only, no parsing yet.
+            Import your workout routine from Excel. Select a .xlsx file to preview days and
+            exercises before saving.
           </p>
         </header>
 
-        {/* Prototype state toggles (for design review) */}
-        <div
-          className="mb-6 flex flex-wrap gap-2 rounded-xl border border-border bg-surface-muted/50 p-3"
-          role="group"
-          aria-label="Preview upload states"
-        >
-          <span className="w-full text-xs font-medium text-muted-foreground mb-1">
-            Preview states (mock)
-          </span>
-          {(
-            [
-              ["empty", "Empty"],
-              ["ready", "Dropzone"],
-              ["uploaded", "Uploaded"],
-              ["error", "Error"],
-            ] as const
-          ).map(([state, label]) => (
-            <button
-              key={state}
-              type="button"
-              onClick={() => {
-                setDemoState(state);
-                if (state === "uploaded") {
-                  setUploadedFile({
-                    name: "glutes-hamstrings-routine.xlsx",
-                    size: 28416,
-                  });
-                } else if (state === "empty") {
-                  setUploadedFile(null);
-                } else {
-                  setUploadedFile(null);
-                }
-              }}
-              className={cn(
-                "rounded-lg px-3 py-1.5 text-xs font-medium transition-colors min-h-[36px]",
-                demoState === state
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-card border border-border text-muted-foreground hover:text-foreground"
-              )}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
+        <RoutineImportForm />
 
-        <section className="mb-8" aria-label="File upload">
-          {demoState === "empty" ? (
-            <div className="rounded-2xl border border-dashed border-border bg-card p-2">
-              <EmptyState
-                icon={
-                  <FileSpreadsheet className="h-8 w-8 text-muted-foreground" aria-hidden />
-                }
-                title="No file selected"
-                description="Drop your .xlsx routine file here or browse from your device."
-                primaryAction={{
-                  label: "Choose file",
-                  onClick: () => setDemoState("ready"),
-                }}
-              />
-            </div>
-          ) : (
-            <UploadDropzone
-              onFileSelect={handleFileSelect}
-              uploadedFile={demoState === "uploaded" ? uploadedFile : null}
-              error={errorMessage}
-              isUploading={false}
-            />
-          )}
-        </section>
-
-        {demoState === "uploaded" && uploadedFile && (
-          <div className="mb-8 flex justify-end">
-            <Button size="lg" type="button">
-              Import routine
-            </Button>
-          </div>
-        )}
-
-        <Card className="mb-8 rounded-2xl shadow-sm">
+        <Card className="mb-8 mt-8 rounded-2xl shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <FileSpreadsheet className="h-5 w-5 text-primary" aria-hidden />
               Example file format
             </CardTitle>
             <CardDescription>
-              Your Excel file should follow this structure for a successful import.
+              One sheet per training day. Row 1 must include {COLUMN_LABELS.EXERCISE} and{" "}
+              {COLUMN_LABELS.SETS_X_REPS} (English headers).
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -133,61 +41,53 @@ export default function UploadPage() {
                 <thead>
                   <tr className="border-b border-border bg-surface-muted/50">
                     <th className="px-3 py-2 text-left font-medium text-muted-foreground">
-                      Day
+                      {COLUMN_LABELS.EXERCISE}
                     </th>
                     <th className="px-3 py-2 text-left font-medium text-muted-foreground">
-                      Exercise
+                      {COLUMN_LABELS.SETS_X_REPS}
                     </th>
                     <th className="px-3 py-2 text-left font-medium text-muted-foreground">
-                      Muscle
+                      {COLUMN_LABELS.WEIGHT}
                     </th>
                     <th className="px-3 py-2 text-left font-medium text-muted-foreground">
-                      Sets
-                    </th>
-                    <th className="px-3 py-2 text-left font-medium text-muted-foreground">
-                      Reps
-                    </th>
-                    <th className="px-3 py-2 text-left font-medium text-muted-foreground">
-                      Weight
-                    </th>
-                    <th className="px-3 py-2 text-left font-medium text-muted-foreground">
-                      Rest
+                      {COLUMN_LABELS.NOTES}
                     </th>
                   </tr>
                 </thead>
                 <tbody className="text-foreground">
                   <tr className="border-b border-border/50">
-                    <td className="px-3 py-2">Monday</td>
                     <td className="px-3 py-2">Hip Thrust</td>
-                    <td className="px-3 py-2">Glutes</td>
-                    <td className="px-3 py-2">4</td>
-                    <td className="px-3 py-2">10</td>
+                    <td className="px-3 py-2">4x10</td>
                     <td className="px-3 py-2">60kg</td>
-                    <td className="px-3 py-2">90s</td>
+                    <td className="px-3 py-2">2s pause at top</td>
                   </tr>
                   <tr className="border-b border-border/50">
-                    <td className="px-3 py-2">Monday</td>
                     <td className="px-3 py-2">RDL</td>
-                    <td className="px-3 py-2">Hamstrings</td>
-                    <td className="px-3 py-2">3</td>
-                    <td className="px-3 py-2">8</td>
+                    <td className="px-3 py-2">3x8</td>
                     <td className="px-3 py-2">45kg</td>
-                    <td className="px-3 py-2">120s</td>
+                    <td className="px-3 py-2">—</td>
                   </tr>
                   <tr>
-                    <td className="px-3 py-2">Tuesday</td>
-                    <td className="px-3 py-2">Lat Pulldown</td>
-                    <td className="px-3 py-2">Back</td>
-                    <td className="px-3 py-2">4</td>
-                    <td className="px-3 py-2">12</td>
-                    <td className="px-3 py-2">35kg</td>
-                    <td className="px-3 py-2">90s</td>
+                    <td className="px-3 py-2">Bulgarian Split Squat</td>
+                    <td className="px-3 py-2">3x10 per leg</td>
+                    <td className="px-3 py-2">12kg</td>
+                    <td className="px-3 py-2">—</td>
                   </tr>
                 </tbody>
               </table>
             </div>
+            <p className="mt-3 text-xs text-muted-foreground">
+              Sheet name example:{" "}
+              <span className="font-medium">Day 1 - FULL BODY</span>
+            </p>
             <div className="mt-4 border-t border-border pt-4">
-              <Button variant="outline" size="sm" type="button" className="gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                type="button"
+                className="gap-2"
+                onClick={() => downloadRoutineTemplate()}
+              >
                 <Download className="h-4 w-4" aria-hidden />
                 Download template
               </Button>
@@ -198,16 +98,16 @@ export default function UploadPage() {
         <Card className="rounded-2xl shadow-sm">
           <CardHeader>
             <CardTitle className="text-base">Validation checklist</CardTitle>
-            <CardDescription>Future import rules — shown for UI planning</CardDescription>
+            <CardDescription>Rules applied when you select a file</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <ul className="space-y-3">
               {[
-                "File must be in .xlsx format",
-                "First row should contain column headers",
-                "Day column uses names like Monday, Tuesday",
-                "Sets and Reps columns contain numbers",
-                "Weight may include units (kg, lbs)",
+                "File must be .xlsx",
+                "Each sheet becomes one training day",
+                `Required columns: ${COLUMN_LABELS.EXERCISE}, ${COLUMN_LABELS.SETS_X_REPS}`,
+                `Optional columns: ${COLUMN_LABELS.WEIGHT}, ${COLUMN_LABELS.NOTES}`,
+                `Empty rows and rows without ${COLUMN_LABELS.EXERCISE} are skipped`,
               ].map((requirement) => (
                 <li key={requirement} className="flex items-start gap-3 text-sm">
                   <CheckCircle2
@@ -218,15 +118,6 @@ export default function UploadPage() {
                 </li>
               ))}
             </ul>
-            {demoState === "error" && (
-              <div
-                className="flex items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive"
-                role="alert"
-              >
-                <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" aria-hidden />
-                <p>{errorMessage}</p>
-              </div>
-            )}
           </CardContent>
         </Card>
       </div>
