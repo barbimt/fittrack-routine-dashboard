@@ -28,6 +28,8 @@ function routineNameFromFileName(fileName: string): string {
   const titled = words
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(" ");
+  // Avoid "Routine Routine …" when the filename already starts with "Routine".
+  if (/^routine\b/i.test(titled)) return titled;
   return `Routine ${titled}`;
 }
 
