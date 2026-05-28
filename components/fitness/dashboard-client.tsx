@@ -10,7 +10,10 @@ import { Button } from "@/components/fitness/button";
 import { getCompletedSets, getTotalSets } from "@/lib/mock-data";
 import type { TrainingDay } from "@/lib/mock-data";
 import { mergeSetLogsIntoDay } from "@/features/routines/routineMapper";
-import { getOrCreateDaySession } from "@/features/routines/actions/sessionActions";
+import {
+  getOrCreateDaySession,
+  toggleSetLog,
+} from "@/features/routines/actions/sessionActions";
 import { RotateCcw, Calendar } from "lucide-react";
 
 interface DashboardClientProps {
@@ -57,6 +60,60 @@ export function DashboardClient({
     month: "long",
     day: "numeric",
   });
+
+  // UUID regex — only toggle rows that exist in the DB.
+  const isDbId = (id: string) =>
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+      id
+    );
+
+  const handleSetToggle = (setId: string) => {
+    if (!isDbId(setId)) return; // set log not yet materialised — ignore
+
+    // Find current completed state so we know what to flip.
+    let currentCompleted = false;
+    for (const day of daysData) {
+      for (const exercise of day.exercises) {
+        const found = exercise.sets.find((s) => s.id === setId);
+        if (found) {
+          currentCompleted = found.completed;
+          break;
+        }
+      }
+    }
+    const nextCompleted = !currentCompleted;
+
+    // Optimistic update — flip immediately in local state.
+    setDaysData((prev) =>
+      prev.map((day) => ({
+        ...day,
+        exercises: day.exercises.map((exercise) => ({
+          ...exercise,
+          sets: exercise.sets.map((set) =>
+            set.id === setId ? { ...set, completed: nextCompleted } : set
+          ),
+        })),
+      }))
+    );
+
+    // Persist to DB in the background.
+    toggleSetLog(setId, nextCompleted).then((result) => {
+      if (!result.ok) {
+        // Revert on error.
+        setDaysData((prev) =>
+          prev.map((day) => ({
+            ...day,
+            exercises: day.exercises.map((exercise) => ({
+              ...exercise,
+              sets: exercise.sets.map((set) =>
+                set.id === setId ? { ...set, completed: currentCompleted } : set
+              ),
+            })),
+          }))
+        );
+      }
+    });
+  };
 
   const handleSelectDay = (dayId: string) => {
     setSelectedDayId(dayId);
@@ -146,7 +203,7 @@ export function DashboardClient({
             <ExerciseCard
               key={exercise.id}
               exercise={exercise}
-              onSetToggle={() => undefined}
+              onSetToggle={handleSetToggle}
               onRepsChange={() => undefined}
             />
           ))}

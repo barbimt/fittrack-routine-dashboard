@@ -114,3 +114,38 @@ export async function getOrCreateDaySession(
     setLogs: (setLogs ?? []) as WorkoutSetLog[],
   };
 }
+
+export type ToggleResult =
+  | { ok: true }
+  | { ok: false; error: string };
+
+/**
+ * Flips the completed state of a single workout_set_log row.
+ * Only updates rows owned by the authenticated user (RLS also enforces this).
+ */
+export async function toggleSetLog(
+  setLogId: string,
+  completed: boolean
+): Promise<ToggleResult> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { ok: false, error: "Not authenticated." };
+  }
+
+  const { error } = await supabase
+    .from("workout_set_logs")
+    .update({ completed })
+    .eq("id", setLogId)
+    .eq("user_id", user.id);
+
+  if (error) {
+    return { ok: false, error: error.message };
+  }
+
+  return { ok: true };
+}
