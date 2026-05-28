@@ -13,6 +13,7 @@ import { mergeSetLogsIntoDay } from "@/features/routines/routineMapper";
 import {
   getOrCreateDaySession,
   toggleSetLog,
+  updateSetReps,
 } from "@/features/routines/actions/sessionActions";
 import { RotateCcw, Calendar } from "lucide-react";
 
@@ -39,6 +40,9 @@ export function DashboardClient({
   const sessionCache = useRef<Record<string, string>>(
     initialSessionId ? { [initialDayId]: initialSessionId } : {}
   );
+
+  // Debounce timers: setLogId → NodeJS.Timeout
+  const repsTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
   const selectedDay =
     daysData.find((d) => d.id === selectedDayId) ?? daysData[0];
@@ -113,6 +117,29 @@ export function DashboardClient({
         );
       }
     });
+  };
+
+  const handleRepsChange = (setId: string, reps: number) => {
+    if (!isDbId(setId)) return;
+
+    // Update local state immediately.
+    setDaysData((prev) =>
+      prev.map((day) => ({
+        ...day,
+        exercises: day.exercises.map((exercise) => ({
+          ...exercise,
+          sets: exercise.sets.map((set) =>
+            set.id === setId ? { ...set, actualReps: reps } : set
+          ),
+        })),
+      }))
+    );
+
+    // Debounce the DB write — fire 600 ms after the user stops typing.
+    clearTimeout(repsTimers.current[setId]);
+    repsTimers.current[setId] = setTimeout(() => {
+      updateSetReps(setId, reps);
+    }, 600);
   };
 
   const handleSelectDay = (dayId: string) => {
@@ -204,7 +231,7 @@ export function DashboardClient({
               key={exercise.id}
               exercise={exercise}
               onSetToggle={handleSetToggle}
-              onRepsChange={() => undefined}
+              onRepsChange={handleRepsChange}
             />
           ))}
         </section>

@@ -115,6 +115,41 @@ export async function getOrCreateDaySession(
   };
 }
 
+export type UpdateRepsResult =
+  | { ok: true }
+  | { ok: false; error: string };
+
+/**
+ * Saves the actual rep count for a single set log.
+ * Called with a debounce from the client — fires once the user stops typing.
+ */
+export async function updateSetReps(
+  setLogId: string,
+  actualReps: number
+): Promise<UpdateRepsResult> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { ok: false, error: "Not authenticated." };
+  }
+
+  const { error } = await supabase
+    .from("workout_set_logs")
+    .update({ actual_reps: actualReps })
+    .eq("id", setLogId)
+    .eq("user_id", user.id);
+
+  if (error) {
+    return { ok: false, error: error.message };
+  }
+
+  return { ok: true };
+}
+
 export type ToggleResult =
   | { ok: true }
   | { ok: false; error: string };
