@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState, useTransition } from "react";
 import { AppShell } from "@/components/app-shell";
 import { DaySelector } from "@/components/fitness/day-selector";
 import { DailyProgressCard } from "@/components/fitness/daily-progress-card";
@@ -9,28 +9,74 @@ import { SummaryPanel } from "@/components/fitness/summary-panel";
 import { Button } from "@/components/fitness/button";
 import { getCompletedSets, getTotalSets } from "@/lib/mock-data";
 import type { TrainingDay } from "@/lib/mock-data";
+import { mergeSetLogsIntoDay } from "@/features/routines/routineMapper";
+import { getOrCreateDaySession } from "@/features/routines/actions/sessionActions";
 import { RotateCcw, Calendar } from "lucide-react";
 
 interface DashboardClientProps {
   days: TrainingDay[];
   routineName: string;
+  routineId: string;
+  initialDayId: string;
+  initialSessionId: string | null;
 }
 
-export function DashboardClient({ days, routineName }: DashboardClientProps) {
-  const [selectedDayId, setSelectedDayId] = useState(days[0]?.id ?? "");
+export function DashboardClient({
+  days: initialDays,
+  routineName,
+  routineId,
+  initialDayId,
+  initialSessionId,
+}: DashboardClientProps) {
+  const [daysData, setDaysData] = useState<TrainingDay[]>(initialDays);
+  const [selectedDayId, setSelectedDayId] = useState(initialDayId);
+  const [isPending, startTransition] = useTransition();
 
-  const selectedDay = days.find((d) => d.id === selectedDayId) ?? days[0];
+  // Cache of dayId → sessionId so we don't re-fetch on re-selection.
+  const sessionCache = useRef<Record<string, string>>(
+    initialSessionId ? { [initialDayId]: initialSessionId } : {}
+  );
+
+  const selectedDay =
+    daysData.find((d) => d.id === selectedDayId) ?? daysData[0];
+
   const completedSets = getCompletedSets(selectedDay);
   const totalSets = getTotalSets(selectedDay);
 
-  const weeklyCompleted = days.reduce((sum, day) => sum + getCompletedSets(day), 0);
-  const weeklyTotal = days.reduce((sum, day) => sum + getTotalSets(day), 0);
+  const weeklyCompleted = daysData.reduce(
+    (sum, day) => sum + getCompletedSets(day),
+    0
+  );
+  const weeklyTotal = daysData.reduce(
+    (sum, day) => sum + getTotalSets(day),
+    0
+  );
 
   const today = new Date().toLocaleDateString("en-US", {
     weekday: "long",
     month: "long",
     day: "numeric",
   });
+
+  const handleSelectDay = (dayId: string) => {
+    setSelectedDayId(dayId);
+
+    // Session already loaded for this day — nothing to do.
+    if (sessionCache.current[dayId]) return;
+
+    startTransition(async () => {
+      const result = await getOrCreateDaySession(routineId, dayId);
+      if (!result.ok) return;
+
+      sessionCache.current[dayId] = result.sessionId;
+
+      setDaysData((prev) =>
+        prev.map((d) =>
+          d.id === dayId ? mergeSetLogsIntoDay(d, result.setLogs) : d
+        )
+      );
+    });
+  };
 
   if (!selectedDay) return null;
 
@@ -58,9 +104,9 @@ export function DashboardClient({ days, routineName }: DashboardClientProps) {
 
         <section className="mb-6" aria-label="Training day selection">
           <DaySelector
-            days={days}
+            days={daysData}
             selectedDay={selectedDayId}
-            onSelectDay={setSelectedDayId}
+            onSelectDay={handleSelectDay}
           />
         </section>
 
@@ -91,7 +137,11 @@ export function DashboardClient({ days, routineName }: DashboardClientProps) {
           </div>
         </section>
 
-        <section className="space-y-4" aria-label="Exercise list">
+        <section
+          className="space-y-4"
+          aria-label="Exercise list"
+          aria-busy={isPending}
+        >
           {selectedDay.exercises.map((exercise) => (
             <ExerciseCard
               key={exercise.id}

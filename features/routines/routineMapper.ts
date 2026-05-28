@@ -1,4 +1,4 @@
-import type { RoutineWithDays } from "./types";
+import type { RoutineWithDays, WorkoutSetLog } from "./types";
 import type { TrainingDay, Exercise, ExerciseSet } from "@/lib/mock-data";
 
 function parseRepsToNumber(reps: string | null): number {
@@ -22,6 +22,39 @@ function generateSets(
     actualReps: null,
     completed: false,
   }));
+}
+
+/**
+ * Overlays workout_set_logs from a DB session onto a TrainingDay's sets.
+ * - Updates ExerciseSet.id to the log's UUID (used for toggle in A2).
+ * - Updates completed and actualReps from the log.
+ * - Sets without a matching log are left unchanged (completed: false).
+ */
+export function mergeSetLogsIntoDay(
+  day: TrainingDay,
+  setLogs: WorkoutSetLog[]
+): TrainingDay {
+  // Key: routineExerciseId-setNumber → log
+  const logMap = new Map(
+    setLogs.map((log) => [`${log.routine_exercise_id}-${log.set_number}`, log])
+  );
+
+  return {
+    ...day,
+    exercises: day.exercises.map((exercise) => ({
+      ...exercise,
+      sets: exercise.sets.map((set) => {
+        const log = logMap.get(`${exercise.id}-${set.setNumber}`);
+        if (!log) return set;
+        return {
+          ...set,
+          id: log.id,
+          completed: log.completed,
+          actualReps: log.actual_reps,
+        };
+      }),
+    })),
+  };
 }
 
 export function mapRoutineToTrainingDays(routine: RoutineWithDays): TrainingDay[] {

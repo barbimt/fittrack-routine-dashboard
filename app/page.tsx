@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { mapRoutineToTrainingDays } from "@/features/routines/routineMapper";
+import { mapRoutineToTrainingDays, mergeSetLogsIntoDay } from "@/features/routines/routineMapper";
+import { getOrCreateDaySession } from "@/features/routines/actions/sessionActions";
 import type { RoutineWithDays } from "@/features/routines/types";
 import { DashboardClient } from "@/components/fitness/dashboard-client";
 
@@ -27,6 +28,28 @@ export default async function HomePage() {
   }
 
   const days = mapRoutineToTrainingDays(routineData as RoutineWithDays);
+  const routineId = routineData.id as string;
+  const firstDay = days[0];
 
-  return <DashboardClient days={days} routineName={routineData.name as string} />;
+  // Create or recover today's session for the initially selected day,
+  // then merge the real set-log state into the day's sets.
+  const sessionResult = await getOrCreateDaySession(routineId, firstDay.id);
+
+  const mergedDays = sessionResult.ok
+    ? days.map((d) =>
+        d.id === firstDay.id
+          ? mergeSetLogsIntoDay(d, sessionResult.setLogs)
+          : d
+      )
+    : days;
+
+  return (
+    <DashboardClient
+      days={mergedDays}
+      routineName={routineData.name as string}
+      routineId={routineId}
+      initialDayId={firstDay.id}
+      initialSessionId={sessionResult.ok ? sessionResult.sessionId : null}
+    />
+  );
 }
