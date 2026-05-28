@@ -41,8 +41,6 @@ export function DashboardClient({
     initialSessionId ? { [initialDayId]: initialSessionId } : {}
   );
 
-  // Debounce timers: setLogId → NodeJS.Timeout
-  const repsTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
   const selectedDay =
     daysData.find((d) => d.id === selectedDayId) ?? daysData[0];
@@ -119,10 +117,9 @@ export function DashboardClient({
     });
   };
 
+  // Updates local state while the user is typing (no DB call).
   const handleRepsChange = (setId: string, reps: number) => {
     if (!isDbId(setId)) return;
-
-    // Update local state immediately.
     setDaysData((prev) =>
       prev.map((day) => ({
         ...day,
@@ -134,12 +131,12 @@ export function DashboardClient({
         })),
       }))
     );
+  };
 
-    // Debounce the DB write — fire 600 ms after the user stops typing.
-    clearTimeout(repsTimers.current[setId]);
-    repsTimers.current[setId] = setTimeout(() => {
-      updateSetReps(setId, reps);
-    }, 600);
+  // Persists to DB when the user leaves the field (onBlur).
+  const handleRepsSave = (setId: string, reps: number) => {
+    if (!isDbId(setId)) return;
+    updateSetReps(setId, reps);
   };
 
   const handleSelectDay = (dayId: string) => {
@@ -232,6 +229,7 @@ export function DashboardClient({
               exercise={exercise}
               onSetToggle={handleSetToggle}
               onRepsChange={handleRepsChange}
+              onRepsSave={handleRepsSave}
             />
           ))}
         </section>

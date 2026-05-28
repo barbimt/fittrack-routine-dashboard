@@ -12,9 +12,10 @@ interface ExerciseCardProps {
   exercise: Exercise;
   onSetToggle?: (setId: string) => void;
   onRepsChange?: (setId: string, reps: number) => void;
+  onRepsSave?: (setId: string, reps: number) => void;
 }
 
-export function ExerciseCard({ exercise, onSetToggle, onRepsChange }: ExerciseCardProps) {
+export function ExerciseCard({ exercise, onSetToggle, onRepsChange, onRepsSave }: ExerciseCardProps) {
   const [expanded, setExpanded] = useState(true);
   const progress = getExerciseProgress(exercise);
   const progressPercentage = (progress.completed / progress.total) * 100;
@@ -115,6 +116,7 @@ export function ExerciseCard({ exercise, onSetToggle, onRepsChange }: ExerciseCa
               set={set}
               onToggle={onSetToggle}
               onRepsChange={onRepsChange}
+              onRepsSave={onRepsSave}
             />
           ))}
         </div>

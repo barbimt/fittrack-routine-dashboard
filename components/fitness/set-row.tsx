@@ -9,9 +9,10 @@ interface SetRowProps {
   set: ExerciseSet;
   onToggle?: (setId: string) => void;
   onRepsChange?: (setId: string, reps: number) => void;
+  onRepsSave?: (setId: string, reps: number) => void;
 }
 
-export function SetRow({ set, onToggle, onRepsChange }: SetRowProps) {
+export function SetRow({ set, onToggle, onRepsChange, onRepsSave }: SetRowProps) {
   return (
     <div
       className={cn(
@@ -47,15 +48,19 @@ export function SetRow({ set, onToggle, onRepsChange }: SetRowProps) {
           type="number"
           min={0}
           defaultValue={set.actualReps ?? ""}
-          readOnly={!onRepsChange}
+          readOnly={!onRepsChange && !onRepsSave}
           onChange={(e) => {
             const val = parseInt(e.target.value, 10);
             if (!Number.isNaN(val)) onRepsChange?.(set.id, val);
           }}
+          onBlur={(e) => {
+            const val = parseInt(e.target.value, 10);
+            if (!Number.isNaN(val)) onRepsSave?.(set.id, val);
+          }}
           className={cn(
             "h-10 w-[4.5rem] text-center text-sm",
             set.completed && "border-success/30 bg-success/10",
-            !onRepsChange && "cursor-default opacity-90"
+            !onRepsChange && !onRepsSave && "cursor-default opacity-90"
           )}
           placeholder="—"
           aria-label={`Actual reps for set ${set.setNumber}`}
