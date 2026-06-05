@@ -23,7 +23,7 @@ export function SetRow({ set, onToggle, onRepsChange, onRepsSave }: SetRowProps)
 
   // Auto-save timer — fires 400ms after last keystroke as a safety net
   // (catches F5 / quick reloads before blur).
-  const saveTimer = useRef<ReturnType<typeof setTimeout>>();
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => () => clearTimeout(saveTimer.current), []);
 
