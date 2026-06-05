@@ -17,14 +17,12 @@ import {
   ChevronRight,
 } from "lucide-react";
 
-// Mock personal records
 const personalRecords = [
   { exercise: "Hip Thrust", weight: "70kg", date: "May 15" },
   { exercise: "Lat Pulldown", weight: "40kg", date: "May 10" },
   { exercise: "Leg Press", weight: "100kg", date: "May 8" },
 ];
 
-// Mock muscle group data
 const muscleGroupVolume = [
   { name: "Glutes", sets: 52, change: 8 },
   { name: "Back", sets: 28, change: 4 },
@@ -37,7 +35,6 @@ export default function ProgressPage() {
   return (
     <AppShell>
       <div className="mx-auto max-w-5xl px-4 py-6 pb-24 lg:px-8 lg:py-8 lg:pb-8">
-        {/* Page Header */}
         <header className="mb-6">
           <h1 className="text-foreground mb-1 text-2xl font-bold">Progress</h1>
           <p className="text-muted-foreground">
@@ -45,7 +42,6 @@ export default function ProgressPage() {
           </p>
         </header>
 
-        {/* Weekly volume highlight */}
         <section className="mb-8">
           <AnalyticsCard title="Weekly volume">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -63,7 +59,6 @@ export default function ProgressPage() {
           </AnalyticsCard>
         </section>
 
-        {/* Top Stats */}
         <section className="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
           <StatCard
             title="Total Volume"
@@ -93,7 +88,6 @@ export default function ProgressPage() {
           />
         </section>
 
-        {/* Charts Row */}
         <section className="mb-8 grid grid-cols-1 gap-4 lg:grid-cols-2">
           <AnalyticsCard
             title="Weekly Volume Trend"
@@ -126,7 +120,6 @@ export default function ProgressPage() {
           </AnalyticsCard>
         </section>
 
-        {/* Muscle Group Volume */}
         <section className="mb-8 grid grid-cols-1 gap-4 lg:grid-cols-2">
           <AnalyticsCard title="Volume by Muscle Group">
             <div className="space-y-4">
@@ -161,7 +154,6 @@ export default function ProgressPage() {
             </div>
           </AnalyticsCard>
 
-          {/* Personal Records */}
           <AnalyticsCard
             title="Recent Personal Records"
             action={
@@ -199,7 +191,6 @@ export default function ProgressPage() {
           </AnalyticsCard>
         </section>
 
-        {/* Progress Trend Placeholder */}
         <AnalyticsCard
           title="Strength Progress Over Time"
           action={

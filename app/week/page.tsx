@@ -23,7 +23,6 @@ export default function WeekOverviewPage() {
   );
   const weeklyPercentage = Math.round((totalCompleted / totalPlanned) * 100);
 
-  // Calculate training days completed
   const daysWithProgress = trainingDays.filter(
     (day) => getCompletedSets(day) > 0
   ).length;
@@ -31,7 +30,6 @@ export default function WeekOverviewPage() {
   return (
     <AppShell>
       <div className="mx-auto max-w-5xl px-4 py-6 pb-24 lg:px-8 lg:py-8 lg:pb-8">
-        {/* Page Header */}
         <header className="mb-6">
           <h1 className="text-foreground mb-1 text-2xl font-bold">
             Week Overview
@@ -41,7 +39,6 @@ export default function WeekOverviewPage() {
           </p>
         </header>
 
-        {/* Weekly Stats Grid */}
         <section className="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
           <StatCard
             title="Weekly Progress"
@@ -70,7 +67,6 @@ export default function WeekOverviewPage() {
           />
         </section>
 
-        {/* Weekly Progress Bar */}
         <section className="bg-card border-border mb-8 rounded-2xl border p-5 shadow-sm">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-card-foreground font-semibold">This Week</h2>
@@ -81,7 +77,6 @@ export default function WeekOverviewPage() {
           <ProgressBar value={totalCompleted} max={totalPlanned} size="lg" />
         </section>
 
-        {/* Training Days Grid */}
         <section>
           <h2 className="text-foreground mb-4 text-lg font-semibold">
             Training Days
@@ -93,7 +88,6 @@ export default function WeekOverviewPage() {
           </div>
         </section>
 
-        {/* Weekly consistency */}
         <section className="mb-8">
           <h2 className="text-foreground mb-4 text-lg font-semibold">
             Consistency
@@ -114,7 +108,6 @@ export default function WeekOverviewPage() {
           </div>
         </section>
 
-        {/* Muscle Group Distribution */}
         <section className="mt-8">
           <h2 className="text-foreground mb-4 text-lg font-semibold">
             Muscle Group Focus

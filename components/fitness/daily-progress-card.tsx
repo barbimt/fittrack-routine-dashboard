@@ -29,7 +29,6 @@ export function DailyProgressCard({
         </div>
       </div>
 
-      {/* Progress Bar */}
       <div
         className="bg-muted relative mb-3 h-2 overflow-hidden rounded-full"
         role="progressbar"
@@ -47,7 +46,6 @@ export function DailyProgressCard({
         />
       </div>
 
-      {/* Stats */}
       <div className="flex items-center justify-between text-sm">
         <span className="text-muted-foreground">
           <span className="text-foreground font-semibold">{completed}</span> of{" "}

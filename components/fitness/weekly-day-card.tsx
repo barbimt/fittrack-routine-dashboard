@@ -15,7 +15,6 @@ export function WeeklyDayCard({ day, isToday, onClick }: WeeklyDayCardProps) {
   const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
   const isComplete = percentage === 100;
 
-  // Get unique muscle groups
   const muscleGroups = [...new Set(day.exercises.map((e) => e.muscleGroup))];
 
   return (
@@ -52,7 +51,6 @@ export function WeeklyDayCard({ day, isToday, onClick }: WeeklyDayCardProps) {
         </div>
       </div>
 
-      {/* Progress Bar */}
       <div className="bg-muted relative mb-3 h-1.5 overflow-hidden rounded-full">
         <div
           className={cn(
@@ -63,7 +61,6 @@ export function WeeklyDayCard({ day, isToday, onClick }: WeeklyDayCardProps) {
         />
       </div>
 
-      {/* Muscle Group Badges */}
       <div className="flex flex-wrap gap-1.5">
         {muscleGroups.slice(0, 3).map((group) => (
           <Badge key={group} variant="secondary" className="text-xs">
@@ -77,7 +74,6 @@ export function WeeklyDayCard({ day, isToday, onClick }: WeeklyDayCardProps) {
         )}
       </div>
 
-      {/* Stats */}
       <div className="border-border text-muted-foreground mt-3 flex items-center justify-between border-t pt-3 text-sm">
         <span>{day.exercises.length} exercises</span>
         <span>

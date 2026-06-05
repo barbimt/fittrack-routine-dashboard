@@ -1,4 +1,3 @@
-// Types
 export interface ExerciseSet {
   id: string;
   setNumber: number;
@@ -32,7 +31,6 @@ export interface WeeklyStats {
   muscleGroups: { name: string; sets: number }[];
 }
 
-// Mock Data
 export const trainingDays: TrainingDay[] = [
   {
     id: "monday",
@@ -556,7 +554,6 @@ export const weeklyStats: WeeklyStats = {
   ],
 };
 
-// Helper functions
 export function getCompletedSets(day: TrainingDay): number {
   return day.exercises.reduce(
     (total, exercise) =>

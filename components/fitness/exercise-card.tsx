@@ -27,7 +27,6 @@ export function ExerciseCard({
 
   return (
     <div className="bg-card border-border overflow-hidden rounded-2xl border shadow-sm">
-      {/* Header */}
       <button
         onClick={() => setExpanded(!expanded)}
         className="hover:bg-muted/30 flex w-full items-start justify-between p-4 text-left transition-colors"
@@ -63,7 +62,6 @@ export function ExerciseCard({
         </div>
 
         <div className="ml-4 flex items-center gap-3">
-          {/* Progress indicator */}
           <div className="flex items-center gap-2">
             <div className="relative h-10 w-10">
               <svg className="h-10 w-10 -rotate-90">
@@ -106,7 +104,6 @@ export function ExerciseCard({
         </div>
       </button>
 
-      {/* Notes */}
       {exercise.notes && expanded && (
         <div className="px-4 pb-2">
           <div className="bg-accent/50 text-accent-foreground flex items-start gap-2 rounded-lg p-2.5">
@@ -116,7 +113,6 @@ export function ExerciseCard({
         </div>
       )}
 
-      {/* Sets */}
       {expanded && (
         <div
           id={`exercise-${exercise.id}-content`}

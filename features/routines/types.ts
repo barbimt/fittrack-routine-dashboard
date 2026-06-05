@@ -1,7 +1,3 @@
-// Database row types for the routines domain.
-// These mirror the columns in supabase/schema.sql exactly.
-// Not generated — maintained manually until Supabase CLI type generation is set up.
-
 export interface Profile {
   id: string;
   email: string | null;
@@ -9,7 +5,6 @@ export interface Profile {
   updated_at: string;
 }
 
-// source values are constrained by a CHECK in the DB.
 export type RoutineSource = "manual" | "excel";
 
 export interface Routine {
@@ -50,7 +45,6 @@ export interface RoutineExercise {
   updated_at: string;
 }
 
-// status values are constrained by a CHECK in the DB.
 export type WorkoutSessionStatus = "in_progress" | "completed" | "cancelled";
 
 export interface WorkoutSession {
@@ -58,7 +52,7 @@ export interface WorkoutSession {
   user_id: string;
   routine_id: string;
   routine_day_id: string;
-  session_date: string; // ISO date string, e.g. "2026-05-27"
+  session_date: string;
   status: WorkoutSessionStatus;
   created_at: string;
   updated_at: string;
@@ -76,10 +70,6 @@ export interface WorkoutSetLog {
   created_at: string;
   updated_at: string;
 }
-
-// ---------------------------------------------------------------------------
-// Joined / composed types — used when fetching nested data in one query.
-// ---------------------------------------------------------------------------
 
 export interface RoutineDayWithExercises extends RoutineDay {
   routine_exercises: RoutineExercise[];

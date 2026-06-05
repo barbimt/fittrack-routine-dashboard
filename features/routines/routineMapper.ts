@@ -24,17 +24,10 @@ function generateSets(
   }));
 }
 
-/**
- * Overlays workout_set_logs from a DB session onto a TrainingDay's sets.
- * - Updates ExerciseSet.id to the log's UUID (used for toggle in A2).
- * - Updates completed and actualReps from the log.
- * - Sets without a matching log are left unchanged (completed: false).
- */
 export function mergeSetLogsIntoDay(
   day: TrainingDay,
   setLogs: WorkoutSetLog[]
 ): TrainingDay {
-  // Key: routineExerciseId-setNumber → log
   const logMap = new Map(
     setLogs.map((log) => [`${log.routine_exercise_id}-${log.set_number}`, log])
   );
