@@ -33,6 +33,10 @@ export function SetRow({ set, onToggle, onRepsChange, onRepsSave }: SetRowProps)
     const val = parseInt(raw, 10);
     if (!Number.isNaN(val) && val >= 0) {
       onRepsChange?.(set.id, val);
+      // Auto-complete the set when a positive rep count is entered.
+      if (val >= 1 && !set.completed) {
+        onToggle?.(set.id);
+      }
       // Debounced save — covers the case where blur never fires.
       clearTimeout(saveTimer.current);
       saveTimer.current = setTimeout(() => onRepsSave?.(set.id, val), 400);
