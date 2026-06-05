@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import type { ExerciseSet } from "@/lib/mock-data";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -13,6 +14,42 @@ interface SetRowProps {
 }
 
 export function SetRow({ set, onToggle, onRepsChange, onRepsSave }: SetRowProps) {
+  // Controlled input: initialised from DB value on mount.
+  // Because the parent uses key={set.id}, this component remounts whenever
+  // the set identity changes (e.g. day switch), which re-runs useState.
+  const [localValue, setLocalValue] = useState(
+    set.actualReps != null ? String(set.actualReps) : ""
+  );
+
+  // Auto-save timer — fires 400ms after last keystroke as a safety net
+  // (catches F5 / quick reloads before blur).
+  const saveTimer = useRef<ReturnType<typeof setTimeout>>();
+
+  useEffect(() => () => clearTimeout(saveTimer.current), []);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value;
+    setLocalValue(raw);
+    const val = parseInt(raw, 10);
+    if (!Number.isNaN(val) && val >= 0) {
+      onRepsChange?.(set.id, val);
+      // Debounced save — covers the case where blur never fires.
+      clearTimeout(saveTimer.current);
+      saveTimer.current = setTimeout(() => onRepsSave?.(set.id, val), 400);
+    }
+  };
+
+  const handleBlur = () => {
+    // Immediate save on blur — cancel the debounce to avoid a double write.
+    clearTimeout(saveTimer.current);
+    const val = parseInt(localValue, 10);
+    if (!Number.isNaN(val) && val >= 0) {
+      onRepsSave?.(set.id, val);
+    }
+  };
+
+  const editable = Boolean(onRepsChange ?? onRepsSave);
+
   return (
     <div
       className={cn(
@@ -47,20 +84,14 @@ export function SetRow({ set, onToggle, onRepsChange, onRepsSave }: SetRowProps)
         <Input
           type="number"
           min={0}
-          defaultValue={set.actualReps ?? ""}
-          readOnly={!onRepsChange && !onRepsSave}
-          onChange={(e) => {
-            const val = parseInt(e.target.value, 10);
-            if (!Number.isNaN(val)) onRepsChange?.(set.id, val);
-          }}
-          onBlur={(e) => {
-            const val = parseInt(e.target.value, 10);
-            if (!Number.isNaN(val)) onRepsSave?.(set.id, val);
-          }}
+          value={localValue}
+          readOnly={!editable}
+          onChange={handleChange}
+          onBlur={handleBlur}
           className={cn(
             "h-10 w-[4.5rem] text-center text-sm",
             set.completed && "border-success/30 bg-success/10",
-            !onRepsChange && !onRepsSave && "cursor-default opacity-90"
+            !editable && "cursor-default opacity-90"
           )}
           placeholder="—"
           aria-label={`Actual reps for set ${set.setNumber}`}
