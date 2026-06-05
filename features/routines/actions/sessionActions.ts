@@ -7,11 +7,6 @@ export type DaySessionResult =
   | { ok: true; sessionId: string; setLogs: WorkoutSetLog[] }
   | { ok: false; error: string };
 
-/**
- * Finds today's workout session for the given routine day, or creates one.
- * When creating, materialises one workout_set_log row per planned set for
- * every exercise in that day.
- */
 export async function getOrCreateDaySession(
   routineId: string,
   routineDayId: string
@@ -28,7 +23,6 @@ export async function getOrCreateDaySession(
 
   const today = new Date().toISOString().split("T")[0];
 
-  // Look for an existing session today for this specific day.
   const { data: existing } = await supabase
     .from("workout_sessions")
     .select("id")
@@ -42,7 +36,6 @@ export async function getOrCreateDaySession(
   if (existing) {
     sessionId = existing.id as string;
   } else {
-    // Create a new session.
     const { data: newSession, error: sessionError } = await supabase
       .from("workout_sessions")
       .insert({
@@ -61,7 +54,6 @@ export async function getOrCreateDaySession(
 
     sessionId = newSession.id as string;
 
-    // Materialise one set_log row per planned set per exercise.
     const { data: exercises } = await supabase
       .from("routine_exercises")
       .select("id, planned_sets, target_reps")
@@ -96,7 +88,6 @@ export async function getOrCreateDaySession(
     }
   }
 
-  // Fetch the set logs for this session.
   const { data: setLogs, error: fetchError } = await supabase
     .from("workout_set_logs")
     .select("*")
@@ -117,10 +108,6 @@ export async function getOrCreateDaySession(
 
 export type UpdateRepsResult = { ok: true } | { ok: false; error: string };
 
-/**
- * Saves the actual rep count for a single set log.
- * Called with a debounce from the client — fires once the user stops typing.
- */
 export async function updateSetReps(
   setLogId: string,
   actualReps: number
@@ -150,10 +137,6 @@ export async function updateSetReps(
 
 export type ToggleResult = { ok: true } | { ok: false; error: string };
 
-/**
- * Flips the completed state of a single workout_set_log row.
- * Only updates rows owned by the authenticated user (RLS also enforces this).
- */
 export async function toggleSetLog(
   setLogId: string,
   completed: boolean

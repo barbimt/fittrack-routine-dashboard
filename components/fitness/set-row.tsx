@@ -19,15 +19,10 @@ export function SetRow({
   onRepsChange,
   onRepsSave,
 }: SetRowProps) {
-  // Controlled input: initialised from DB value on mount.
-  // Because the parent uses key={set.id}, this component remounts whenever
-  // the set identity changes (e.g. day switch), which re-runs useState.
   const [localValue, setLocalValue] = useState(
     set.actualReps != null ? String(set.actualReps) : ""
   );
 
-  // Auto-save timer — fires 400ms after last keystroke as a safety net
-  // (catches F5 / quick reloads before blur).
   const saveTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
     undefined
   );
@@ -37,29 +32,24 @@ export function SetRow({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value;
     setLocalValue(raw);
-    // If the field is cleared, unmark the set.
     if (raw === "" && set.completed) {
       onToggle?.(set.id);
     }
     const val = parseInt(raw, 10);
     if (!Number.isNaN(val) && val >= 0) {
       onRepsChange?.(set.id, val);
-      // Auto-complete when a positive rep count is entered.
       if (val >= 1 && !set.completed) {
         onToggle?.(set.id);
       }
-      // Auto-uncomplete when reps are cleared (set to 0).
       if (val === 0 && set.completed) {
         onToggle?.(set.id);
       }
-      // Debounced save — covers the case where blur never fires.
       clearTimeout(saveTimer.current);
       saveTimer.current = setTimeout(() => onRepsSave?.(set.id, val), 400);
     }
   };
 
   const handleBlur = () => {
-    // Immediate save on blur — cancel the debounce to avoid a double write.
     clearTimeout(saveTimer.current);
     const val = parseInt(localValue, 10);
     if (!Number.isNaN(val) && val >= 0) {

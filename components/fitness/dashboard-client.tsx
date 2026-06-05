@@ -36,7 +36,6 @@ export function DashboardClient({
   const [selectedDayId, setSelectedDayId] = useState(initialDayId);
   const [isPending, startTransition] = useTransition();
 
-  // Cache of dayId → sessionId so we don't re-fetch on re-selection.
   const sessionCache = useRef<Record<string, string>>(
     initialSessionId ? { [initialDayId]: initialSessionId } : {}
   );
@@ -59,14 +58,12 @@ export function DashboardClient({
     day: "numeric",
   });
 
-  // UUID regex — only toggle rows that exist in the DB.
   const isDbId = (id: string) =>
     /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 
   const handleSetToggle = (setId: string) => {
-    if (!isDbId(setId)) return; // set log not yet materialised — ignore
+    if (!isDbId(setId)) return;
 
-    // Find current completed state so we know what to flip.
     let currentCompleted = false;
     for (const day of daysData) {
       for (const exercise of day.exercises) {
@@ -79,7 +76,6 @@ export function DashboardClient({
     }
     const nextCompleted = !currentCompleted;
 
-    // Optimistic update — flip immediately in local state.
     setDaysData((prev) =>
       prev.map((day) => ({
         ...day,
@@ -92,10 +88,8 @@ export function DashboardClient({
       }))
     );
 
-    // Persist to DB in the background.
     toggleSetLog(setId, nextCompleted).then((result) => {
       if (!result.ok) {
-        // Revert on error.
         setDaysData((prev) =>
           prev.map((day) => ({
             ...day,
@@ -111,7 +105,6 @@ export function DashboardClient({
     });
   };
 
-  // Updates local state while the user is typing (no DB call).
   const handleRepsChange = (setId: string, reps: number) => {
     if (!isDbId(setId)) return;
     setDaysData((prev) =>
@@ -127,7 +120,6 @@ export function DashboardClient({
     );
   };
 
-  // Persists to DB when the user leaves the field (onBlur).
   const handleRepsSave = (setId: string, reps: number) => {
     if (!isDbId(setId)) return;
     updateSetReps(setId, reps);
@@ -136,7 +128,6 @@ export function DashboardClient({
   const handleSelectDay = (dayId: string) => {
     setSelectedDayId(dayId);
 
-    // Session already loaded for this day — nothing to do.
     if (sessionCache.current[dayId]) return;
 
     startTransition(async () => {

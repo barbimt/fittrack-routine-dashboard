@@ -34,8 +34,6 @@ export default async function HomePage() {
   const routineId = routineData.id as string;
   const firstDay = days[0];
 
-  // Create or recover today's session for the initially selected day,
-  // then merge the real set-log state into the day's sets.
   const sessionResult = await getOrCreateDaySession(routineId, firstDay.id);
 
   const mergedDays = sessionResult.ok

@@ -23,9 +23,6 @@ export async function saveRoutine(
 
   const userId = user.id;
 
-  // If a routine with the same name already exists for this user, delete it first.
-  // Cascade FK removes all its routine_days and routine_exercises automatically.
-  // This makes reimporting the same file idempotent.
   const { error: deleteExistingError } = await supabase
     .from("routines")
     .delete()
@@ -36,8 +33,6 @@ export async function saveRoutine(
     return { ok: false, error: "Failed to replace existing routine." };
   }
 
-  // Deactivate any other currently active routine before inserting the new one.
-  // Required because the partial unique index enforces at most one active routine per user.
   const { error: deactivateError } = await supabase
     .from("routines")
     .update({ is_active: false })
@@ -48,7 +43,6 @@ export async function saveRoutine(
     return { ok: false, error: "Failed to update existing routines." };
   }
 
-  // Insert the routine row.
   const { data: routineRow, error: routineError } = await supabase
     .from("routines")
     .insert({
@@ -67,7 +61,6 @@ export async function saveRoutine(
   const routineId = routineRow.id as string;
   let totalExerciseCount = 0;
 
-  // Insert days and their exercises sequentially to respect FK order.
   for (const day of routine.days) {
     const { data: dayRow, error: dayError } = await supabase
       .from("routine_days")
