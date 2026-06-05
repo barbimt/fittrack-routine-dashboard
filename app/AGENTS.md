@@ -1,6 +1,6 @@
 # App routes (Next.js App Router)
 
-One `page.tsx` per screen. See `AGENTS.md` for the route list.
+One `page.tsx` per screen. See root `AGENTS.md` for the route list.
 
 ## Routes
 

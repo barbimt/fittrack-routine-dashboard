@@ -1,14 +1,14 @@
 # Features
 
-Domain logic grouped by capability: auth, routine import, live routines/sessions. Each subfolder has its own `README.md`.
+Domain logic grouped by capability: auth, routine import, live routines/sessions. Each subfolder has its own `AGENTS.md`.
 
 ## Structure
 
 | Folder | Responsibility |
 |--------|----------------|
-| [`auth/`](./auth/README.md) | Login, signup, logout (Server Actions + forms) |
-| [`routine-import/`](./routine-import/README.md) | Excel parse, preview, save to Supabase |
-| [`routines/`](./routines/README.md) | DB types, mapper, workout session/set actions |
+| `auth/` | Login, signup, logout (Server Actions + forms) |
+| `routine-import/` | Excel parse, preview, save to Supabase |
+| `routines/` | DB types, mapper, workout session/set actions |
 
 ## Conventions
 

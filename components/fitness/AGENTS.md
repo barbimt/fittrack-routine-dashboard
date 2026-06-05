@@ -22,8 +22,6 @@ Presentational workout UI. Props in, events up — no Supabase or routing here.
 
 ## Set row behavior
 
-Documented here (not in code comments):
-
 - `localValue` syncs from `set.actualReps` on mount; remounts when `key={set.id}` changes (day switch).
 - Typing updates parent via `onRepsChange`; persist via `onRepsSave` on blur or after 400ms debounce.
 - Entering reps ≥ 1 auto-checks the set; clearing to 0 auto-unchecks.

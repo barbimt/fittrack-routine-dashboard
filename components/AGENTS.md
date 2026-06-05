@@ -6,9 +6,9 @@ UI building blocks for FitTrack. **No business logic or data fetching** in prese
 
 | Folder | Role |
 |--------|------|
-| [`fitness/`](./fitness/README.md) | Workout UI: exercises, sets, progress, import dropzone |
-| [`layout/`](./layout/README.md) | App chrome: sidebar, header, mobile tabs |
-| [`ui/`](./ui/README.md) | shadcn/Radix primitives — generic, not FitTrack-branded |
+| `fitness/` | Workout UI: exercises, sets, progress, import dropzone — see `fitness/AGENTS.md` |
+| `layout/` | App chrome: sidebar, header, mobile tabs — see `layout/AGENTS.md` |
+| `ui/` | shadcn/Radix primitives — see `ui/AGENTS.md` |
 | `app-shell.tsx` | Responsive shell template (`Sidebar` + `Header` + optional `aside`) |
 | `theme-provider.tsx` | Dark/light theme wrapper |
 
