@@ -13,6 +13,7 @@ Presentational workout UI. Props in, events up — no Supabase or routing here.
 | `daily-progress-card.tsx` | Selected day progress (`completed/total` sets) |
 | `summary-panel.tsx` | Desktop `xl+` aside: today, muscle focus, week |
 | `workout-save-panel.tsx` | Save / edit / reset-day footer banner + copy helper |
+| `reset-day-dialog.tsx` | Confirm before clearing today’s session |
 | `dashboard-client.tsx` | **Layout** dashboard; state in `hooks/use-workout-session.ts` |
 | `progress-bar.tsx`, `stat-card.tsx` | Reusable metrics widgets |
 | `weekly-day-card.tsx` | Day summary for `/week` |
@@ -36,7 +37,7 @@ Presentational workout UI. Props in, events up — no Supabase or routing here.
 - Set toggles/reps only persist when `set.id` is a UUID (materialised `workout_set_logs` row).
 - Optimistic UI with revert on `toggleSetLog` / reset failures.
 - **Reset exercise**: per-card button (visible when exercise has completed sets); calls `resetExerciseSets`.
-- **Reset day**: header button; clears all sets for today’s session via `resetDaySession`.
+- **Reset day**: header button; clears all sets for today’s session via `resetDaySession`. Confirmation dialog before reset.
 - **Save workout**: enabled once at least one set is complete; first save vs re-save show different banner/toast copy.
 - **Edit workout**: reopens a saved session (`in_progress`) for edits; shows Save again when done.
 - **Reset day** (when saved): shown next to Edit workout in the footer; clears today’s session and exits read-only mode.

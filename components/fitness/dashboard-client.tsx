@@ -1,11 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { DaySelector } from "@/components/fitness/day-selector";
 import { DailyProgressCard } from "@/components/fitness/daily-progress-card";
 import { ExerciseCard } from "@/components/fitness/exercise-card";
 import { SummaryPanel } from "@/components/fitness/summary-panel";
 import { WorkoutSavePanel } from "@/components/fitness/workout-save-panel";
+import { ResetDayDialog } from "@/components/fitness/reset-day-dialog";
 import { Button } from "@/components/fitness/button";
 import type { TrainingDay } from "@/lib/mock-data";
 import { useWorkoutSession } from "@/hooks/use-workout-session";
@@ -28,6 +30,8 @@ export function DashboardClient({
   initialSessionId,
   initialSessionCompleted = false,
 }: DashboardClientProps) {
+  const [resetDayDialogOpen, setResetDayDialogOpen] = useState(false);
+
   const workout = useWorkoutSession({
     initialDays,
     routineId,
@@ -71,6 +75,13 @@ export function DashboardClient({
   });
 
   if (!selectedDay) return null;
+
+  const requestResetDay = () => setResetDayDialogOpen(true);
+
+  const confirmResetDay = () => {
+    setResetDayDialogOpen(false);
+    handleResetDay();
+  };
 
   return (
     <AppShell
@@ -123,7 +134,7 @@ export function DashboardClient({
               isPending || completedSets === 0 || isReadOnly || isResetting
             }
             onMouseDown={(e) => e.preventDefault()}
-            onClick={handleResetDay}
+            onClick={requestResetDay}
           >
             <RotateCcw className="mr-2 h-4 w-4" aria-hidden />
             Reset day
@@ -163,7 +174,15 @@ export function DashboardClient({
           isResetting={isResetting}
           onSave={handleSaveWorkout}
           onEdit={handleEditWorkout}
-          onResetDay={handleResetDay}
+          onResetDay={requestResetDay}
+        />
+
+        <ResetDayDialog
+          open={resetDayDialogOpen}
+          onOpenChange={setResetDayDialogOpen}
+          dayName={selectedDay.dayName}
+          isResetting={isResetting}
+          onConfirm={confirmResetDay}
         />
       </div>
     </AppShell>

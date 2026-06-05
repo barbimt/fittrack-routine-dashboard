@@ -237,9 +237,7 @@ export async function resetDaySession(sessionId: string): Promise<ResetResult> {
   return { ok: true };
 }
 
-export type CompleteSessionResult =
-  | { ok: true }
-  | { ok: false; error: string };
+export type CompleteSessionResult = { ok: true } | { ok: false; error: string };
 
 export async function completeDaySession(
   sessionId: string

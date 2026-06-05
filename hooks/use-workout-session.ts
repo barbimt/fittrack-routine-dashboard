@@ -96,10 +96,7 @@ export function useWorkoutSession({
     (sum, day) => sum + getCompletedSets(day),
     0
   );
-  const weeklyTotal = daysData.reduce(
-    (sum, day) => sum + getTotalSets(day),
-    0
-  );
+  const weeklyTotal = daysData.reduce((sum, day) => sum + getTotalSets(day), 0);
 
   const bumpSetRowRevision = (exerciseIds: string[]) => {
     setSetRowRevision((prev) => {
@@ -170,9 +167,7 @@ export function useWorkoutSession({
   const handleRepsChange = (setId: string, reps: number) => {
     if (isReadOnly || !isUuid(setId)) return;
 
-    setDaysData((prev) =>
-      updateSetInDays(prev, setId, { actualReps: reps })
-    );
+    setDaysData((prev) => updateSetInDays(prev, setId, { actualReps: reps }));
 
     if (currentSessionId) {
       markSessionEditable(currentSessionId);
@@ -215,9 +210,7 @@ export function useWorkoutSession({
     if (!sessionId) return;
 
     const previousDays = daysData;
-    setDaysData((prev) =>
-      resetExerciseInDays(prev, selectedDayId, exerciseId)
-    );
+    setDaysData((prev) => resetExerciseInDays(prev, selectedDayId, exerciseId));
     bumpSetRowRevision([exerciseId]);
 
     if (currentSessionId) {
@@ -247,9 +240,7 @@ export function useWorkoutSession({
 
     const previousDays = daysData;
     setDaysData((prev) => resetDayInDays(prev, selectedDayId));
-    bumpSetRowRevision(
-      selectedDay.exercises.map((exercise) => exercise.id)
-    );
+    bumpSetRowRevision(selectedDay.exercises.map((exercise) => exercise.id));
 
     markSessionEditable(sessionId);
     clearSessionSaveHistory(sessionId);
