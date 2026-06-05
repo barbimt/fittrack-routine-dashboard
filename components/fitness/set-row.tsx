@@ -11,6 +11,7 @@ interface SetRowProps {
   onToggle?: (setId: string) => void;
   onRepsChange?: (setId: string, reps: number) => void;
   onRepsSave?: (setId: string, reps: number) => void;
+  readOnly?: boolean;
 }
 
 export function SetRow({
@@ -18,6 +19,7 @@ export function SetRow({
   onToggle,
   onRepsChange,
   onRepsSave,
+  readOnly = false,
 }: SetRowProps) {
   const [localValue, setLocalValue] = useState(
     set.actualReps != null ? String(set.actualReps) : ""
@@ -26,8 +28,14 @@ export function SetRow({
   const saveTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
     undefined
   );
+  const isFocused = useRef(false);
 
   useEffect(() => () => clearTimeout(saveTimer.current), []);
+
+  useEffect(() => {
+    if (isFocused.current) return;
+    setLocalValue(set.actualReps != null ? String(set.actualReps) : "");
+  }, [set.actualReps, set.completed]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value;
@@ -50,6 +58,7 @@ export function SetRow({
   };
 
   const handleBlur = () => {
+    isFocused.current = false;
     clearTimeout(saveTimer.current);
     const val = parseInt(localValue, 10);
     if (!Number.isNaN(val) && val >= 0) {
@@ -57,32 +66,49 @@ export function SetRow({
     }
   };
 
-  const editable = Boolean(onRepsChange ?? onRepsSave);
+  const handleFocus = () => {
+    isFocused.current = true;
+  };
+
+  const editable = !readOnly && Boolean(onRepsChange ?? onRepsSave);
+  const canToggle = !readOnly && Boolean(onToggle);
+
+  const handleRowClick = () => {
+    if (!canToggle) return;
+    onToggle?.(set.id);
+  };
+
+  const stopRowToggle = (e: React.MouseEvent | React.PointerEvent) => {
+    e.stopPropagation();
+  };
 
   return (
     <div
+      onClick={handleRowClick}
       className={cn(
         "flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors",
-        set.completed ? "bg-success/10" : "bg-muted/50"
+        set.completed ? "bg-success/10" : "bg-muted/50",
+        canToggle && "cursor-pointer"
       )}
     >
       <Checkbox
         id={`set-${set.id}`}
         checked={set.completed}
+        disabled={readOnly}
         onCheckedChange={() => onToggle?.(set.id)}
+        onClick={stopRowToggle}
         className="h-5 w-5 rounded-md border-2"
         aria-label={`Mark set ${set.setNumber} as ${set.completed ? "incomplete" : "complete"}`}
       />
 
-      <label
-        htmlFor={`set-${set.id}`}
+      <span
         className={cn(
           "min-w-[50px] text-sm font-medium",
           set.completed ? "text-muted-foreground" : "text-foreground"
         )}
       >
         Set {set.setNumber}
-      </label>
+      </span>
 
       <div className="flex flex-1 items-center gap-2">
         <span className="text-muted-foreground text-sm">
@@ -90,7 +116,11 @@ export function SetRow({
         </span>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div
+        className="flex items-center gap-2"
+        onClick={stopRowToggle}
+        onPointerDown={stopRowToggle}
+      >
         <span className="text-muted-foreground text-xs">Actual:</span>
         <Input
           type="number"
@@ -98,6 +128,7 @@ export function SetRow({
           value={localValue}
           readOnly={!editable}
           onChange={handleChange}
+          onFocus={handleFocus}
           onBlur={handleBlur}
           className={cn(
             "h-10 w-[4.5rem] text-center text-sm",

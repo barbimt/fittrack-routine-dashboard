@@ -1,10 +1,15 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import type { WorkoutSetLog } from "../types";
+import type { WorkoutSetLog, WorkoutSessionStatus } from "../types";
 
 export type DaySessionResult =
-  | { ok: true; sessionId: string; setLogs: WorkoutSetLog[] }
+  | {
+      ok: true;
+      sessionId: string;
+      sessionStatus: WorkoutSessionStatus;
+      setLogs: WorkoutSetLog[];
+    }
   | { ok: false; error: string };
 
 export async function getOrCreateDaySession(
@@ -25,16 +30,18 @@ export async function getOrCreateDaySession(
 
   const { data: existing } = await supabase
     .from("workout_sessions")
-    .select("id")
+    .select("id, status")
     .eq("user_id", user.id)
     .eq("routine_day_id", routineDayId)
     .eq("session_date", today)
     .maybeSingle();
 
   let sessionId: string;
+  let sessionStatus: WorkoutSessionStatus;
 
   if (existing) {
     sessionId = existing.id as string;
+    sessionStatus = existing.status as WorkoutSessionStatus;
   } else {
     const { data: newSession, error: sessionError } = await supabase
       .from("workout_sessions")
@@ -53,6 +60,7 @@ export async function getOrCreateDaySession(
     }
 
     sessionId = newSession.id as string;
+    sessionStatus = "in_progress";
 
     const { data: exercises } = await supabase
       .from("routine_exercises")
@@ -102,6 +110,7 @@ export async function getOrCreateDaySession(
   return {
     ok: true,
     sessionId,
+    sessionStatus,
     setLogs: (setLogs ?? []) as WorkoutSetLog[],
   };
 }
@@ -155,6 +164,124 @@ export async function toggleSetLog(
     .from("workout_set_logs")
     .update({ completed })
     .eq("id", setLogId)
+    .eq("user_id", user.id);
+
+  if (error) {
+    return { ok: false, error: error.message };
+  }
+
+  return { ok: true };
+}
+
+export type ResetResult = { ok: true } | { ok: false; error: string };
+
+export async function resetExerciseSets(
+  sessionId: string,
+  exerciseId: string
+): Promise<ResetResult> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { ok: false, error: "Not authenticated." };
+  }
+
+  const { error } = await supabase
+    .from("workout_set_logs")
+    .update({ completed: false, actual_reps: null })
+    .eq("workout_session_id", sessionId)
+    .eq("routine_exercise_id", exerciseId)
+    .eq("user_id", user.id);
+
+  if (error) {
+    return { ok: false, error: error.message };
+  }
+
+  return { ok: true };
+}
+
+export async function resetDaySession(sessionId: string): Promise<ResetResult> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { ok: false, error: "Not authenticated." };
+  }
+
+  const { error: logsError } = await supabase
+    .from("workout_set_logs")
+    .update({ completed: false, actual_reps: null })
+    .eq("workout_session_id", sessionId)
+    .eq("user_id", user.id);
+
+  if (logsError) {
+    return { ok: false, error: logsError.message };
+  }
+
+  const { error: sessionError } = await supabase
+    .from("workout_sessions")
+    .update({ status: "in_progress" })
+    .eq("id", sessionId)
+    .eq("user_id", user.id);
+
+  if (sessionError) {
+    return { ok: false, error: sessionError.message };
+  }
+
+  return { ok: true };
+}
+
+export type CompleteSessionResult = { ok: true } | { ok: false; error: string };
+
+export async function completeDaySession(
+  sessionId: string
+): Promise<CompleteSessionResult> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { ok: false, error: "Not authenticated." };
+  }
+
+  const { error } = await supabase
+    .from("workout_sessions")
+    .update({ status: "completed" })
+    .eq("id", sessionId)
+    .eq("user_id", user.id);
+
+  if (error) {
+    return { ok: false, error: error.message };
+  }
+
+  return { ok: true };
+}
+
+export async function reopenDaySession(
+  sessionId: string
+): Promise<CompleteSessionResult> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { ok: false, error: "Not authenticated." };
+  }
+
+  const { error } = await supabase
+    .from("workout_sessions")
+    .update({ status: "in_progress" })
+    .eq("id", sessionId)
     .eq("user_id", user.id);
 
   if (error) {

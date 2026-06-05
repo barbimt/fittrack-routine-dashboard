@@ -1,0 +1,2 @@
+-- Optional seed data for local dev (pnpm supabase:reset).
+-- Add INSERT statements here if you want a default routine on reset.

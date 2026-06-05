@@ -49,6 +49,9 @@ export default async function HomePage() {
       routineId={routineId}
       initialDayId={firstDay.id}
       initialSessionId={sessionResult.ok ? sessionResult.sessionId : null}
+      initialSessionCompleted={
+        sessionResult.ok && sessionResult.sessionStatus === "completed"
+      }
     />
   );
 }

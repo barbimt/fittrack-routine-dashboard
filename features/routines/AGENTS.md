@@ -8,13 +8,14 @@ Maps Supabase rows to dashboard UI types and persists set completion/reps.
 |------|------|
 | `types.ts` | DB row types (`Routine`, `RoutineDay`, `WorkoutSetLog`, joins) |
 | `routineMapper.ts` | `RoutineWithDays` → `TrainingDay[]`; `mergeSetLogsIntoDay` |
-| `actions/sessionActions.ts` | `getOrCreateDaySession`, `toggleSetLog`, `updateSetReps` |
+| `dashboardDayState.ts` | Pure set/day mutations + `canSaveWorkoutForDay` for dashboard |
+| `actions/sessionActions.ts` | `getOrCreateDaySession`, `toggleSetLog`, `updateSetReps`, `resetExerciseSets`, `resetDaySession`, `completeDaySession`, `reopenDaySession` |
 
 ## `getOrCreateDaySession`
 
 1. Find `workout_sessions` for user + `routine_day_id` + today's date
 2. If missing: insert session, then materialise one `workout_set_log` per planned set per exercise
-3. Return session id + all set logs for that session
+3. Return session id, status, and all set logs for that session
 
 ## Types
 

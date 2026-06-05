@@ -47,6 +47,8 @@ export interface RoutineExercise {
 
 export type WorkoutSessionStatus = "in_progress" | "completed" | "cancelled";
 
+export type SessionSavedNotice = "first" | "updated";
+
 export interface WorkoutSession {
   id: string;
   user_id: string;

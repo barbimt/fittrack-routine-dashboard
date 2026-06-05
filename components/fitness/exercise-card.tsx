@@ -6,13 +6,18 @@ import type { Exercise } from "@/lib/mock-data";
 import { getExerciseProgress } from "@/lib/mock-data";
 import { SetRow } from "./set-row";
 import { Badge } from "./badge";
-import { ChevronDown, Clock, Weight, Info } from "lucide-react";
+import { Button } from "./button";
+import { ChevronDown, Clock, Weight, Info, RotateCcw } from "lucide-react";
 
 interface ExerciseCardProps {
   exercise: Exercise;
   onSetToggle?: (setId: string) => void;
   onRepsChange?: (setId: string, reps: number) => void;
   onRepsSave?: (setId: string, reps: number) => void;
+  onResetExercise?: (exerciseId: string) => void;
+  resetDisabled?: boolean;
+  setRowRevision?: number;
+  readOnly?: boolean;
 }
 
 export function ExerciseCard({
@@ -20,10 +25,15 @@ export function ExerciseCard({
   onSetToggle,
   onRepsChange,
   onRepsSave,
+  onResetExercise,
+  resetDisabled = false,
+  setRowRevision = 0,
+  readOnly = false,
 }: ExerciseCardProps) {
   const [expanded, setExpanded] = useState(true);
   const progress = getExerciseProgress(exercise);
   const progressPercentage = (progress.completed / progress.total) * 100;
+  const hasRestTime = exercise.restTime && exercise.restTime !== "—";
 
   return (
     <div className="bg-card border-border overflow-hidden rounded-2xl border shadow-sm">
@@ -50,14 +60,21 @@ export function ExerciseCard({
               </span>{" "}
               x {exercise.targetReps}
             </span>
-            <span className="flex items-center gap-1">
-              <Weight className="h-3.5 w-3.5" />
-              {exercise.weight}
-            </span>
-            <span className="flex items-center gap-1">
-              <Clock className="h-3.5 w-3.5" />
-              {exercise.restTime}
-            </span>
+            {exercise.weight !== "—" && (
+              <span className="flex items-center gap-1">
+                <Weight className="h-3.5 w-3.5" aria-hidden />
+                {exercise.weight}
+              </span>
+            )}
+            {hasRestTime && (
+              <span
+                className="flex items-center gap-1"
+                title="Rest between sets"
+              >
+                <Clock className="h-3.5 w-3.5" aria-hidden />
+                <span>{exercise.restTime} rest</span>
+              </span>
+            )}
           </div>
         </div>
 
@@ -120,13 +137,30 @@ export function ExerciseCard({
         >
           {exercise.sets.map((set) => (
             <SetRow
-              key={set.id}
+              key={`${set.id}-${setRowRevision}`}
               set={set}
-              onToggle={onSetToggle}
-              onRepsChange={onRepsChange}
-              onRepsSave={onRepsSave}
+              onToggle={readOnly ? undefined : onSetToggle}
+              onRepsChange={readOnly ? undefined : onRepsChange}
+              onRepsSave={readOnly ? undefined : onRepsSave}
+              readOnly={readOnly}
             />
           ))}
+          {onResetExercise && !readOnly && progress.completed > 0 && (
+            <div className="flex justify-end pt-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                type="button"
+                disabled={resetDisabled}
+                className="text-muted-foreground h-8 px-2 text-xs"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => onResetExercise(exercise.id)}
+              >
+                <RotateCcw className="mr-1.5 h-3.5 w-3.5" aria-hidden />
+                Reset exercise
+              </Button>
+            </div>
+          )}
         </div>
       )}
     </div>
