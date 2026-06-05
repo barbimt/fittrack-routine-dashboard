@@ -11,7 +11,8 @@ const variantClasses: Record<FitnessBadgeVariant, string> = {
   warning: "bg-warning/10 text-warning-foreground border-warning/30 hover:bg-warning/10",
 };
 
-export interface FitnessBadgeProps extends React.ComponentProps<typeof UiBadge> {
+export interface FitnessBadgeProps
+  extends Omit<React.ComponentProps<typeof UiBadge>, "variant"> {
   variant?: FitnessBadgeVariant;
 }
 

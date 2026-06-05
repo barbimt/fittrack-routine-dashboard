@@ -1,5 +1,7 @@
 import { cn } from "@/lib/utils";
-import { Button as UiButton, type ButtonProps } from "@/components/ui/button";
+import { Button as UiButton } from "@/components/ui/button";
+
+type ButtonProps = React.ComponentProps<typeof UiButton>;
 
 /** FitTrack-styled button — min touch target on mobile */
 export function Button({ className, size, ...props }: ButtonProps) {
