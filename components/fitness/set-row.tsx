@@ -30,11 +30,19 @@ export function SetRow({ set, onToggle, onRepsChange, onRepsSave }: SetRowProps)
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value;
     setLocalValue(raw);
+    // If the field is cleared, unmark the set.
+    if (raw === "" && set.completed) {
+      onToggle?.(set.id);
+    }
     const val = parseInt(raw, 10);
     if (!Number.isNaN(val) && val >= 0) {
       onRepsChange?.(set.id, val);
-      // Auto-complete the set when a positive rep count is entered.
+      // Auto-complete when a positive rep count is entered.
       if (val >= 1 && !set.completed) {
+        onToggle?.(set.id);
+      }
+      // Auto-uncomplete when reps are cleared (set to 0).
+      if (val === 0 && set.completed) {
         onToggle?.(set.id);
       }
       // Debounced save — covers the case where blur never fires.
