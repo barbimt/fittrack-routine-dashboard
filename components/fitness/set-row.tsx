@@ -71,12 +71,24 @@ export function SetRow({
   };
 
   const editable = !readOnly && Boolean(onRepsChange ?? onRepsSave);
+  const canToggle = !readOnly && Boolean(onToggle);
+
+  const handleRowClick = () => {
+    if (!canToggle) return;
+    onToggle?.(set.id);
+  };
+
+  const stopRowToggle = (e: React.MouseEvent | React.PointerEvent) => {
+    e.stopPropagation();
+  };
 
   return (
     <div
+      onClick={handleRowClick}
       className={cn(
         "flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors",
-        set.completed ? "bg-success/10" : "bg-muted/50"
+        set.completed ? "bg-success/10" : "bg-muted/50",
+        canToggle && "cursor-pointer"
       )}
     >
       <Checkbox
@@ -84,19 +96,19 @@ export function SetRow({
         checked={set.completed}
         disabled={readOnly}
         onCheckedChange={() => onToggle?.(set.id)}
+        onClick={stopRowToggle}
         className="h-5 w-5 rounded-md border-2"
         aria-label={`Mark set ${set.setNumber} as ${set.completed ? "incomplete" : "complete"}`}
       />
 
-      <label
-        htmlFor={`set-${set.id}`}
+      <span
         className={cn(
           "min-w-[50px] text-sm font-medium",
           set.completed ? "text-muted-foreground" : "text-foreground"
         )}
       >
         Set {set.setNumber}
-      </label>
+      </span>
 
       <div className="flex flex-1 items-center gap-2">
         <span className="text-muted-foreground text-sm">
@@ -104,7 +116,11 @@ export function SetRow({
         </span>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div
+        className="flex items-center gap-2"
+        onClick={stopRowToggle}
+        onPointerDown={stopRowToggle}
+      >
         <span className="text-muted-foreground text-xs">Actual:</span>
         <Input
           type="number"

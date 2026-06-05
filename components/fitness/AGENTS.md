@@ -26,6 +26,7 @@ Presentational workout UI. Props in, events up — no Supabase or routing here.
 - `localValue` syncs from `set.actualReps` when the input is not focused; remounts via `setRowRevision` key on reset.
 - Typing updates parent via `onRepsChange`; persist via `onRepsSave` on blur or after 400ms debounce.
 - Entering reps ≥ 1 auto-checks the set; clearing to 0 auto-unchecks.
+- Tap/click anywhere on the row toggles completion (except the actual-reps input area); checkbox keeps keyboard focus.
 
 ## Dashboard client
 
