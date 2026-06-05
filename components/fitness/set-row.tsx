@@ -11,6 +11,7 @@ interface SetRowProps {
   onToggle?: (setId: string) => void;
   onRepsChange?: (setId: string, reps: number) => void;
   onRepsSave?: (setId: string, reps: number) => void;
+  readOnly?: boolean;
 }
 
 export function SetRow({
@@ -18,6 +19,7 @@ export function SetRow({
   onToggle,
   onRepsChange,
   onRepsSave,
+  readOnly = false,
 }: SetRowProps) {
   const [localValue, setLocalValue] = useState(
     set.actualReps != null ? String(set.actualReps) : ""
@@ -26,8 +28,14 @@ export function SetRow({
   const saveTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
     undefined
   );
+  const isFocused = useRef(false);
 
   useEffect(() => () => clearTimeout(saveTimer.current), []);
+
+  useEffect(() => {
+    if (isFocused.current) return;
+    setLocalValue(set.actualReps != null ? String(set.actualReps) : "");
+  }, [set.actualReps, set.completed]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value;
@@ -50,6 +58,7 @@ export function SetRow({
   };
 
   const handleBlur = () => {
+    isFocused.current = false;
     clearTimeout(saveTimer.current);
     const val = parseInt(localValue, 10);
     if (!Number.isNaN(val) && val >= 0) {
@@ -57,7 +66,11 @@ export function SetRow({
     }
   };
 
-  const editable = Boolean(onRepsChange ?? onRepsSave);
+  const handleFocus = () => {
+    isFocused.current = true;
+  };
+
+  const editable = !readOnly && Boolean(onRepsChange ?? onRepsSave);
 
   return (
     <div
@@ -69,6 +82,7 @@ export function SetRow({
       <Checkbox
         id={`set-${set.id}`}
         checked={set.completed}
+        disabled={readOnly}
         onCheckedChange={() => onToggle?.(set.id)}
         className="h-5 w-5 rounded-md border-2"
         aria-label={`Mark set ${set.setNumber} as ${set.completed ? "incomplete" : "complete"}`}
@@ -98,6 +112,7 @@ export function SetRow({
           value={localValue}
           readOnly={!editable}
           onChange={handleChange}
+          onFocus={handleFocus}
           onBlur={handleBlur}
           className={cn(
             "h-10 w-[4.5rem] text-center text-sm",

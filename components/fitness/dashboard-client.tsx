@@ -1,21 +1,15 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
 import { AppShell } from "@/components/app-shell";
 import { DaySelector } from "@/components/fitness/day-selector";
 import { DailyProgressCard } from "@/components/fitness/daily-progress-card";
 import { ExerciseCard } from "@/components/fitness/exercise-card";
 import { SummaryPanel } from "@/components/fitness/summary-panel";
+import { WorkoutSavePanel } from "@/components/fitness/workout-save-panel";
 import { Button } from "@/components/fitness/button";
-import { getCompletedSets, getTotalSets } from "@/lib/mock-data";
 import type { TrainingDay } from "@/lib/mock-data";
-import { mergeSetLogsIntoDay } from "@/features/routines/routineMapper";
-import {
-  getOrCreateDaySession,
-  toggleSetLog,
-  updateSetReps,
-} from "@/features/routines/actions/sessionActions";
-import { RotateCcw, Calendar } from "lucide-react";
+import { useWorkoutSession } from "@/hooks/use-workout-session";
+import { Calendar, RotateCcw } from "lucide-react";
 
 interface DashboardClientProps {
   days: TrainingDay[];
@@ -23,6 +17,7 @@ interface DashboardClientProps {
   routineId: string;
   initialDayId: string;
   initialSessionId: string | null;
+  initialSessionCompleted?: boolean;
 }
 
 export function DashboardClient({
@@ -31,118 +26,49 @@ export function DashboardClient({
   routineId,
   initialDayId,
   initialSessionId,
+  initialSessionCompleted = false,
 }: DashboardClientProps) {
-  const [daysData, setDaysData] = useState<TrainingDay[]>(initialDays);
-  const [selectedDayId, setSelectedDayId] = useState(initialDayId);
-  const [isPending, startTransition] = useTransition();
+  const workout = useWorkoutSession({
+    initialDays,
+    routineId,
+    initialDayId,
+    initialSessionId,
+    initialSessionCompleted,
+  });
 
-  const sessionCache = useRef<Record<string, string>>(
-    initialSessionId ? { [initialDayId]: initialSessionId } : {}
-  );
-
-  const selectedDay =
-    daysData.find((d) => d.id === selectedDayId) ?? daysData[0];
-
-  const completedSets = getCompletedSets(selectedDay);
-  const totalSets = getTotalSets(selectedDay);
-
-  const weeklyCompleted = daysData.reduce(
-    (sum, day) => sum + getCompletedSets(day),
-    0
-  );
-  const weeklyTotal = daysData.reduce((sum, day) => sum + getTotalSets(day), 0);
+  const {
+    daysData,
+    selectedDay,
+    selectedDayId,
+    completedSets,
+    totalSets,
+    isDayComplete,
+    canSaveWorkout,
+    isSessionSaved,
+    isReadOnly,
+    sessionSavedNotice,
+    weeklyCompleted,
+    weeklyTotal,
+    isPending,
+    isSaving,
+    isReopening,
+    isResetting,
+    setRowRevision,
+    handleSelectDay,
+    handleSetToggle,
+    handleRepsChange,
+    handleRepsSave,
+    handleResetExercise,
+    handleResetDay,
+    handleSaveWorkout,
+    handleEditWorkout,
+  } = workout;
 
   const today = new Date().toLocaleDateString("en-US", {
     weekday: "long",
     month: "long",
     day: "numeric",
   });
-
-  const isDbId = (id: string) =>
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
-
-  const handleSetToggle = (setId: string) => {
-    if (!isDbId(setId)) return;
-
-    let currentCompleted = false;
-    for (const day of daysData) {
-      for (const exercise of day.exercises) {
-        const found = exercise.sets.find((s) => s.id === setId);
-        if (found) {
-          currentCompleted = found.completed;
-          break;
-        }
-      }
-    }
-    const nextCompleted = !currentCompleted;
-
-    setDaysData((prev) =>
-      prev.map((day) => ({
-        ...day,
-        exercises: day.exercises.map((exercise) => ({
-          ...exercise,
-          sets: exercise.sets.map((set) =>
-            set.id === setId ? { ...set, completed: nextCompleted } : set
-          ),
-        })),
-      }))
-    );
-
-    toggleSetLog(setId, nextCompleted).then((result) => {
-      if (!result.ok) {
-        setDaysData((prev) =>
-          prev.map((day) => ({
-            ...day,
-            exercises: day.exercises.map((exercise) => ({
-              ...exercise,
-              sets: exercise.sets.map((set) =>
-                set.id === setId ? { ...set, completed: currentCompleted } : set
-              ),
-            })),
-          }))
-        );
-      }
-    });
-  };
-
-  const handleRepsChange = (setId: string, reps: number) => {
-    if (!isDbId(setId)) return;
-    setDaysData((prev) =>
-      prev.map((day) => ({
-        ...day,
-        exercises: day.exercises.map((exercise) => ({
-          ...exercise,
-          sets: exercise.sets.map((set) =>
-            set.id === setId ? { ...set, actualReps: reps } : set
-          ),
-        })),
-      }))
-    );
-  };
-
-  const handleRepsSave = (setId: string, reps: number) => {
-    if (!isDbId(setId)) return;
-    updateSetReps(setId, reps);
-  };
-
-  const handleSelectDay = (dayId: string) => {
-    setSelectedDayId(dayId);
-
-    if (sessionCache.current[dayId]) return;
-
-    startTransition(async () => {
-      const result = await getOrCreateDaySession(routineId, dayId);
-      if (!result.ok) return;
-
-      sessionCache.current[dayId] = result.sessionId;
-
-      setDaysData((prev) =>
-        prev.map((d) =>
-          d.id === dayId ? mergeSetLogsIntoDay(d, result.setLogs) : d
-        )
-      );
-    });
-  };
 
   if (!selectedDay) return null;
 
@@ -189,20 +115,19 @@ export function DashboardClient({
 
         <section className="mb-4 flex items-center justify-between gap-4">
           <h2 className="text-foreground text-lg font-semibold">Exercises</h2>
-          <div className="flex gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              type="button"
-              className="text-muted-foreground"
-            >
-              <RotateCcw className="mr-2 h-4 w-4" aria-hidden />
-              Reset exercise
-            </Button>
-            <Button variant="outline" size="sm" type="button">
-              Reset day
-            </Button>
-          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            type="button"
+            disabled={
+              isPending || completedSets === 0 || isReadOnly || isResetting
+            }
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={handleResetDay}
+          >
+            <RotateCcw className="mr-2 h-4 w-4" aria-hidden />
+            Reset day
+          </Button>
         </section>
 
         <section
@@ -217,9 +142,29 @@ export function DashboardClient({
               onSetToggle={handleSetToggle}
               onRepsChange={handleRepsChange}
               onRepsSave={handleRepsSave}
+              onResetExercise={isReadOnly ? undefined : handleResetExercise}
+              resetDisabled={isPending}
+              setRowRevision={setRowRevision[exercise.id] ?? 0}
+              readOnly={isReadOnly}
             />
           ))}
         </section>
+
+        <WorkoutSavePanel
+          isSessionSaved={isSessionSaved}
+          sessionSavedNotice={sessionSavedNotice}
+          isDayComplete={isDayComplete}
+          completedSets={completedSets}
+          totalSets={totalSets}
+          canSaveWorkout={canSaveWorkout}
+          isPending={isPending}
+          isSaving={isSaving}
+          isReopening={isReopening}
+          isResetting={isResetting}
+          onSave={handleSaveWorkout}
+          onEdit={handleEditWorkout}
+          onResetDay={handleResetDay}
+        />
       </div>
     </AppShell>
   );

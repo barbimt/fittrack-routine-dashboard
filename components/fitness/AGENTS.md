@@ -8,11 +8,12 @@ Presentational workout UI. Props in, events up — no Supabase or routing here.
 |-----------|---------|
 | `button.tsx`, `input.tsx`, `badge.tsx` | FitTrack-themed wrappers over `components/ui/*` |
 | `set-row.tsx` | One set: checkbox, target reps, editable actual reps (debounced save + auto-complete) |
-| `exercise-card.tsx` | Collapsible exercise block; lists `SetRow`s |
+| `exercise-card.tsx` | Collapsible exercise block; lists `SetRow`s; optional per-exercise reset |
 | `day-selector.tsx` | Horizontal day pills |
 | `daily-progress-card.tsx` | Selected day progress (`completed/total` sets) |
 | `summary-panel.tsx` | Desktop `xl+` aside: today, muscle focus, week |
-| `dashboard-client.tsx` | **Stateful** dashboard page client (optimistic toggles, session cache) |
+| `workout-save-panel.tsx` | Save / edit / reset-day footer banner + copy helper |
+| `dashboard-client.tsx` | **Layout** dashboard; state in `hooks/use-workout-session.ts` |
 | `progress-bar.tsx`, `stat-card.tsx` | Reusable metrics widgets |
 | `weekly-day-card.tsx` | Day summary for `/week` |
 | `analytics-card.tsx` | Chart shell + `ChartPlaceholder` |
@@ -22,15 +23,22 @@ Presentational workout UI. Props in, events up — no Supabase or routing here.
 
 ## Set row behavior
 
-- `localValue` syncs from `set.actualReps` on mount; remounts when `key={set.id}` changes (day switch).
+- `localValue` syncs from `set.actualReps` when the input is not focused; remounts via `setRowRevision` key on reset.
 - Typing updates parent via `onRepsChange`; persist via `onRepsSave` on blur or after 400ms debounce.
 - Entering reps ≥ 1 auto-checks the set; clearing to 0 auto-unchecks.
 
 ## Dashboard client
 
-- `sessionCache` ref avoids re-fetching `getOrCreateDaySession` when re-selecting a day.
+- State and handlers: `hooks/use-workout-session.ts`
+- Set mutations: `features/routines/dashboardDayState.ts` (`updateSetInDays`, `findSetInDays`, reset helpers)
+- `sessionIdsByDayId` caches day session ids; avoids re-fetching `getOrCreateDaySession` when re-selecting a day.
 - Set toggles/reps only persist when `set.id` is a UUID (materialised `workout_set_logs` row).
-- Optimistic UI with revert on `toggleSetLog` failure.
+- Optimistic UI with revert on `toggleSetLog` / reset failures.
+- **Reset exercise**: per-card button (visible when exercise has completed sets); calls `resetExerciseSets`.
+- **Reset day**: header button; clears all sets for today’s session via `resetDaySession`.
+- **Save workout**: enabled once at least one set is complete; first save vs re-save show different banner/toast copy.
+- **Edit workout**: reopens a saved session (`in_progress`) for edits; shows Save again when done.
+- **Reset day** (when saved): shown next to Edit workout in the footer; clears today’s session and exits read-only mode.
 
 ## Conventions
 

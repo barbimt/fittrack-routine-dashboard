@@ -19,6 +19,7 @@ Domain logic grouped by capability: auth, routine import, live routines/sessions
 
 ## Related docs
 
-- `docs/ROUTINE-IMPORT.md` — Excel format and parser
-- `docs/DOMAIN.md` — entity types
+- `supabase/LOCAL-DEV.md` — local Docker vs cloud dev
 - `supabase/schema.sql` — source of truth for DB shape
+- `docs/ROUTINE-IMPORT.md` — Excel format and parser (if present)
+- `docs/DOMAIN.md` — entity types (if present)
