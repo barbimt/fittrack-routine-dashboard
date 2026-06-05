@@ -15,7 +15,7 @@ const INITIAL_VISIBLE = 3;
 function ExerciseRow({ exercise }: { exercise: ParsedRoutineExercise }) {
   return (
     <li className="text-sm">
-      <span className="font-medium text-foreground">{exercise.name}</span>
+      <span className="text-foreground font-medium">{exercise.name}</span>
       <span className="text-muted-foreground"> · {exercise.prescription}</span>
       {exercise.weight ? (
         <span className="text-muted-foreground"> · {exercise.weight}</span>
@@ -29,7 +29,10 @@ interface ImportDayExercisesProps {
   dayLabel: string;
 }
 
-export function ImportDayExercises({ exercises, dayLabel }: ImportDayExercisesProps) {
+export function ImportDayExercises({
+  exercises,
+  dayLabel,
+}: ImportDayExercisesProps) {
   const [open, setOpen] = useState(false);
   const visible = exercises.slice(0, INITIAL_VISIBLE);
   const hidden = exercises.slice(INITIAL_VISIBLE);
@@ -37,7 +40,7 @@ export function ImportDayExercises({ exercises, dayLabel }: ImportDayExercisesPr
 
   return (
     <div>
-      <ul className="space-y-2 border-t border-border/60 pt-3">
+      <ul className="border-border/60 space-y-2 border-t pt-3">
         {visible.map((exercise) => (
           <ExerciseRow
             key={`${exercise.sortOrder}-${exercise.name}`}
@@ -50,8 +53,8 @@ export function ImportDayExercises({ exercises, dayLabel }: ImportDayExercisesPr
         <Collapsible open={open} onOpenChange={setOpen} className="mt-2">
           <CollapsibleTrigger
             className={cn(
-              "flex w-full min-h-11 items-center justify-between gap-2 rounded-lg px-2 py-2 text-left text-sm font-medium text-primary",
-              "hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              "text-primary flex min-h-11 w-full items-center justify-between gap-2 rounded-lg px-2 py-2 text-left text-sm font-medium",
+              "hover:bg-muted/50 focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none"
             )}
             aria-label={
               open
@@ -65,12 +68,15 @@ export function ImportDayExercises({ exercises, dayLabel }: ImportDayExercisesPr
                 : `Show ${hiddenCount} more ${hiddenCount === 1 ? "exercise" : "exercises"}`}
             </span>
             <ChevronDown
-              className={cn("h-4 w-4 shrink-0 transition-transform", open && "rotate-180")}
+              className={cn(
+                "h-4 w-4 shrink-0 transition-transform",
+                open && "rotate-180"
+              )}
               aria-hidden
             />
           </CollapsibleTrigger>
           <CollapsibleContent>
-            <ul className="mt-2 space-y-2 border-t border-border/40 pt-3">
+            <ul className="border-border/40 mt-2 space-y-2 border-t pt-3">
               {hidden.map((exercise) => (
                 <ExerciseRow
                   key={`${exercise.sortOrder}-${exercise.name}`}

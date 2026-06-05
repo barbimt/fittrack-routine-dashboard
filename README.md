@@ -62,22 +62,22 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Scripts
 
-| Command | Description |
-|---------|-------------|
-| `pnpm dev` | Development server |
-| `pnpm build` | Production build |
+| Command      | Description          |
+| ------------ | -------------------- |
+| `pnpm dev`   | Development server   |
+| `pnpm build` | Production build     |
 | `pnpm start` | Run production build |
-| `pnpm lint` | ESLint |
+| `pnpm lint`  | ESLint               |
 
 ## Project structure (high level)
 
-| Path | Role |
-|------|------|
-| `app/` | Routes and pages |
-| `components/fitness/` | Workout UI components |
-| `components/layout/` | Navigation and shell |
+| Path                       | Role                            |
+| -------------------------- | ------------------------------- |
+| `app/`                     | Routes and pages                |
+| `components/fitness/`      | Workout UI components           |
+| `components/layout/`       | Navigation and shell            |
 | `features/routine-import/` | Excel parser and import preview |
-| `lib/mock-data.ts` | Dashboard types and sample week |
+| `lib/mock-data.ts`         | Dashboard types and sample week |
 
 ## Current limitations
 

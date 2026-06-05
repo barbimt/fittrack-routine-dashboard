@@ -22,11 +22,31 @@ export interface NavItem {
 
 export const navItems: NavItem[] = [
   { label: "Today", href: "/", icon: <Home className="h-5 w-5" aria-hidden /> },
-  { label: "Upload Routine", href: "/upload", icon: <Upload className="h-5 w-5" aria-hidden /> },
-  { label: "Week Overview", href: "/week", icon: <Calendar className="h-5 w-5" aria-hidden /> },
-  { label: "Progress", href: "/progress", icon: <BarChart3 className="h-5 w-5" aria-hidden /> },
-  { label: "Routine Editor", href: "/editor", icon: <Edit3 className="h-5 w-5" aria-hidden /> },
-  { label: "Settings", href: "/settings", icon: <Settings className="h-5 w-5" aria-hidden /> },
+  {
+    label: "Upload Routine",
+    href: "/upload",
+    icon: <Upload className="h-5 w-5" aria-hidden />,
+  },
+  {
+    label: "Week Overview",
+    href: "/week",
+    icon: <Calendar className="h-5 w-5" aria-hidden />,
+  },
+  {
+    label: "Progress",
+    href: "/progress",
+    icon: <BarChart3 className="h-5 w-5" aria-hidden />,
+  },
+  {
+    label: "Routine Editor",
+    href: "/editor",
+    icon: <Edit3 className="h-5 w-5" aria-hidden />,
+  },
+  {
+    label: "Settings",
+    href: "/settings",
+    icon: <Settings className="h-5 w-5" aria-hidden />,
+  },
 ];
 
 interface SidebarProps {
@@ -40,22 +60,22 @@ export function Sidebar({ onNavigate, className }: SidebarProps) {
   return (
     <aside
       className={cn(
-        "flex flex-col border-r border-sidebar-border bg-sidebar",
+        "border-sidebar-border bg-sidebar flex flex-col border-r",
         className
       )}
     >
-      <div className="flex items-center gap-2.5 px-6 py-5 border-b border-sidebar-border">
+      <div className="border-sidebar-border flex items-center gap-2.5 border-b px-6 py-5">
         <div
-          className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary"
+          className="bg-primary flex h-9 w-9 items-center justify-center rounded-lg"
           aria-hidden
         >
-          <Dumbbell className="h-5 w-5 text-primary-foreground" />
+          <Dumbbell className="text-primary-foreground h-5 w-5" />
         </div>
         <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
             FitTrack
           </p>
-          <p className="text-sm font-semibold text-sidebar-foreground leading-tight">
+          <p className="text-sidebar-foreground text-sm leading-tight font-semibold">
             Routine Dashboard
           </p>
         </div>
@@ -68,7 +88,7 @@ export function Sidebar({ onNavigate, className }: SidebarProps) {
             href={item.href}
             onClick={onNavigate}
             className={cn(
-              "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors min-h-[44px]",
+              "flex min-h-[44px] items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
               pathname === item.href
                 ? "bg-sidebar-accent text-sidebar-accent-foreground"
                 : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
@@ -81,7 +101,7 @@ export function Sidebar({ onNavigate, className }: SidebarProps) {
         ))}
       </nav>
 
-      <div className="px-3 py-3 border-t border-sidebar-border">
+      <div className="border-sidebar-border border-t px-3 py-3">
         <LogoutButton />
       </div>
     </aside>

@@ -41,7 +41,6 @@ export function DashboardClient({
     initialSessionId ? { [initialDayId]: initialSessionId } : {}
   );
 
-
   const selectedDay =
     daysData.find((d) => d.id === selectedDayId) ?? daysData[0];
 
@@ -52,10 +51,7 @@ export function DashboardClient({
     (sum, day) => sum + getCompletedSets(day),
     0
   );
-  const weeklyTotal = daysData.reduce(
-    (sum, day) => sum + getTotalSets(day),
-    0
-  );
+  const weeklyTotal = daysData.reduce((sum, day) => sum + getTotalSets(day), 0);
 
   const today = new Date().toLocaleDateString("en-US", {
     weekday: "long",
@@ -65,9 +61,7 @@ export function DashboardClient({
 
   // UUID regex — only toggle rows that exist in the DB.
   const isDbId = (id: string) =>
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
-      id
-    );
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 
   const handleSetToggle = (setId: string) => {
     if (!isDbId(setId)) return; // set log not yet materialised — ignore
@@ -173,14 +167,16 @@ export function DashboardClient({
     >
       <div className="mx-auto max-w-4xl flex-1 px-4 py-6 pb-24 lg:px-0 lg:py-0 lg:pb-0">
         <header className="mb-6">
-          <div className="mb-1 flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="text-muted-foreground mb-1 flex items-center gap-2 text-sm">
             <Calendar className="h-4 w-4" aria-hidden />
-            <time dateTime={new Date().toISOString().split("T")[0]}>{today}</time>
+            <time dateTime={new Date().toISOString().split("T")[0]}>
+              {today}
+            </time>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+          <h1 className="text-foreground text-2xl font-bold tracking-tight">
             Today&apos;s Workout
           </h1>
-          <p className="mt-1 text-sm text-muted-foreground">{routineName}</p>
+          <p className="text-muted-foreground mt-1 text-sm">{routineName}</p>
         </header>
 
         <section className="mb-6" aria-label="Training day selection">
@@ -201,7 +197,7 @@ export function DashboardClient({
         </section>
 
         <section className="mb-4 flex items-center justify-between gap-4">
-          <h2 className="text-lg font-semibold text-foreground">Exercises</h2>
+          <h2 className="text-foreground text-lg font-semibold">Exercises</h2>
           <div className="flex gap-2">
             <Button
               variant="ghost"

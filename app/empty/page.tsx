@@ -15,8 +15,8 @@ export default function EmptyRoutinePage() {
       <div className="mx-auto flex min-h-[70vh] max-w-lg flex-col items-center justify-center px-4 py-12 pb-28 lg:pb-12">
         <EmptyState
           icon={
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-accent-soft">
-              <Dumbbell className="h-8 w-8 text-primary" aria-hidden />
+            <div className="bg-accent-soft flex h-16 w-16 items-center justify-center rounded-2xl">
+              <Dumbbell className="text-primary h-8 w-8" aria-hidden />
             </div>
           }
           title="No routine yet"
@@ -39,7 +39,7 @@ export default function EmptyRoutinePage() {
             </Link>
           </Button>
           <Button variant="ghost" asChild>
-            <Link href="/" className="gap-2 text-muted-foreground">
+            <Link href="/" className="text-muted-foreground gap-2">
               <Sparkles className="h-4 w-4" aria-hidden />
               Preview dashboard
             </Link>

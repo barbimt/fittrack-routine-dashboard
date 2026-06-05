@@ -1,7 +1,13 @@
 "use client";
 
 import { AppShell } from "@/components/app-shell";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
@@ -18,10 +24,10 @@ import { User, Bell, Palette, Database, HelpCircle } from "lucide-react";
 export default function SettingsPage() {
   return (
     <AppShell>
-      <div className="px-4 py-6 pb-24 lg:px-8 lg:py-8 lg:pb-8 max-w-3xl mx-auto">
+      <div className="mx-auto max-w-3xl px-4 py-6 pb-24 lg:px-8 lg:py-8 lg:pb-8">
         {/* Page Header */}
         <header className="mb-6">
-          <h1 className="text-2xl font-bold text-foreground mb-1">Settings</h1>
+          <h1 className="text-foreground mb-1 text-2xl font-bold">Settings</h1>
           <p className="text-muted-foreground">Manage your app preferences</p>
         </header>
 
@@ -30,20 +36,24 @@ export default function SettingsPage() {
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2">
-                <User className="h-5 w-5 text-muted-foreground" />
+                <User className="text-muted-foreground h-5 w-5" />
                 <CardTitle className="text-base">Profile</CardTitle>
               </div>
               <CardDescription>Your personal information</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="name">Display Name</Label>
                   <Input id="name" defaultValue="Alex" />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" defaultValue="alex@example.com" />
+                  <Input
+                    id="email"
+                    type="email"
+                    defaultValue="alex@example.com"
+                  />
                 </div>
               </div>
             </CardContent>
@@ -53,16 +63,18 @@ export default function SettingsPage() {
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2">
-                <Bell className="h-5 w-5 text-muted-foreground" />
+                <Bell className="text-muted-foreground h-5 w-5" />
                 <CardTitle className="text-base">Notifications</CardTitle>
               </div>
-              <CardDescription>Configure how you receive updates</CardDescription>
+              <CardDescription>
+                Configure how you receive updates
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
                   <Label htmlFor="workout-reminders">Workout Reminders</Label>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-muted-foreground text-sm">
                     Get reminded about scheduled workouts
                   </p>
                 </div>
@@ -71,7 +83,7 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <Label htmlFor="progress-updates">Progress Updates</Label>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-muted-foreground text-sm">
                     Weekly summary of your progress
                   </p>
                 </div>
@@ -80,7 +92,7 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <Label htmlFor="rest-timer">Rest Timer Sound</Label>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-muted-foreground text-sm">
                     Audio notification when rest is over
                   </p>
                 </div>
@@ -93,7 +105,7 @@ export default function SettingsPage() {
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2">
-                <Palette className="h-5 w-5 text-muted-foreground" />
+                <Palette className="text-muted-foreground h-5 w-5" />
                 <CardTitle className="text-base">Appearance</CardTitle>
               </div>
               <CardDescription>Customize the app look and feel</CardDescription>
@@ -131,7 +143,7 @@ export default function SettingsPage() {
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2">
-                <Database className="h-5 w-5 text-muted-foreground" />
+                <Database className="text-muted-foreground h-5 w-5" />
                 <CardTitle className="text-base">Data</CardTitle>
               </div>
               <CardDescription>Manage your workout data</CardDescription>
@@ -139,8 +151,8 @@ export default function SettingsPage() {
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-medium text-sm">Export Data</p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm font-medium">Export Data</p>
+                  <p className="text-muted-foreground text-sm">
                     Download all your workout history
                   </p>
                 </div>
@@ -150,12 +162,18 @@ export default function SettingsPage() {
               </div>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-medium text-sm text-destructive">Reset Progress</p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-destructive text-sm font-medium">
+                    Reset Progress
+                  </p>
+                  <p className="text-muted-foreground text-sm">
                     Clear all completed sets and progress
                   </p>
                 </div>
-                <Button variant="outline" size="sm" className="text-destructive hover:text-destructive">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-destructive hover:text-destructive"
+                >
                   Reset
                 </Button>
               </div>
@@ -166,7 +184,7 @@ export default function SettingsPage() {
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2">
-                <HelpCircle className="h-5 w-5 text-muted-foreground" />
+                <HelpCircle className="text-muted-foreground h-5 w-5" />
                 <CardTitle className="text-base">Help & Support</CardTitle>
               </div>
             </CardHeader>

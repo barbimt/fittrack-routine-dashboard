@@ -115,9 +115,7 @@ export async function getOrCreateDaySession(
   };
 }
 
-export type UpdateRepsResult =
-  | { ok: true }
-  | { ok: false; error: string };
+export type UpdateRepsResult = { ok: true } | { ok: false; error: string };
 
 /**
  * Saves the actual rep count for a single set log.
@@ -150,9 +148,7 @@ export async function updateSetReps(
   return { ok: true };
 }
 
-export type ToggleResult =
-  | { ok: true }
-  | { ok: false; error: string };
+export type ToggleResult = { ok: true } | { ok: false; error: string };
 
 /**
  * Flips the completed state of a single workout_set_log row.

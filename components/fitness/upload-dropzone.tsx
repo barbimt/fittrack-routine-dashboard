@@ -54,16 +54,30 @@ export function UploadDropzone({
 
   if (uploadedFile) {
     return (
-      <div className={cn("bg-card rounded-2xl border border-border p-6", className)}>
+      <div
+        className={cn(
+          "bg-card border-border rounded-2xl border p-6",
+          className
+        )}
+      >
         <div className="flex items-center gap-4">
-          <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-success/10">
-            <Check className="h-6 w-6 text-success" />
+          <div className="bg-success/10 flex h-12 w-12 items-center justify-center rounded-xl">
+            <Check className="text-success h-6 w-6" />
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="font-medium text-card-foreground truncate">{uploadedFile.name}</p>
-            <p className="text-sm text-muted-foreground">{formatFileSize(uploadedFile.size)}</p>
+          <div className="min-w-0 flex-1">
+            <p className="text-card-foreground truncate font-medium">
+              {uploadedFile.name}
+            </p>
+            <p className="text-muted-foreground text-sm">
+              {formatFileSize(uploadedFile.size)}
+            </p>
           </div>
-          <Button variant="outline" size="sm" type="button" onClick={() => onChangeFile?.()}>
+          <Button
+            variant="outline"
+            size="sm"
+            type="button"
+            onClick={() => onChangeFile?.()}
+          >
             Change file
           </Button>
         </div>
@@ -76,7 +90,7 @@ export function UploadDropzone({
       onDrop={handleDrop}
       onDragOver={(e) => e.preventDefault()}
       className={cn(
-        "relative bg-card rounded-2xl border-2 border-dashed border-border p-8 transition-colors",
+        "bg-card border-border relative rounded-2xl border-2 border-dashed p-8 transition-colors",
         "hover:border-primary/50 hover:bg-muted/30",
         error && "border-destructive/50",
         className
@@ -86,35 +100,35 @@ export function UploadDropzone({
         type="file"
         accept=".xlsx"
         onChange={handleFileInput}
-        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+        className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
         aria-label="Upload Excel file"
       />
 
       <div className="flex flex-col items-center text-center">
         <div
           className={cn(
-            "flex items-center justify-center w-14 h-14 rounded-2xl mb-4",
+            "mb-4 flex h-14 w-14 items-center justify-center rounded-2xl",
             error ? "bg-destructive/10" : "bg-primary/10"
           )}
         >
           {error ? (
-            <AlertCircle className="h-7 w-7 text-destructive" />
+            <AlertCircle className="text-destructive h-7 w-7" />
           ) : (
-            <Upload className="h-7 w-7 text-primary" />
+            <Upload className="text-primary h-7 w-7" />
           )}
         </div>
 
-        <h3 className="text-lg font-semibold text-card-foreground mb-1">
+        <h3 className="text-card-foreground mb-1 text-lg font-semibold">
           {isUploading ? "Uploading..." : "Drop your routine file here"}
         </h3>
-        <p className="text-sm text-muted-foreground mb-4">
+        <p className="text-muted-foreground mb-4 text-sm">
           or click to browse your files
         </p>
 
         {error ? (
-          <p className="text-sm text-destructive">{error}</p>
+          <p className="text-destructive text-sm">{error}</p>
         ) : (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="text-muted-foreground flex items-center gap-2 text-sm">
             <FileSpreadsheet className="h-4 w-4" />
             <span>Accepts .xlsx files only</span>
           </div>

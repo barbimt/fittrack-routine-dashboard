@@ -2,16 +2,19 @@
 
 import { useActionState } from "react";
 import Link from "next/link";
-import { login, type AuthActionState } from "@/features/auth/actions/authActions";
+import {
+  login,
+  type AuthActionState,
+} from "@/features/auth/actions/authActions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export function LoginForm() {
-  const [state, formAction, isPending] = useActionState<AuthActionState, FormData>(
-    login,
-    null
-  );
+  const [state, formAction, isPending] = useActionState<
+    AuthActionState,
+    FormData
+  >(login, null);
 
   return (
     <form action={formAction} className="space-y-4">
@@ -40,7 +43,7 @@ export function LoginForm() {
       </div>
 
       {state?.error && (
-        <p role="alert" className="text-sm text-destructive">
+        <p role="alert" className="text-destructive text-sm">
           {state.error}
         </p>
       )}
@@ -49,11 +52,11 @@ export function LoginForm() {
         {isPending ? "Signing in…" : "Sign in"}
       </Button>
 
-      <p className="text-center text-sm text-muted-foreground">
+      <p className="text-muted-foreground text-center text-sm">
         Don&apos;t have an account?{" "}
         <Link
           href="/signup"
-          className="font-medium text-primary hover:underline"
+          className="text-primary font-medium hover:underline"
         >
           Sign up
         </Link>

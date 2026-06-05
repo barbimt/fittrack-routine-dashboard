@@ -6,20 +6,14 @@ import type {
   ParsedRoutineExercise,
   ParseWorkbookResult,
 } from "../types";
-import {
-  COLUMN_LABELS,
-  OPTIONAL_COLUMNS,
-  REQUIRED_COLUMNS,
-} from "../types";
-import {
-  getCell,
-  isRowEmpty,
-  mapHeaderRow,
-} from "./normaliseExcelHeaders";
+import { COLUMN_LABELS, OPTIONAL_COLUMNS, REQUIRED_COLUMNS } from "../types";
+import { getCell, isRowEmpty, mapHeaderRow } from "./normaliseExcelHeaders";
 import { parsePrescription } from "./parsePrescription";
 import { parseSheetName } from "./parseSheetName";
 
-const REQUIRED_LABELS = REQUIRED_COLUMNS.map((col) => COLUMN_LABELS[col]).join(", ");
+const REQUIRED_LABELS = REQUIRED_COLUMNS.map((col) => COLUMN_LABELS[col]).join(
+  ", "
+);
 
 function routineNameFromFileName(fileName: string): string {
   const base = fileName.replace(/\.xlsx$/i, "").trim();
@@ -152,7 +146,9 @@ function parseSheet(
   };
 }
 
-export async function parseRoutineWorkbook(file: File): Promise<ParseWorkbookResult> {
+export async function parseRoutineWorkbook(
+  file: File
+): Promise<ParseWorkbookResult> {
   const warnings: ImportWarning[] = [];
 
   if (!file.name.toLowerCase().endsWith(".xlsx")) {
@@ -170,7 +166,8 @@ export async function parseRoutineWorkbook(file: File): Promise<ParseWorkbookRes
   } catch {
     return {
       ok: false,
-      error: "Could not read the Excel file. Check that it is a valid .xlsx workbook.",
+      error:
+        "Could not read the Excel file. Check that it is a valid .xlsx workbook.",
       warnings,
     };
   }

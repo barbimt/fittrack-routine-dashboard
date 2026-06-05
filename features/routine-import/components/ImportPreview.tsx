@@ -15,25 +15,37 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-export function ImportPreview({ fileName, fileSize, routine }: ImportPreviewProps) {
-  const totalExercises = routine.days.reduce((sum, day) => sum + day.exercises.length, 0);
+export function ImportPreview({
+  fileName,
+  fileSize,
+  routine,
+}: ImportPreviewProps) {
+  const totalExercises = routine.days.reduce(
+    (sum, day) => sum + day.exercises.length,
+    0
+  );
 
   return (
     <section className="space-y-6" aria-labelledby="routine-preview-title">
-      <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+      <div className="border-border bg-card rounded-2xl border p-5 shadow-sm">
         <div className="flex items-start gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10">
-            <FileSpreadsheet className="h-5 w-5 text-primary" aria-hidden />
+          <div className="bg-primary/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
+            <FileSpreadsheet className="text-primary h-5 w-5" aria-hidden />
           </div>
           <div className="min-w-0 flex-1">
-            <h2 id="routine-preview-title" className="text-lg font-semibold text-foreground">
+            <h2
+              id="routine-preview-title"
+              className="text-foreground text-lg font-semibold"
+            >
               Routine preview
             </h2>
-            <p className="text-base font-medium text-foreground">{routine.name}</p>
-            <p className="mt-1 truncate text-sm text-muted-foreground">
+            <p className="text-foreground text-base font-medium">
+              {routine.name}
+            </p>
+            <p className="text-muted-foreground mt-1 truncate text-sm">
               {fileName} · {formatFileSize(fileSize)}
             </p>
-            <p className="mt-3 text-sm text-foreground">
+            <p className="text-foreground mt-3 text-sm">
               <span className="font-medium">{routine.days.length}</span>{" "}
               {routine.days.length === 1 ? "day" : "days"} found ·{" "}
               <span className="font-medium">{totalExercises}</span>{" "}
@@ -47,11 +59,11 @@ export function ImportPreview({ fileName, fileSize, routine }: ImportPreviewProp
         {routine.days.map((day) => (
           <li
             key={`${day.originalName}-${day.sortOrder}`}
-            className="rounded-2xl border border-border bg-card p-4 shadow-sm"
+            className="border-border bg-card rounded-2xl border p-4 shadow-sm"
           >
             <div className="mb-3">
-              <p className="font-medium text-foreground">{day.originalName}</p>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-foreground font-medium">{day.originalName}</p>
+              <p className="text-muted-foreground text-sm">
                 {day.exercises.length}{" "}
                 {day.exercises.length === 1 ? "exercise" : "exercises"}
                 {day.focus ? ` · ${day.focus}` : ""}
@@ -65,7 +77,9 @@ export function ImportPreview({ fileName, fileSize, routine }: ImportPreviewProp
         ))}
       </ul>
 
-      {routine.warnings.length > 0 ? <ImportWarnings warnings={routine.warnings} /> : null}
+      {routine.warnings.length > 0 ? (
+        <ImportWarnings warnings={routine.warnings} />
+      ) : null}
     </section>
   );
 }

@@ -18,13 +18,13 @@ export function AppShell({ children, aside }: AppShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="bg-background flex min-h-screen">
       <Sidebar className="hidden lg:fixed lg:inset-y-0 lg:z-20 lg:flex lg:w-64" />
 
       {sidebarOpen && (
         <button
           type="button"
-          className="fixed inset-0 z-40 bg-foreground/20 backdrop-blur-sm lg:hidden"
+          className="bg-foreground/20 fixed inset-0 z-40 backdrop-blur-sm lg:hidden"
           aria-label="Close menu overlay"
           onClick={() => setSidebarOpen(false)}
         />
@@ -37,17 +37,20 @@ export function AppShell({ children, aside }: AppShellProps) {
         )}
         aria-hidden={!sidebarOpen}
       >
-        <div className="relative flex h-full flex-col bg-sidebar shadow-xl">
+        <div className="bg-sidebar relative flex h-full flex-col shadow-xl">
           <Button
             variant="ghost"
             size="icon"
-            className="absolute right-3 top-3 z-10 h-11 w-11"
+            className="absolute top-3 right-3 z-10 h-11 w-11"
             onClick={() => setSidebarOpen(false)}
             aria-label="Close navigation menu"
           >
             <X className="h-5 w-5" />
           </Button>
-          <Sidebar onNavigate={() => setSidebarOpen(false)} className="h-full w-full" />
+          <Sidebar
+            onNavigate={() => setSidebarOpen(false)}
+            className="h-full w-full"
+          />
         </div>
       </aside>
 
