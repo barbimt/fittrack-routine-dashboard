@@ -4,12 +4,12 @@
 
 Current suites live next to **pure logic** (parsers, mappers, progress helpers). They do **not** render React UI or assert visible copy.
 
-| Area | Literal strings in tests | i18n risk |
-|------|--------------------------|-----------|
-| `parsePrescription` | `3x12`, `4×10` | None — prescription notation, not UI |
-| `normaliseExcelHeaders` | `EXERCISE`, `EJERCICIO`, `SETS x REPS` | None — Excel column aliases for import |
-| `parseSheetName` | `Day 1 - FULL BODY` | None — user workbook content |
-| `mock-data` / `routineMapper` | Fixture names (`Hip Thrust`, etc.) | None — sample **data**, not translated labels |
+| Area                          | Literal strings in tests               | i18n risk                                     |
+| ----------------------------- | -------------------------------------- | --------------------------------------------- |
+| `parsePrescription`           | `3x12`, `4×10`                         | None — prescription notation, not UI          |
+| `normaliseExcelHeaders`       | `EXERCISE`, `EJERCICIO`, `SETS x REPS` | None — Excel column aliases for import        |
+| `parseSheetName`              | `Day 1 - FULL BODY`                    | None — user workbook content                  |
+| `mock-data` / `routineMapper` | Fixture names (`Hip Thrust`, etc.)     | None — sample **data**, not translated labels |
 
 When the app gets i18n, these tests should stay as-is.
 
