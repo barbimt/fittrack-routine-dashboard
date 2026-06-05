@@ -7,11 +7,11 @@ const HEADER_ALIASES: Record<string, CanonicalColumn> = {
   EJERCICIOS: "EXERCISE",
   "SETS X REPS": "SETS_X_REPS",
   "SETS X REP": "SETS_X_REPS",
-  "SETSXREPS": "SETS_X_REPS",
+  SETSXREPS: "SETS_X_REPS",
   "SERIES X REPS": "SETS_X_REPS",
   "SERIES X REPETICIONES": "SETS_X_REPS",
   "SERIES X REP": "SETS_X_REPS",
-  "SERIESXREPS": "SETS_X_REPS",
+  SERIESXREPS: "SETS_X_REPS",
   SETS: "SETS_X_REPS",
   SERIES: "SETS_X_REPS",
   REPS: "SETS_X_REPS",
@@ -25,10 +25,7 @@ const HEADER_ALIASES: Record<string, CanonicalColumn> = {
 
 export function normaliseHeaderCell(value: unknown): string {
   if (value === null || value === undefined) return "";
-  return String(value)
-    .trim()
-    .replace(/\s+/g, " ")
-    .toUpperCase();
+  return String(value).trim().replace(/\s+/g, " ").toUpperCase();
 }
 
 function canonicaliseHeader(normalised: string): CanonicalColumn | null {
@@ -45,7 +42,10 @@ function canonicaliseHeader(normalised: string): CanonicalColumn | null {
 
 export type HeaderMap = Partial<Record<CanonicalColumn, number>>;
 
-export function mapHeaderRow(row: unknown[]): { map: HeaderMap; unknownHeaders: string[] } {
+export function mapHeaderRow(row: unknown[]): {
+  map: HeaderMap;
+  unknownHeaders: string[];
+} {
   const map: HeaderMap = {};
   const unknownHeaders: string[] = [];
 
@@ -67,7 +67,10 @@ export function mapHeaderRow(row: unknown[]): { map: HeaderMap; unknownHeaders: 
   return { map, unknownHeaders };
 }
 
-export function getCell(row: unknown[], columnIndex: number | undefined): string {
+export function getCell(
+  row: unknown[],
+  columnIndex: number | undefined
+): string {
   if (columnIndex === undefined) return "";
   const value = row[columnIndex];
   if (value === null || value === undefined) return "";

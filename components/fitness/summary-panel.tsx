@@ -19,32 +19,39 @@ export function SummaryPanel({
 }: SummaryPanelProps) {
   const dayCompleted = getCompletedSets(selectedDay);
   const dayTotal = getTotalSets(selectedDay);
-  const muscleGroups = [...new Set(selectedDay.exercises.map((e) => e.muscleGroup))];
+  const muscleGroups = [
+    ...new Set(selectedDay.exercises.map((e) => e.muscleGroup)),
+  ];
 
   return (
     <aside
-      className={cn(
-        "hidden xl:block w-72 shrink-0 space-y-4",
-        className
-      )}
+      className={cn("hidden w-72 shrink-0 space-y-4 xl:block", className)}
       aria-label="Workout summary"
     >
       <div className="sticky top-8 space-y-4">
-        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground mb-1">
+        <div className="border-border bg-card rounded-2xl border p-5 shadow-sm">
+          <p className="text-muted-foreground mb-1 text-xs font-medium tracking-wide uppercase">
             Today
           </p>
-          <h2 className="text-lg font-semibold text-card-foreground">{selectedDay.dayName}</h2>
-          <p className="text-sm text-muted-foreground mb-4">{selectedDay.focus}</p>
+          <h2 className="text-card-foreground text-lg font-semibold">
+            {selectedDay.dayName}
+          </h2>
+          <p className="text-muted-foreground mb-4 text-sm">
+            {selectedDay.focus}
+          </p>
           <ProgressBar value={dayCompleted} max={dayTotal} size="md" />
-          <p className="mt-2 text-sm text-muted-foreground">
-            <span className="font-semibold text-foreground">{dayCompleted}</span> of{" "}
-            {dayTotal} sets completed
+          <p className="text-muted-foreground mt-2 text-sm">
+            <span className="text-foreground font-semibold">
+              {dayCompleted}
+            </span>{" "}
+            of {dayTotal} sets completed
           </p>
         </div>
 
-        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-          <p className="text-sm font-semibold text-card-foreground mb-3">Muscle focus</p>
+        <div className="border-border bg-card rounded-2xl border p-5 shadow-sm">
+          <p className="text-card-foreground mb-3 text-sm font-semibold">
+            Muscle focus
+          </p>
           <div className="flex flex-wrap gap-1.5">
             {muscleGroups.map((group) => (
               <Badge key={group} variant="soft">
@@ -54,16 +61,18 @@ export function SummaryPanel({
           </div>
         </div>
 
-        <div className="rounded-2xl border border-border bg-accent-soft/40 p-5">
-          <p className="text-sm font-semibold text-foreground mb-2">This week</p>
+        <div className="border-border bg-accent-soft/40 rounded-2xl border p-5">
+          <p className="text-foreground mb-2 text-sm font-semibold">
+            This week
+          </p>
           <ProgressBar value={weeklyCompleted} max={weeklyTotal} size="sm" />
-          <p className="mt-2 text-xs text-muted-foreground">
+          <p className="text-muted-foreground mt-2 text-xs">
             {weeklyCompleted} / {weeklyTotal} sets across all days
           </p>
         </div>
 
-        <div className="rounded-2xl border border-dashed border-border bg-surface-muted/50 p-4 text-center">
-          <p className="text-xs text-muted-foreground">
+        <div className="border-border bg-surface-muted/50 rounded-2xl border border-dashed p-4 text-center">
+          <p className="text-muted-foreground text-xs">
             Prototype panel — wire live stats in Cursor
           </p>
         </div>

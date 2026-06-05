@@ -57,7 +57,9 @@ export function mergeSetLogsIntoDay(
   };
 }
 
-export function mapRoutineToTrainingDays(routine: RoutineWithDays): TrainingDay[] {
+export function mapRoutineToTrainingDays(
+  routine: RoutineWithDays
+): TrainingDay[] {
   return [...routine.routine_days]
     .sort((a, b) => a.sort_order - b.sort_order)
     .map((day) => {

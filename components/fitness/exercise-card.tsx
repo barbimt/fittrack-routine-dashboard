@@ -15,32 +15,41 @@ interface ExerciseCardProps {
   onRepsSave?: (setId: string, reps: number) => void;
 }
 
-export function ExerciseCard({ exercise, onSetToggle, onRepsChange, onRepsSave }: ExerciseCardProps) {
+export function ExerciseCard({
+  exercise,
+  onSetToggle,
+  onRepsChange,
+  onRepsSave,
+}: ExerciseCardProps) {
   const [expanded, setExpanded] = useState(true);
   const progress = getExerciseProgress(exercise);
   const progressPercentage = (progress.completed / progress.total) * 100;
 
   return (
-    <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
+    <div className="bg-card border-border overflow-hidden rounded-2xl border shadow-sm">
       {/* Header */}
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-start justify-between p-4 text-left hover:bg-muted/30 transition-colors"
+        className="hover:bg-muted/30 flex w-full items-start justify-between p-4 text-left transition-colors"
         aria-expanded={expanded}
         aria-controls={`exercise-${exercise.id}-content`}
       >
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap mb-1">
-            <h3 className="text-base font-semibold text-card-foreground">{exercise.name}</h3>
+        <div className="min-w-0 flex-1">
+          <div className="mb-1 flex flex-wrap items-center gap-2">
+            <h3 className="text-card-foreground text-base font-semibold">
+              {exercise.name}
+            </h3>
             <Badge variant="muscle" className="text-xs">
               {exercise.muscleGroup}
             </Badge>
           </div>
 
-          <div className="flex items-center gap-4 text-sm text-muted-foreground mt-2">
+          <div className="text-muted-foreground mt-2 flex items-center gap-4 text-sm">
             <span className="flex items-center gap-1">
-              <span className="font-medium text-foreground">{exercise.targetSets}</span> x{" "}
-              {exercise.targetReps}
+              <span className="text-foreground font-medium">
+                {exercise.targetSets}
+              </span>{" "}
+              x {exercise.targetReps}
             </span>
             <span className="flex items-center gap-1">
               <Weight className="h-3.5 w-3.5" />
@@ -53,11 +62,11 @@ export function ExerciseCard({ exercise, onSetToggle, onRepsChange, onRepsSave }
           </div>
         </div>
 
-        <div className="flex items-center gap-3 ml-4">
+        <div className="ml-4 flex items-center gap-3">
           {/* Progress indicator */}
           <div className="flex items-center gap-2">
-            <div className="relative w-10 h-10">
-              <svg className="w-10 h-10 -rotate-90">
+            <div className="relative h-10 w-10">
+              <svg className="h-10 w-10 -rotate-90">
                 <circle
                   cx="20"
                   cy="20"
@@ -90,7 +99,7 @@ export function ExerciseCard({ exercise, onSetToggle, onRepsChange, onRepsSave }
 
           <ChevronDown
             className={cn(
-              "h-5 w-5 text-muted-foreground transition-transform",
+              "text-muted-foreground h-5 w-5 transition-transform",
               expanded && "rotate-180"
             )}
           />
@@ -100,8 +109,8 @@ export function ExerciseCard({ exercise, onSetToggle, onRepsChange, onRepsSave }
       {/* Notes */}
       {exercise.notes && expanded && (
         <div className="px-4 pb-2">
-          <div className="flex items-start gap-2 p-2.5 rounded-lg bg-accent/50 text-accent-foreground">
-            <Info className="h-4 w-4 mt-0.5 shrink-0" />
+          <div className="bg-accent/50 text-accent-foreground flex items-start gap-2 rounded-lg p-2.5">
+            <Info className="mt-0.5 h-4 w-4 shrink-0" />
             <p className="text-sm">{exercise.notes}</p>
           </div>
         </div>
@@ -109,7 +118,10 @@ export function ExerciseCard({ exercise, onSetToggle, onRepsChange, onRepsSave }
 
       {/* Sets */}
       {expanded && (
-        <div id={`exercise-${exercise.id}-content`} className="px-4 pb-4 space-y-2">
+        <div
+          id={`exercise-${exercise.id}-content`}
+          className="space-y-2 px-4 pb-4"
+        >
           {exercise.sets.map((set) => (
             <SetRow
               key={set.id}

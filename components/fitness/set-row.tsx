@@ -13,7 +13,12 @@ interface SetRowProps {
   onRepsSave?: (setId: string, reps: number) => void;
 }
 
-export function SetRow({ set, onToggle, onRepsChange, onRepsSave }: SetRowProps) {
+export function SetRow({
+  set,
+  onToggle,
+  onRepsChange,
+  onRepsSave,
+}: SetRowProps) {
   // Controlled input: initialised from DB value on mount.
   // Because the parent uses key={set.id}, this component remounts whenever
   // the set identity changes (e.g. day switch), which re-runs useState.
@@ -23,7 +28,9 @@ export function SetRow({ set, onToggle, onRepsChange, onRepsSave }: SetRowProps)
 
   // Auto-save timer — fires 400ms after last keystroke as a safety net
   // (catches F5 / quick reloads before blur).
-  const saveTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined
+  );
 
   useEffect(() => () => clearTimeout(saveTimer.current), []);
 
@@ -65,7 +72,7 @@ export function SetRow({ set, onToggle, onRepsChange, onRepsSave }: SetRowProps)
   return (
     <div
       className={cn(
-        "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors",
+        "flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors",
         set.completed ? "bg-success/10" : "bg-muted/50"
       )}
     >
@@ -80,19 +87,21 @@ export function SetRow({ set, onToggle, onRepsChange, onRepsSave }: SetRowProps)
       <label
         htmlFor={`set-${set.id}`}
         className={cn(
-          "text-sm font-medium min-w-[50px]",
+          "min-w-[50px] text-sm font-medium",
           set.completed ? "text-muted-foreground" : "text-foreground"
         )}
       >
         Set {set.setNumber}
       </label>
 
-      <div className="flex items-center gap-2 flex-1">
-        <span className="text-sm text-muted-foreground">Target: {set.targetReps}</span>
+      <div className="flex flex-1 items-center gap-2">
+        <span className="text-muted-foreground text-sm">
+          Target: {set.targetReps}
+        </span>
       </div>
 
       <div className="flex items-center gap-2">
-        <span className="text-xs text-muted-foreground">Actual:</span>
+        <span className="text-muted-foreground text-xs">Actual:</span>
         <Input
           type="number"
           min={0}

@@ -33,7 +33,12 @@ export function ProgressBar({
 
   return (
     <div className={cn("w-full", className)}>
-      <div className={cn("bg-muted rounded-full overflow-hidden", sizeClasses[size])}>
+      <div
+        className={cn(
+          "bg-muted overflow-hidden rounded-full",
+          sizeClasses[size]
+        )}
+      >
         <div
           className={cn(
             "h-full rounded-full transition-all duration-500",
@@ -47,7 +52,7 @@ export function ProgressBar({
         />
       </div>
       {showLabel && (
-        <p className="text-sm text-muted-foreground mt-1">{percentage}%</p>
+        <p className="text-muted-foreground mt-1 text-sm">{percentage}%</p>
       )}
     </div>
   );

@@ -26,6 +26,11 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# testing
+/coverage
+/playwright-report
+/test-results
+
 # Local-only docs & Cursor config (not published to remote)
 /docs/
 /AGENTS.md

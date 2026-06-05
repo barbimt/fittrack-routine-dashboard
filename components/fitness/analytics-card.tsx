@@ -7,11 +7,21 @@ interface AnalyticsCardProps {
   action?: React.ReactNode;
 }
 
-export function AnalyticsCard({ title, children, className, action }: AnalyticsCardProps) {
+export function AnalyticsCard({
+  title,
+  children,
+  className,
+  action,
+}: AnalyticsCardProps) {
   return (
-    <div className={cn("bg-card rounded-2xl border border-border p-5 shadow-sm", className)}>
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-semibold text-card-foreground">{title}</h3>
+    <div
+      className={cn(
+        "bg-card border-border rounded-2xl border p-5 shadow-sm",
+        className
+      )}
+    >
+      <div className="mb-4 flex items-center justify-between">
+        <h3 className="text-card-foreground text-sm font-semibold">{title}</h3>
         {action}
       </div>
       {children}
@@ -24,10 +34,20 @@ interface ChartPlaceholderProps {
   label?: string;
 }
 
-export function ChartPlaceholder({ height = "h-40", label }: ChartPlaceholderProps) {
+export function ChartPlaceholder({
+  height = "h-40",
+  label,
+}: ChartPlaceholderProps) {
   return (
-    <div className={cn("flex items-center justify-center rounded-xl bg-muted/50", height)}>
-      <span className="text-sm text-muted-foreground">{label || "Chart placeholder"}</span>
+    <div
+      className={cn(
+        "bg-muted/50 flex items-center justify-center rounded-xl",
+        height
+      )}
+    >
+      <span className="text-muted-foreground text-sm">
+        {label || "Chart placeholder"}
+      </span>
     </div>
   );
 }

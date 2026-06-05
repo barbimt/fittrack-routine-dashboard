@@ -1,0 +1,117 @@
+import { describe, expect, it } from "vitest";
+import type { RoutineWithDays, WorkoutSetLog } from "./types";
+import { mapRoutineToTrainingDays, mergeSetLogsIntoDay } from "./routineMapper";
+import type { TrainingDay } from "@/lib/mock-data";
+
+const baseDay: TrainingDay = {
+  id: "day-1",
+  dayName: "Monday",
+  focus: "Glutes",
+  exercises: [
+    {
+      id: "ex-1",
+      name: "Hip Thrust",
+      muscleGroup: "Glutes",
+      targetSets: 3,
+      targetReps: 10,
+      weight: "60kg",
+      restTime: "90s",
+      sets: [
+        {
+          id: "ex-1-set-1",
+          setNumber: 1,
+          targetReps: 10,
+          actualReps: null,
+          completed: false,
+        },
+        {
+          id: "ex-1-set-2",
+          setNumber: 2,
+          targetReps: 10,
+          actualReps: null,
+          completed: false,
+        },
+      ],
+    },
+  ],
+};
+
+describe("mergeSetLogsIntoDay", () => {
+  it("overlays matching set logs by exercise id and set number", () => {
+    const logs: WorkoutSetLog[] = [
+      {
+        id: "log-uuid-1",
+        user_id: "user-1",
+        workout_session_id: "session-1",
+        routine_exercise_id: "ex-1",
+        set_number: 1,
+        target_reps: "10",
+        actual_reps: 12,
+        completed: true,
+        created_at: "2026-01-01T00:00:00Z",
+        updated_at: "2026-01-01T00:00:00Z",
+      },
+    ];
+
+    const merged = mergeSetLogsIntoDay(baseDay, logs);
+    const firstSet = merged.exercises[0].sets[0];
+    const secondSet = merged.exercises[0].sets[1];
+
+    expect(firstSet).toMatchObject({
+      id: "log-uuid-1",
+      completed: true,
+      actualReps: 12,
+    });
+    expect(secondSet.completed).toBe(false);
+  });
+});
+
+describe("mapRoutineToTrainingDays", () => {
+  const routine: RoutineWithDays = {
+    id: "routine-1",
+    user_id: "user-1",
+    name: "Push Pull",
+    source: "excel",
+    is_active: true,
+    created_at: "2026-01-01T00:00:00Z",
+    updated_at: "2026-01-01T00:00:00Z",
+    routine_days: [
+      {
+        id: "day-1",
+        user_id: "user-1",
+        routine_id: "routine-1",
+        name: "Day 1",
+        focus: "Upper",
+        original_name: "Day 1 - Upper",
+        sort_order: 1,
+        created_at: "2026-01-01T00:00:00Z",
+        updated_at: "2026-01-01T00:00:00Z",
+        routine_exercises: [
+          {
+            id: "ex-1",
+            user_id: "user-1",
+            routine_day_id: "day-1",
+            name: "Bench Press",
+            prescription: "3x10",
+            planned_sets: null,
+            target_reps: "10",
+            weight: "40kg",
+            rest_time: "60s",
+            notes: null,
+            sort_order: 1,
+            created_at: "2026-01-01T00:00:00Z",
+            updated_at: "2026-01-01T00:00:00Z",
+          },
+        ],
+      },
+    ],
+  };
+
+  it("maps routine days and defaults to 3 sets when planned_sets is null", () => {
+    const days = mapRoutineToTrainingDays(routine);
+    expect(days).toHaveLength(1);
+    expect(days[0].dayName).toBe("Day 1 - Upper");
+    expect(days[0].exercises[0].sets).toHaveLength(3);
+    expect(days[0].exercises[0].sets[0].targetReps).toBe(10);
+  });
+});

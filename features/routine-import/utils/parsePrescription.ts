@@ -36,7 +36,9 @@ function splitPrescriptionBlocks(prescription: string): string[] {
     .filter((part) => part.length > 0);
 }
 
-export function parsePrescription(prescription: string): PrescriptionParseResult {
+export function parsePrescription(
+  prescription: string
+): PrescriptionParseResult {
   const trimmed = normalizePrescriptionInput(prescription).trim();
   if (!trimmed) {
     return { plannedSets: null, targetReps: null, parsed: false };
@@ -44,7 +46,9 @@ export function parsePrescription(prescription: string): PrescriptionParseResult
 
   const blocks = splitPrescriptionBlocks(trimmed);
   const segments =
-    blocks.length > 0 ? blocks.map((block) => parseBlock(block)).filter(Boolean) : [parseBlock(trimmed)];
+    blocks.length > 0
+      ? blocks.map((block) => parseBlock(block)).filter(Boolean)
+      : [parseBlock(trimmed)];
 
   const parsedSegments = segments.filter(
     (segment): segment is { sets: number; reps: string } => segment !== null
@@ -54,10 +58,14 @@ export function parsePrescription(prescription: string): PrescriptionParseResult
     return { plannedSets: null, targetReps: null, parsed: false };
   }
 
-  const plannedSets = parsedSegments.reduce((sum, segment) => sum + segment.sets, 0);
+  const plannedSets = parsedSegments.reduce(
+    (sum, segment) => sum + segment.sets,
+    0
+  );
   const repsValues = parsedSegments.map((segment) => segment.reps);
   const uniqueReps = [...new Set(repsValues)];
-  const targetReps = uniqueReps.length === 1 ? uniqueReps[0] : repsValues[repsValues.length - 1];
+  const targetReps =
+    uniqueReps.length === 1 ? uniqueReps[0] : repsValues[repsValues.length - 1];
 
   return {
     plannedSets,

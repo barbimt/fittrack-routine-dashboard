@@ -12,7 +12,13 @@ import { ImportPreview } from "./ImportPreview";
 import { ImportWarnings } from "./ImportWarnings";
 import { saveRoutine } from "../actions/saveRoutineAction";
 
-type ImportPhase = "idle" | "parsing" | "preview" | "saving" | "saved" | "error";
+type ImportPhase =
+  | "idle"
+  | "parsing"
+  | "preview"
+  | "saving"
+  | "saved"
+  | "error";
 
 export function RoutineImportForm() {
   const inputId = useId();
@@ -20,9 +26,14 @@ export function RoutineImportForm() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [routine, setRoutine] = useState<ParsedRoutine | null>(null);
   const [fatalError, setFatalError] = useState<string | null>(null);
-  const [parseWarnings, setParseWarnings] = useState<ParsedRoutine["warnings"]>([]);
+  const [parseWarnings, setParseWarnings] = useState<ParsedRoutine["warnings"]>(
+    []
+  );
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [savedMeta, setSavedMeta] = useState<{ dayCount: number; exerciseCount: number } | null>(null);
+  const [savedMeta, setSavedMeta] = useState<{
+    dayCount: number;
+    exerciseCount: number;
+  } | null>(null);
 
   const resetImport = useCallback(() => {
     setPhase("idle");
@@ -40,7 +51,10 @@ export function RoutineImportForm() {
     setSaveError(null);
     const result = await saveRoutine(routine);
     if (result.ok) {
-      setSavedMeta({ dayCount: result.dayCount, exerciseCount: result.exerciseCount });
+      setSavedMeta({
+        dayCount: result.dayCount,
+        exerciseCount: result.exerciseCount,
+      });
       setPhase("saved");
     } else {
       setSaveError(result.error);
@@ -77,9 +91,11 @@ export function RoutineImportForm() {
     setPhase("preview");
   }, []);
 
-  const showDropzone = phase === "idle" || phase === "parsing" || phase === "error";
+  const showDropzone =
+    phase === "idle" || phase === "parsing" || phase === "error";
   const uploadedMeta =
-    selectedFile && (phase === "preview" || phase === "parsing" || phase === "saving")
+    selectedFile &&
+    (phase === "preview" || phase === "parsing" || phase === "saving")
       ? { name: selectedFile.name, size: selectedFile.size }
       : null;
 
@@ -87,9 +103,14 @@ export function RoutineImportForm() {
     <div className="space-y-8">
       <section aria-label="File upload">
         {phase === "idle" && !selectedFile ? (
-          <div className="rounded-2xl border border-dashed border-border bg-card p-2">
+          <div className="border-border bg-card rounded-2xl border border-dashed p-2">
             <EmptyState
-              icon={<FileSpreadsheet className="h-8 w-8 text-muted-foreground" aria-hidden />}
+              icon={
+                <FileSpreadsheet
+                  className="text-muted-foreground h-8 w-8"
+                  aria-hidden
+                />
+              }
               title="No file selected"
               description="Drop your .xlsx routine file here or browse from your device."
               primaryAction={{
@@ -124,7 +145,7 @@ export function RoutineImportForm() {
 
       {phase === "error" && fatalError ? (
         <div
-          className="flex items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive"
+          className="border-destructive/30 bg-destructive/5 text-destructive flex items-start gap-3 rounded-lg border p-3 text-sm"
           role="alert"
         >
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
@@ -136,7 +157,9 @@ export function RoutineImportForm() {
         <ImportWarnings warnings={parseWarnings} title="Import issues" />
       ) : null}
 
-      {(phase === "preview" || phase === "saving") && selectedFile && routine ? (
+      {(phase === "preview" || phase === "saving") &&
+      selectedFile &&
+      routine ? (
         <>
           <ImportPreview
             fileName={selectedFile.name}
@@ -146,7 +169,7 @@ export function RoutineImportForm() {
 
           {saveError ? (
             <div
-              className="flex items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive"
+              className="border-destructive/30 bg-destructive/5 text-destructive flex items-start gap-3 rounded-lg border p-3 text-sm"
               role="alert"
             >
               <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
@@ -168,13 +191,15 @@ export function RoutineImportForm() {
       ) : null}
 
       {phase === "saved" && savedMeta ? (
-        <div className="rounded-2xl border border-success/30 bg-success/5 p-6 text-center space-y-4">
+        <div className="border-success/30 bg-success/5 space-y-4 rounded-2xl border p-6 text-center">
           <div className="flex justify-center">
-            <CheckCircle2 className="h-10 w-10 text-success" aria-hidden />
+            <CheckCircle2 className="text-success h-10 w-10" aria-hidden />
           </div>
           <div>
-            <p className="text-base font-semibold text-foreground">Routine saved</p>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <p className="text-foreground text-base font-semibold">
+              Routine saved
+            </p>
+            <p className="text-muted-foreground mt-1 text-sm">
               {savedMeta.dayCount} {savedMeta.dayCount === 1 ? "day" : "days"} ·{" "}
               {savedMeta.exerciseCount}{" "}
               {savedMeta.exerciseCount === 1 ? "exercise" : "exercises"}
@@ -184,7 +209,12 @@ export function RoutineImportForm() {
             <Button size="sm" type="button" asChild>
               <Link href="/">Go to dashboard</Link>
             </Button>
-            <Button size="sm" variant="outline" type="button" onClick={resetImport}>
+            <Button
+              size="sm"
+              variant="outline"
+              type="button"
+              onClick={resetImport}
+            >
               Import another
             </Button>
           </div>

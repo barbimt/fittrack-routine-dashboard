@@ -2,7 +2,10 @@
 
 import { AppShell } from "@/components/app-shell";
 import { StatCard } from "@/components/fitness/stat-card";
-import { AnalyticsCard, ChartPlaceholder } from "@/components/fitness/analytics-card";
+import {
+  AnalyticsCard,
+  ChartPlaceholder,
+} from "@/components/fitness/analytics-card";
 import { ProgressBar } from "@/components/fitness/progress-bar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -33,11 +36,13 @@ const muscleGroupVolume = [
 export default function ProgressPage() {
   return (
     <AppShell>
-      <div className="px-4 py-6 pb-24 lg:px-8 lg:py-8 lg:pb-8 max-w-5xl mx-auto">
+      <div className="mx-auto max-w-5xl px-4 py-6 pb-24 lg:px-8 lg:py-8 lg:pb-8">
         {/* Page Header */}
         <header className="mb-6">
-          <h1 className="text-2xl font-bold text-foreground mb-1">Progress</h1>
-          <p className="text-muted-foreground">Track your fitness journey over time</p>
+          <h1 className="text-foreground mb-1 text-2xl font-bold">Progress</h1>
+          <p className="text-muted-foreground">
+            Track your fitness journey over time
+          </p>
         </header>
 
         {/* Weekly volume highlight */}
@@ -45,16 +50,21 @@ export default function ProgressPage() {
           <AnalyticsCard title="Weekly volume">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <p className="text-3xl font-bold text-card-foreground">142</p>
-                <p className="text-sm text-muted-foreground">Sets completed this week</p>
+                <p className="text-card-foreground text-3xl font-bold">142</p>
+                <p className="text-muted-foreground text-sm">
+                  Sets completed this week
+                </p>
               </div>
-              <ChartPlaceholder height="h-24 sm:h-20 sm:flex-1 sm:max-w-md" label="Bar chart placeholder" />
+              <ChartPlaceholder
+                height="h-24 sm:h-20 sm:flex-1 sm:max-w-md"
+                label="Bar chart placeholder"
+              />
             </div>
           </AnalyticsCard>
         </section>
 
         {/* Top Stats */}
-        <section className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <section className="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
           <StatCard
             title="Total Volume"
             value="1,240"
@@ -84,17 +94,20 @@ export default function ProgressPage() {
         </section>
 
         {/* Charts Row */}
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
+        <section className="mb-8 grid grid-cols-1 gap-4 lg:grid-cols-2">
           <AnalyticsCard
             title="Weekly Volume Trend"
             action={
               <Button variant="ghost" size="sm" className="text-xs">
                 View Details
-                <ChevronRight className="h-3 w-3 ml-1" />
+                <ChevronRight className="ml-1 h-3 w-3" />
               </Button>
             }
           >
-            <ChartPlaceholder height="h-48" label="Line chart: Weekly sets over time" />
+            <ChartPlaceholder
+              height="h-48"
+              label="Line chart: Weekly sets over time"
+            />
           </AnalyticsCard>
 
           <AnalyticsCard
@@ -102,30 +115,38 @@ export default function ProgressPage() {
             action={
               <Button variant="ghost" size="sm" className="text-xs">
                 View Details
-                <ChevronRight className="h-3 w-3 ml-1" />
+                <ChevronRight className="ml-1 h-3 w-3" />
               </Button>
             }
           >
-            <ChartPlaceholder height="h-48" label="Bar chart: Days trained per week" />
+            <ChartPlaceholder
+              height="h-48"
+              label="Bar chart: Days trained per week"
+            />
           </AnalyticsCard>
         </section>
 
         {/* Muscle Group Volume */}
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
+        <section className="mb-8 grid grid-cols-1 gap-4 lg:grid-cols-2">
           <AnalyticsCard title="Volume by Muscle Group">
             <div className="space-y-4">
               {muscleGroupVolume.map((group) => (
                 <div key={group.name}>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-sm font-medium text-card-foreground">{group.name}</span>
+                  <div className="mb-1.5 flex items-center justify-between">
+                    <span className="text-card-foreground text-sm font-medium">
+                      {group.name}
+                    </span>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm text-muted-foreground">{group.sets} sets</span>
+                      <span className="text-muted-foreground text-sm">
+                        {group.sets} sets
+                      </span>
                       {group.change !== 0 && (
                         <Badge
                           variant={group.change > 0 ? "default" : "secondary"}
                           className="text-xs"
                         >
-                          {group.change > 0 ? "+" : ""}{group.change}
+                          {group.change > 0 ? "+" : ""}
+                          {group.change}
                         </Badge>
                       )}
                     </div>
@@ -146,7 +167,7 @@ export default function ProgressPage() {
             action={
               <Button variant="ghost" size="sm" className="text-xs">
                 View All
-                <ChevronRight className="h-3 w-3 ml-1" />
+                <ChevronRight className="ml-1 h-3 w-3" />
               </Button>
             }
           >
@@ -154,18 +175,24 @@ export default function ProgressPage() {
               {personalRecords.map((record, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between p-3 rounded-lg bg-success/5 border border-success/20"
+                  className="bg-success/5 border-success/20 flex items-center justify-between rounded-lg border p-3"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-success/10">
-                      <Award className="h-4 w-4 text-success" />
+                    <div className="bg-success/10 flex h-8 w-8 items-center justify-center rounded-full">
+                      <Award className="text-success h-4 w-4" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-card-foreground">{record.exercise}</p>
-                      <p className="text-xs text-muted-foreground">{record.date}</p>
+                      <p className="text-card-foreground text-sm font-medium">
+                        {record.exercise}
+                      </p>
+                      <p className="text-muted-foreground text-xs">
+                        {record.date}
+                      </p>
                     </div>
                   </div>
-                  <span className="text-sm font-semibold text-success">{record.weight}</span>
+                  <span className="text-success text-sm font-semibold">
+                    {record.weight}
+                  </span>
                 </div>
               ))}
             </div>
@@ -177,13 +204,22 @@ export default function ProgressPage() {
           title="Strength Progress Over Time"
           action={
             <div className="flex gap-2">
-              <Badge variant="secondary" className="text-xs cursor-pointer">Hip Thrust</Badge>
-              <Badge variant="outline" className="text-xs cursor-pointer">Lat Pulldown</Badge>
-              <Badge variant="outline" className="text-xs cursor-pointer">Leg Press</Badge>
+              <Badge variant="secondary" className="cursor-pointer text-xs">
+                Hip Thrust
+              </Badge>
+              <Badge variant="outline" className="cursor-pointer text-xs">
+                Lat Pulldown
+              </Badge>
+              <Badge variant="outline" className="cursor-pointer text-xs">
+                Leg Press
+              </Badge>
             </div>
           }
         >
-          <ChartPlaceholder height="h-64" label="Line chart: Weight progression per exercise" />
+          <ChartPlaceholder
+            height="h-64"
+            label="Line chart: Weight progression per exercise"
+          />
         </AnalyticsCard>
       </div>
     </AppShell>

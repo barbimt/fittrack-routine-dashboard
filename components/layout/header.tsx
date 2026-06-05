@@ -10,7 +10,7 @@ interface HeaderProps {
 
 export function Header({ onMenuOpen, title = "FitTrack" }: HeaderProps) {
   return (
-    <header className="sticky top-0 z-30 flex items-center justify-between border-b border-border bg-background/95 px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/60 lg:hidden">
+    <header className="border-border bg-background/95 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-30 flex items-center justify-between border-b px-4 py-3 backdrop-blur lg:hidden">
       <Button
         variant="ghost"
         size="icon"
@@ -23,12 +23,12 @@ export function Header({ onMenuOpen, title = "FitTrack" }: HeaderProps) {
 
       <div className="flex items-center gap-2">
         <div
-          className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary"
+          className="bg-primary flex h-8 w-8 items-center justify-center rounded-lg"
           aria-hidden
         >
-          <Dumbbell className="h-4 w-4 text-primary-foreground" />
+          <Dumbbell className="text-primary-foreground h-4 w-4" />
         </div>
-        <span className="font-semibold text-foreground">{title}</span>
+        <span className="text-foreground font-semibold">{title}</span>
       </div>
 
       <div className="w-11" aria-hidden />

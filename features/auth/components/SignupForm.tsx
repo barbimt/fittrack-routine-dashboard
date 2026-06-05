@@ -2,16 +2,19 @@
 
 import { useActionState } from "react";
 import Link from "next/link";
-import { signup, type AuthActionState } from "@/features/auth/actions/authActions";
+import {
+  signup,
+  type AuthActionState,
+} from "@/features/auth/actions/authActions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export function SignupForm() {
-  const [state, formAction, isPending] = useActionState<AuthActionState, FormData>(
-    signup,
-    null
-  );
+  const [state, formAction, isPending] = useActionState<
+    AuthActionState,
+    FormData
+  >(signup, null);
 
   return (
     <form action={formAction} className="space-y-4">
@@ -38,11 +41,11 @@ export function SignupForm() {
           minLength={6}
           placeholder="••••••••"
         />
-        <p className="text-xs text-muted-foreground">Minimum 6 characters.</p>
+        <p className="text-muted-foreground text-xs">Minimum 6 characters.</p>
       </div>
 
       {state?.error && (
-        <p role="alert" className="text-sm text-destructive">
+        <p role="alert" className="text-destructive text-sm">
           {state.error}
         </p>
       )}
@@ -51,11 +54,11 @@ export function SignupForm() {
         {isPending ? "Creating account…" : "Create account"}
       </Button>
 
-      <p className="text-center text-sm text-muted-foreground">
+      <p className="text-muted-foreground text-center text-sm">
         Already have an account?{" "}
         <Link
           href="/login"
-          className="font-medium text-primary hover:underline"
+          className="text-primary font-medium hover:underline"
         >
           Sign in
         </Link>

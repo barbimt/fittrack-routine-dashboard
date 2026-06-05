@@ -13,10 +13,10 @@ export function MobileNavigation() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-30 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 lg:hidden"
+      className="border-border bg-background/95 supports-[backdrop-filter]:bg-background/60 fixed right-0 bottom-0 left-0 z-30 border-t backdrop-blur lg:hidden"
       aria-label="Mobile navigation"
     >
-      <div className="flex items-center justify-around py-1.5 safe-area-pb">
+      <div className="safe-area-pb flex items-center justify-around py-1.5">
         {mobileNavItems.map((item) => {
           const shortLabel = item.label.split(" ")[0];
           const isActive = pathname === item.href;
@@ -27,12 +27,16 @@ export function MobileNavigation() {
               href={item.href}
               className={cn(
                 "flex min-h-[52px] min-w-[56px] flex-col items-center justify-center gap-0.5 rounded-lg px-2 py-2 transition-colors",
-                isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                isActive
+                  ? "text-primary"
+                  : "text-muted-foreground hover:text-foreground"
               )}
               aria-current={isActive ? "page" : undefined}
             >
               {item.icon}
-              <span className="text-[10px] font-medium leading-none">{shortLabel}</span>
+              <span className="text-[10px] leading-none font-medium">
+                {shortLabel}
+              </span>
             </Link>
           );
         })}

@@ -10,20 +10,20 @@ import { SignupForm } from "@/features/auth/components/SignupForm";
 
 export default function SignupPage() {
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
+    <div className="bg-background flex min-h-screen items-center justify-center px-4">
       <div className="w-full max-w-sm">
-        <div className="flex items-center justify-center gap-2.5 mb-8">
+        <div className="mb-8 flex items-center justify-center gap-2.5">
           <div
-            className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary"
+            className="bg-primary flex h-9 w-9 items-center justify-center rounded-lg"
             aria-hidden
           >
-            <Dumbbell className="h-5 w-5 text-primary-foreground" />
+            <Dumbbell className="text-primary-foreground h-5 w-5" />
           </div>
           <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
               FitTrack
             </p>
-            <p className="text-sm font-semibold text-foreground leading-tight">
+            <p className="text-foreground text-sm leading-tight font-semibold">
               Routine Dashboard
             </p>
           </div>

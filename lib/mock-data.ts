@@ -49,10 +49,34 @@ export const trainingDays: TrainingDay[] = [
         restTime: "90s",
         notes: "Focus on controlled movement",
         sets: [
-          { id: "s1", setNumber: 1, targetReps: 10, actualReps: 10, completed: true },
-          { id: "s2", setNumber: 2, targetReps: 10, actualReps: 12, completed: true },
-          { id: "s3", setNumber: 3, targetReps: 10, actualReps: null, completed: false },
-          { id: "s4", setNumber: 4, targetReps: 10, actualReps: null, completed: false },
+          {
+            id: "s1",
+            setNumber: 1,
+            targetReps: 10,
+            actualReps: 10,
+            completed: true,
+          },
+          {
+            id: "s2",
+            setNumber: 2,
+            targetReps: 10,
+            actualReps: 12,
+            completed: true,
+          },
+          {
+            id: "s3",
+            setNumber: 3,
+            targetReps: 10,
+            actualReps: null,
+            completed: false,
+          },
+          {
+            id: "s4",
+            setNumber: 4,
+            targetReps: 10,
+            actualReps: null,
+            completed: false,
+          },
         ],
       },
       {
@@ -65,9 +89,27 @@ export const trainingDays: TrainingDay[] = [
         restTime: "120s",
         notes: "Keep back straight, hinge at hips",
         sets: [
-          { id: "s5", setNumber: 1, targetReps: 8, actualReps: 8, completed: true },
-          { id: "s6", setNumber: 2, targetReps: 8, actualReps: 8, completed: true },
-          { id: "s7", setNumber: 3, targetReps: 8, actualReps: null, completed: false },
+          {
+            id: "s5",
+            setNumber: 1,
+            targetReps: 8,
+            actualReps: 8,
+            completed: true,
+          },
+          {
+            id: "s6",
+            setNumber: 2,
+            targetReps: 8,
+            actualReps: 8,
+            completed: true,
+          },
+          {
+            id: "s7",
+            setNumber: 3,
+            targetReps: 8,
+            actualReps: null,
+            completed: false,
+          },
         ],
       },
       {
@@ -79,9 +121,27 @@ export const trainingDays: TrainingDay[] = [
         weight: "Bodyweight",
         restTime: "90s",
         sets: [
-          { id: "s8", setNumber: 1, targetReps: 10, actualReps: null, completed: false },
-          { id: "s9", setNumber: 2, targetReps: 10, actualReps: null, completed: false },
-          { id: "s10", setNumber: 3, targetReps: 10, actualReps: null, completed: false },
+          {
+            id: "s8",
+            setNumber: 1,
+            targetReps: 10,
+            actualReps: null,
+            completed: false,
+          },
+          {
+            id: "s9",
+            setNumber: 2,
+            targetReps: 10,
+            actualReps: null,
+            completed: false,
+          },
+          {
+            id: "s10",
+            setNumber: 3,
+            targetReps: 10,
+            actualReps: null,
+            completed: false,
+          },
         ],
       },
       {
@@ -93,9 +153,27 @@ export const trainingDays: TrainingDay[] = [
         weight: "15kg",
         restTime: "60s",
         sets: [
-          { id: "s11", setNumber: 1, targetReps: 12, actualReps: null, completed: false },
-          { id: "s12", setNumber: 2, targetReps: 12, actualReps: null, completed: false },
-          { id: "s13", setNumber: 3, targetReps: 12, actualReps: null, completed: false },
+          {
+            id: "s11",
+            setNumber: 1,
+            targetReps: 12,
+            actualReps: null,
+            completed: false,
+          },
+          {
+            id: "s12",
+            setNumber: 2,
+            targetReps: 12,
+            actualReps: null,
+            completed: false,
+          },
+          {
+            id: "s13",
+            setNumber: 3,
+            targetReps: 12,
+            actualReps: null,
+            completed: false,
+          },
         ],
       },
     ],
@@ -114,10 +192,34 @@ export const trainingDays: TrainingDay[] = [
         weight: "35kg",
         restTime: "90s",
         sets: [
-          { id: "s14", setNumber: 1, targetReps: 12, actualReps: null, completed: false },
-          { id: "s15", setNumber: 2, targetReps: 12, actualReps: null, completed: false },
-          { id: "s16", setNumber: 3, targetReps: 12, actualReps: null, completed: false },
-          { id: "s17", setNumber: 4, targetReps: 12, actualReps: null, completed: false },
+          {
+            id: "s14",
+            setNumber: 1,
+            targetReps: 12,
+            actualReps: null,
+            completed: false,
+          },
+          {
+            id: "s15",
+            setNumber: 2,
+            targetReps: 12,
+            actualReps: null,
+            completed: false,
+          },
+          {
+            id: "s16",
+            setNumber: 3,
+            targetReps: 12,
+            actualReps: null,
+            completed: false,
+          },
+          {
+            id: "s17",
+            setNumber: 4,
+            targetReps: 12,
+            actualReps: null,
+            completed: false,
+          },
         ],
       },
       {
@@ -129,9 +231,27 @@ export const trainingDays: TrainingDay[] = [
         weight: "30kg",
         restTime: "90s",
         sets: [
-          { id: "s18", setNumber: 1, targetReps: 10, actualReps: null, completed: false },
-          { id: "s19", setNumber: 2, targetReps: 10, actualReps: null, completed: false },
-          { id: "s20", setNumber: 3, targetReps: 10, actualReps: null, completed: false },
+          {
+            id: "s18",
+            setNumber: 1,
+            targetReps: 10,
+            actualReps: null,
+            completed: false,
+          },
+          {
+            id: "s19",
+            setNumber: 2,
+            targetReps: 10,
+            actualReps: null,
+            completed: false,
+          },
+          {
+            id: "s20",
+            setNumber: 3,
+            targetReps: 10,
+            actualReps: null,
+            completed: false,
+          },
         ],
       },
       {
@@ -143,9 +263,27 @@ export const trainingDays: TrainingDay[] = [
         weight: "12kg",
         restTime: "90s",
         sets: [
-          { id: "s21", setNumber: 1, targetReps: 10, actualReps: null, completed: false },
-          { id: "s22", setNumber: 2, targetReps: 10, actualReps: null, completed: false },
-          { id: "s23", setNumber: 3, targetReps: 10, actualReps: null, completed: false },
+          {
+            id: "s21",
+            setNumber: 1,
+            targetReps: 10,
+            actualReps: null,
+            completed: false,
+          },
+          {
+            id: "s22",
+            setNumber: 2,
+            targetReps: 10,
+            actualReps: null,
+            completed: false,
+          },
+          {
+            id: "s23",
+            setNumber: 3,
+            targetReps: 10,
+            actualReps: null,
+            completed: false,
+          },
         ],
       },
       {
@@ -157,9 +295,27 @@ export const trainingDays: TrainingDay[] = [
         weight: "8kg",
         restTime: "60s",
         sets: [
-          { id: "s24", setNumber: 1, targetReps: 12, actualReps: null, completed: false },
-          { id: "s25", setNumber: 2, targetReps: 12, actualReps: null, completed: false },
-          { id: "s26", setNumber: 3, targetReps: 12, actualReps: null, completed: false },
+          {
+            id: "s24",
+            setNumber: 1,
+            targetReps: 12,
+            actualReps: null,
+            completed: false,
+          },
+          {
+            id: "s25",
+            setNumber: 2,
+            targetReps: 12,
+            actualReps: null,
+            completed: false,
+          },
+          {
+            id: "s26",
+            setNumber: 3,
+            targetReps: 12,
+            actualReps: null,
+            completed: false,
+          },
         ],
       },
     ],
@@ -178,9 +334,27 @@ export const trainingDays: TrainingDay[] = [
         weight: "Bodyweight",
         restTime: "60s",
         sets: [
-          { id: "s27", setNumber: 1, targetReps: 60, actualReps: null, completed: false },
-          { id: "s28", setNumber: 2, targetReps: 60, actualReps: null, completed: false },
-          { id: "s29", setNumber: 3, targetReps: 60, actualReps: null, completed: false },
+          {
+            id: "s27",
+            setNumber: 1,
+            targetReps: 60,
+            actualReps: null,
+            completed: false,
+          },
+          {
+            id: "s28",
+            setNumber: 2,
+            targetReps: 60,
+            actualReps: null,
+            completed: false,
+          },
+          {
+            id: "s29",
+            setNumber: 3,
+            targetReps: 60,
+            actualReps: null,
+            completed: false,
+          },
         ],
       },
       {
@@ -192,9 +366,27 @@ export const trainingDays: TrainingDay[] = [
         weight: "Bodyweight",
         restTime: "45s",
         sets: [
-          { id: "s30", setNumber: 1, targetReps: 12, actualReps: null, completed: false },
-          { id: "s31", setNumber: 2, targetReps: 12, actualReps: null, completed: false },
-          { id: "s32", setNumber: 3, targetReps: 12, actualReps: null, completed: false },
+          {
+            id: "s30",
+            setNumber: 1,
+            targetReps: 12,
+            actualReps: null,
+            completed: false,
+          },
+          {
+            id: "s31",
+            setNumber: 2,
+            targetReps: 12,
+            actualReps: null,
+            completed: false,
+          },
+          {
+            id: "s32",
+            setNumber: 3,
+            targetReps: 12,
+            actualReps: null,
+            completed: false,
+          },
         ],
       },
     ],
@@ -213,10 +405,34 @@ export const trainingDays: TrainingDay[] = [
         weight: "80kg",
         restTime: "120s",
         sets: [
-          { id: "s33", setNumber: 1, targetReps: 12, actualReps: null, completed: false },
-          { id: "s34", setNumber: 2, targetReps: 12, actualReps: null, completed: false },
-          { id: "s35", setNumber: 3, targetReps: 12, actualReps: null, completed: false },
-          { id: "s36", setNumber: 4, targetReps: 12, actualReps: null, completed: false },
+          {
+            id: "s33",
+            setNumber: 1,
+            targetReps: 12,
+            actualReps: null,
+            completed: false,
+          },
+          {
+            id: "s34",
+            setNumber: 2,
+            targetReps: 12,
+            actualReps: null,
+            completed: false,
+          },
+          {
+            id: "s35",
+            setNumber: 3,
+            targetReps: 12,
+            actualReps: null,
+            completed: false,
+          },
+          {
+            id: "s36",
+            setNumber: 4,
+            targetReps: 12,
+            actualReps: null,
+            completed: false,
+          },
         ],
       },
       {
@@ -228,9 +444,27 @@ export const trainingDays: TrainingDay[] = [
         weight: "16kg",
         restTime: "90s",
         sets: [
-          { id: "s37", setNumber: 1, targetReps: 10, actualReps: null, completed: false },
-          { id: "s38", setNumber: 2, targetReps: 10, actualReps: null, completed: false },
-          { id: "s39", setNumber: 3, targetReps: 10, actualReps: null, completed: false },
+          {
+            id: "s37",
+            setNumber: 1,
+            targetReps: 10,
+            actualReps: null,
+            completed: false,
+          },
+          {
+            id: "s38",
+            setNumber: 2,
+            targetReps: 10,
+            actualReps: null,
+            completed: false,
+          },
+          {
+            id: "s39",
+            setNumber: 3,
+            targetReps: 10,
+            actualReps: null,
+            completed: false,
+          },
         ],
       },
     ],
@@ -249,9 +483,27 @@ export const trainingDays: TrainingDay[] = [
         weight: "14kg",
         restTime: "90s",
         sets: [
-          { id: "s40", setNumber: 1, targetReps: 10, actualReps: null, completed: false },
-          { id: "s41", setNumber: 2, targetReps: 10, actualReps: null, completed: false },
-          { id: "s42", setNumber: 3, targetReps: 10, actualReps: null, completed: false },
+          {
+            id: "s40",
+            setNumber: 1,
+            targetReps: 10,
+            actualReps: null,
+            completed: false,
+          },
+          {
+            id: "s41",
+            setNumber: 2,
+            targetReps: 10,
+            actualReps: null,
+            completed: false,
+          },
+          {
+            id: "s42",
+            setNumber: 3,
+            targetReps: 10,
+            actualReps: null,
+            completed: false,
+          },
         ],
       },
       {
@@ -263,9 +515,27 @@ export const trainingDays: TrainingDay[] = [
         weight: "12kg",
         restTime: "60s",
         sets: [
-          { id: "s43", setNumber: 1, targetReps: 15, actualReps: null, completed: false },
-          { id: "s44", setNumber: 2, targetReps: 15, actualReps: null, completed: false },
-          { id: "s45", setNumber: 3, targetReps: 15, actualReps: null, completed: false },
+          {
+            id: "s43",
+            setNumber: 1,
+            targetReps: 15,
+            actualReps: null,
+            completed: false,
+          },
+          {
+            id: "s44",
+            setNumber: 2,
+            targetReps: 15,
+            actualReps: null,
+            completed: false,
+          },
+          {
+            id: "s45",
+            setNumber: 3,
+            targetReps: 15,
+            actualReps: null,
+            completed: false,
+          },
         ],
       },
     ],
@@ -289,16 +559,23 @@ export const weeklyStats: WeeklyStats = {
 // Helper functions
 export function getCompletedSets(day: TrainingDay): number {
   return day.exercises.reduce(
-    (total, exercise) => total + exercise.sets.filter((set) => set.completed).length,
+    (total, exercise) =>
+      total + exercise.sets.filter((set) => set.completed).length,
     0
   );
 }
 
 export function getTotalSets(day: TrainingDay): number {
-  return day.exercises.reduce((total, exercise) => total + exercise.sets.length, 0);
+  return day.exercises.reduce(
+    (total, exercise) => total + exercise.sets.length,
+    0
+  );
 }
 
-export function getExerciseProgress(exercise: Exercise): { completed: number; total: number } {
+export function getExerciseProgress(exercise: Exercise): {
+  completed: number;
+  total: number;
+} {
   const completed = exercise.sets.filter((set) => set.completed).length;
   return { completed, total: exercise.sets.length };
 }
