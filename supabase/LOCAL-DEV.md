@@ -1,29 +1,33 @@
 # Supabase local (Docker) — FitTrack
 
-Prueba el dashboard **sin tocar la nube**. Todo queda en tu Mac.
+Prueba el dashboard **sin tocar la nube**. Todo queda en tu máquina.
 
 ## Requisitos
 
-1. **[Docker Desktop](https://www.docker.com/products/docker-desktop/)** — instalar y abrir (whale icon en la barra).
-2. **Supabase CLI** — ya instalado en el repo; si falta:
+1. **[Docker Desktop](https://www.docker.com/products/docker-desktop/)** — instalar y abrir.
+2. **Supabase CLI** — si falta:
 
    ```bash
    brew install supabase/tap/supabase
    ```
 
-## Primera vez (5 min)
+3. **Node.js 20+** y **pnpm** — ver [README](../README.md#clone-and-run-locally).
+
+## Primera vez (~5 min)
 
 ```bash
-cd fitness-app-ui
+git clone https://github.com/barbimt/fittrack-routine-dashboard.git
+cd fittrack-routine-dashboard
+pnpm install
 
 # 1. Levantar Postgres + Auth + Studio (descarga imágenes la primera vez)
 pnpm supabase:start
 
-# 2. Ver URL y anon key
-pnpm supabase:status
+# 2. Aplicar schema + migraciones
+pnpm supabase:reset
 ```
 
-Copia la **anon key** (JWT, no la “Publishable”) y crea `.env.local` en la raíz:
+Crea `.env.local` en la raíz (plantilla: `supabase/env.local.example`):
 
 ```bash
 pnpm supabase:status -o env | grep ANON_KEY
@@ -34,28 +38,31 @@ NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
 NEXT_PUBLIC_SUPABASE_ANON_KEY=<ANON_KEY del comando anterior>
 ```
 
-La clave **Publishable** (`sb_publishable_…`) del resumen visual **no** es la que usa Next.js; usa `ANON_KEY`.
+Usa la clave **JWT `ANON_KEY`**, no la **Publishable** (`sb_publishable_…`) del resumen visual de `supabase status`.
 
-Plantilla: `supabase/env.local.example`  
-Backup cloud: guarda tu `.env.local` anterior en `.env.cloud.local` (gitignored).
+Backup cloud: guarda credenciales en `.env.cloud.local` (gitignored) y copia a `.env.local` cuando haga falta.
 
 ```bash
-# 3. Aplicar schema (migración inicial)
-pnpm supabase:reset
-
-# 4. App
+# 3. App
 pnpm dev
 ```
 
-Abre http://localhost:3000 → **Sign up** con un email de prueba (ej. `test@local.dev` / contraseña cualquiera).  
-Auth local **no envía emails reales**; el login funciona directo.
+Abre http://localhost:3000:
+
+1. **Sign up** (`/signup`) — cualquier email y contraseña (mín. 6 caracteres), ej. `test@local.dev` / `123456`.
+2. Tras el registro vas a `/login` con el aviso **“Cuenta creada con éxito”** — inicia sesión con las mismas credenciales.
+3. Importa una rutina en `/upload` o edita en `/editor` → entrena en `/`.
+
+Auth local **no envía emails reales** (`enable_confirmations = false` en `config.toml`).
+
+Cada usuario solo ve sus datos (RLS + trigger `handle_new_user` que crea el `profile` al registrarse).
 
 ### URLs útiles (local)
 
 | Servicio | URL |
 |----------|-----|
 | App | http://localhost:3000 |
-| Supabase Studio (SQL, tablas) | http://127.0.0.1:54323 |
+| Supabase Studio (SQL, tablas, usuarios) | http://127.0.0.1:54323 |
 | API | http://127.0.0.1:54321 |
 
 ## Día a día
@@ -76,7 +83,7 @@ pnpm supabase:status  # keys + estado
 pnpm supabase:reset
 ```
 
-Vuelve a crear tablas vacías + schema. Tendrás que registrarte otra vez en `/signup`.
+Tablas vacías + schema. Tendrás que registrarte otra vez en `/signup`.
 
 Solo sesiones (sin borrar rutina): Studio → SQL → `reset-workout-sessions.sql`.
 
@@ -84,31 +91,30 @@ Solo sesiones (sin borrar rutina): Studio → SQL → `reset-workout-sessions.sq
 
 En `.env.local`, pon la URL y anon key de tu proyecto en la nube y reinicia `pnpm dev`.
 
-Puedes guardar credenciales cloud en otro archivo (ej. `.env.cloud.local`) y copiar cuando haga falta.
+En Authentication → Providers → Email, desactiva **Confirm email** si quieres el mismo flujo que en local (signup sin correo de confirmación).
 
----
+## Alternativa: proyecto Free en la nube (sin Docker)
 
-## Alternativa: segundo proyecto Free en la nube
-
-Si no quieres Docker, crea `fittrack-dev` en supabase.com (gratis, 2º proyecto).  
-Ver sección “Option A” abajo o [Billing FAQ](https://supabase.com/docs/guides/platform/billing-faq).
-
----
-
-## Option A — Two cloud projects
-
-1. `fittrack-dev` + `fittrack-prod` (ambos Free).
-2. `schema.sql` en SQL Editor de cada uno.
-3. `.env.local` → dev; Vercel → prod.
+Crea un proyecto en [supabase.com](https://supabase.com), ejecuta `schema.sql` en el SQL Editor, y pon URL + anon key en `.env.local`. Ver [README](../README.md#supabase-cloud-optional).
 
 Reset en cloud: `reset-workout-sessions.sql` / `reset-user-data.sql`.
 
----
+## Producción (Vercel)
+
+La app en producción usa Supabase cloud y está desplegada en:
+
+https://fittrack-routine-dashboard.vercel.app
+
+En Supabase → Authentication → URL Configuration:
+
+- **Site URL** = dominio de Vercel
+- **Redirect URLs** = `https://<dominio>/auth/callback`
 
 ## Qué guarda el dashboard
 
 | Tabla | Contenido |
 |-------|-----------|
-| `workout_set_logs` | Sets completados + repes |
+| `profiles` | Perfil 1:1 con `auth.users` (creado al registrarse) |
+| `routines` … `routine_exercises` | Rutina activa (import o editor) |
 | `workout_sessions` | Sesión del día (`in_progress` / `completed`) |
-| `routines` … | Rutina importada |
+| `workout_set_logs` | Sets completados + repes |

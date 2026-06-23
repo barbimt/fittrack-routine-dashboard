@@ -13,7 +13,9 @@ Supabase email/password auth via Server Actions.
 
 ## Flow
 
-- Success → `redirect("/")` or `redirect("/login")` on logout
+- `signup` → `signOut()` → `redirect("/login?registered=1")` (success notice on login page)
+- `login` success → `redirect("/")`
+- `logout` → `redirect("/login")`
 - `proxy.ts` + `lib/supabase/middleware.ts` guard private routes
 
 ## Related
