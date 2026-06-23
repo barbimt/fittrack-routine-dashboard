@@ -203,4 +203,4 @@ In Supabase → Authentication → URL Configuration:
 
 ## Design
 
-Calm, minimal UI: warm stone background, sage accent, touch-friendly controls. Responsive shell with sidebar on desktop and bottom tabs on mobile.
+Calm, minimal UI: warm stone background, sage accent, touch-friendly controls. Responsive shell with a fixed sidebar on desktop and a hamburger drawer on mobile.

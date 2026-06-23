@@ -4,7 +4,6 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Header } from "@/components/layout/header";
-import { MobileNavigation } from "@/components/layout/mobile-navigation";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 
@@ -59,7 +58,7 @@ export function AppShell({ children, aside }: AppShellProps) {
 
         <main className="flex flex-1 flex-col">
           {aside ? (
-            <div className="mx-auto flex w-full max-w-7xl flex-1 gap-8 px-4 py-6 pb-24 lg:px-8 lg:py-8 lg:pb-8 xl:px-10">
+            <div className="mx-auto flex w-full max-w-7xl flex-1 gap-8 px-4 py-6 lg:px-8 lg:py-8 xl:px-10">
               <div className="min-w-0 flex-1">{children}</div>
               {aside}
             </div>
@@ -67,8 +66,6 @@ export function AppShell({ children, aside }: AppShellProps) {
             children
           )}
         </main>
-
-        <MobileNavigation />
       </div>
     </div>
   );
