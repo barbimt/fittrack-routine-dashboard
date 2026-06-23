@@ -61,7 +61,7 @@ export function mapRoutineToTrainingDays(
         .map((ex) => ({
           id: ex.id,
           name: ex.name,
-          muscleGroup: day.focus ?? day.name,
+          muscleGroup: ex.muscle_group ?? day.focus ?? day.name,
           targetSets: ex.planned_sets ?? 0,
           targetReps: ex.target_reps ?? ex.prescription,
           weight: ex.weight ?? "—",

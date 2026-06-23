@@ -40,6 +40,7 @@ export interface RoutineExercise {
   weight: string | null;
   rest_time: string | null;
   notes: string | null;
+  muscle_group: string | null;
   sort_order: number;
   created_at: string;
   updated_at: string;
