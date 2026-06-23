@@ -1,6 +1,7 @@
 "use client";
 
 import { AppShell } from "@/components/app-shell";
+import { PageContent } from "@/components/layout/page-content";
 import { WeeklyDayCard } from "@/components/fitness/weekly-day-card";
 import { StatCard } from "@/components/fitness/stat-card";
 import { ProgressBar } from "@/components/fitness/progress-bar";
@@ -29,7 +30,7 @@ export default function WeekOverviewPage() {
 
   return (
     <AppShell>
-      <div className="mx-auto max-w-5xl px-4 py-6 pb-6 lg:px-8 lg:py-8 lg:pb-8">
+      <PageContent className="max-w-5xl">
         <header className="mb-6">
           <h1 className="text-foreground mb-1 text-2xl font-bold">
             Week Overview
@@ -136,7 +137,7 @@ export default function WeekOverviewPage() {
             </div>
           </div>
         </section>
-      </div>
+      </PageContent>
     </AppShell>
   );
 }

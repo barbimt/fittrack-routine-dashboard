@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { AppShell } from "@/components/app-shell";
+import { PageContent } from "@/components/layout/page-content";
 import { DaySelector } from "@/components/fitness/day-selector";
 import { DailyProgressCard } from "@/components/fitness/daily-progress-card";
 import { ExerciseCard } from "@/components/fitness/exercise-card";
@@ -93,7 +94,7 @@ export function DashboardClient({
         />
       }
     >
-      <div className="mx-auto max-w-4xl flex-1 px-4 py-6 pb-6 lg:px-0 lg:py-0 lg:pb-0">
+      <PageContent className="flex-1 lg:px-0 lg:py-0">
         <header className="mb-6">
           <div className="text-muted-foreground mb-1 flex items-center gap-2 text-sm">
             <Calendar className="h-4 w-4" aria-hidden />
@@ -184,7 +185,7 @@ export function DashboardClient({
           isResetting={isResetting}
           onConfirm={confirmResetDay}
         />
-      </div>
+      </PageContent>
     </AppShell>
   );
 }

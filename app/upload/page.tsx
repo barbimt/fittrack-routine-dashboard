@@ -1,6 +1,7 @@
 "use client";
 
 import { AppShell } from "@/components/app-shell";
+import { PageContent } from "@/components/layout/page-content";
 import { RoutineImportForm } from "@/features/routine-import/components/RoutineImportForm";
 import { downloadRoutineTemplate } from "@/features/routine-import/utils/downloadRoutineTemplate";
 import { COLUMN_LABELS } from "@/features/routine-import/types";
@@ -17,7 +18,7 @@ import { FileSpreadsheet, Download, CheckCircle2 } from "lucide-react";
 export default function UploadPage() {
   return (
     <AppShell>
-      <div className="mx-auto max-w-3xl px-4 py-6 pb-6 lg:px-8 lg:py-8 lg:pb-8">
+      <PageContent className="max-w-3xl">
         <header className="mb-8">
           <h1 className="text-foreground text-2xl font-bold tracking-tight">
             Upload Routine
@@ -132,7 +133,7 @@ export default function UploadPage() {
             </ul>
           </CardContent>
         </Card>
-      </div>
+      </PageContent>
     </AppShell>
   );
 }

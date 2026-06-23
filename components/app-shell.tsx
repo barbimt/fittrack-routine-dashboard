@@ -1,12 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { cn } from "@/lib/utils";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Header } from "@/components/layout/header";
-import { MobileNavigation } from "@/components/layout/mobile-navigation";
-import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+import { MobileNavDrawer } from "@/components/layout/mobile-nav-drawer";
+import { PageContent } from "@/components/layout/page-content";
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -21,54 +19,21 @@ export function AppShell({ children, aside }: AppShellProps) {
     <div className="bg-background flex min-h-screen max-lg:h-dvh max-lg:max-h-dvh max-lg:overflow-hidden">
       <Sidebar className="hidden lg:fixed lg:inset-y-0 lg:z-20 lg:flex lg:w-64" />
 
-      {sidebarOpen && (
-        <button
-          type="button"
-          className="bg-foreground/20 fixed inset-0 z-40 backdrop-blur-sm lg:hidden"
-          aria-label="Close menu overlay"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
-      <aside
-        className={cn(
-          "fixed inset-y-0 left-0 z-50 w-72 transform transition-transform duration-200 ease-in-out lg:hidden",
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        )}
-        aria-hidden={!sidebarOpen}
-      >
-        <div className="bg-sidebar relative flex h-full flex-col shadow-xl">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute top-3 right-3 z-10 h-11 w-11"
-            onClick={() => setSidebarOpen(false)}
-            aria-label="Close navigation menu"
-          >
-            <X className="h-5 w-5" />
-          </Button>
-          <Sidebar
-            onNavigate={() => setSidebarOpen(false)}
-            className="h-full w-full"
-          />
-        </div>
-      </aside>
+      <MobileNavDrawer open={sidebarOpen} onOpenChange={setSidebarOpen} />
 
       <div className="flex min-h-0 flex-1 flex-col max-lg:overflow-hidden lg:pl-64">
         <Header onMenuOpen={() => setSidebarOpen(true)} />
 
         <main className="flex min-h-0 flex-1 flex-col max-lg:overflow-y-auto max-lg:overscroll-y-contain">
           {aside ? (
-            <div className="mx-auto flex w-full max-w-7xl flex-1 gap-8 px-4 py-6 pb-6 lg:px-8 lg:py-8 lg:pb-8 xl:px-10">
+            <PageContent className="flex w-full max-w-7xl flex-1 gap-8 xl:px-10">
               <div className="min-w-0 flex-1">{children}</div>
               {aside}
-            </div>
+            </PageContent>
           ) : (
             children
           )}
         </main>
-
-        <MobileNavigation />
       </div>
     </div>
   );

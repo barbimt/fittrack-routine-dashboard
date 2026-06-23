@@ -1,6 +1,7 @@
 "use client";
 
 import { AppShell } from "@/components/app-shell";
+import { PageContent } from "@/components/layout/page-content";
 import { StatCard } from "@/components/fitness/stat-card";
 import {
   AnalyticsCard,
@@ -34,7 +35,7 @@ const muscleGroupVolume = [
 export default function ProgressPage() {
   return (
     <AppShell>
-      <div className="mx-auto max-w-5xl px-4 py-6 pb-6 lg:px-8 lg:py-8 lg:pb-8">
+      <PageContent className="max-w-5xl">
         <header className="mb-6">
           <h1 className="text-foreground mb-1 text-2xl font-bold">Progress</h1>
           <p className="text-muted-foreground">
@@ -212,7 +213,7 @@ export default function ProgressPage() {
             label="Line chart: Weight progression per exercise"
           />
         </AnalyticsCard>
-      </div>
+      </PageContent>
     </AppShell>
   );
 }
