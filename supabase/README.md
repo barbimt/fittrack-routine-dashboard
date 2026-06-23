@@ -22,3 +22,14 @@ pnpm supabase:status -o env | grep ANON_KEY
 ## Keys
 
 Next.js needs **`ANON_KEY`** (JWT from `supabase status -o env`), not the **Publishable** key shown in the default status table.
+
+## Migrations to apply
+
+The routine editor needs a per-exercise muscle column. Local dev picks it up via `pnpm supabase:reset`; on a cloud DB run it once in the SQL editor:
+
+```sql
+ALTER TABLE routine_exercises
+  ADD COLUMN IF NOT EXISTS muscle_group text;
+```
+
+See [migrations/20260622170000_add_muscle_group.sql](./migrations/20260622170000_add_muscle_group.sql).

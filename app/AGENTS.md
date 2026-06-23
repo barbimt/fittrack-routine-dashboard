@@ -10,7 +10,8 @@ One `page.tsx` per screen. See root `AGENTS.md` for the route list.
 | `/login`, `/signup` | `login/page.tsx`, `signup/page.tsx` | Auth forms → `features/auth` |
 | `/upload` | `upload/page.tsx` | Excel import UI → `features/routine-import` |
 | `/empty` | `empty/page.tsx` | No active routine state |
-| `/week`, `/progress`, `/editor` | mock prototypes | `lib/mock-data.ts` |
+| `/editor` | `editor/page.tsx` | Active Supabase routine → `RoutineEditorClient`; saves via `updateRoutine` |
+| `/week`, `/progress` | mock prototypes | `lib/mock-data.ts` |
 | `/settings` | `settings/page.tsx` | Placeholder UI |
 | `/auth/callback` | `auth/callback/route.ts` | Supabase OAuth code exchange |
 

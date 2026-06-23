@@ -149,6 +149,7 @@ CREATE OR REPLACE TRIGGER trg_routine_days_updated_at
 -- prescription: raw string, e.g. "4x8-10 @ RPE 8".
 -- planned_sets, target_reps, weight, rest_time: parsed from prescription
 -- at import time for convenience; may be NULL if unparseable.
+-- muscle_group: optional per-exercise target muscle, set from the routine editor.
 --
 -- Composite FK (routine_day_id, user_id) → routine_days(id, user_id).
 -- UNIQUE (id, user_id) enables composite FK reference from workout_set_logs.
@@ -165,6 +166,7 @@ CREATE TABLE IF NOT EXISTS routine_exercises (
   weight           text,
   rest_time        text,
   notes            text,
+  muscle_group     text,
   sort_order       integer     NOT NULL DEFAULT 0,
   created_at       timestamptz NOT NULL DEFAULT now(),
   updated_at       timestamptz NOT NULL DEFAULT now(),

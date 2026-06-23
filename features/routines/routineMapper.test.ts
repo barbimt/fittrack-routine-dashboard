@@ -98,6 +98,7 @@ describe("mapRoutineToTrainingDays", () => {
             weight: "40kg",
             rest_time: "60s",
             notes: null,
+            muscle_group: null,
             sort_order: 1,
             created_at: "2026-01-01T00:00:00Z",
             updated_at: "2026-01-01T00:00:00Z",
@@ -113,5 +114,29 @@ describe("mapRoutineToTrainingDays", () => {
     expect(days[0].dayName).toBe("Day 1 - Upper");
     expect(days[0].exercises[0].sets).toHaveLength(3);
     expect(days[0].exercises[0].sets[0].targetReps).toBe(10);
+  });
+
+  it("falls back to the day focus when muscle_group is null", () => {
+    const days = mapRoutineToTrainingDays(routine);
+    expect(days[0].exercises[0].muscleGroup).toBe("Upper");
+  });
+
+  it("prefers the exercise muscle_group when set", () => {
+    const withMuscle: RoutineWithDays = {
+      ...routine,
+      routine_days: [
+        {
+          ...routine.routine_days[0],
+          routine_exercises: [
+            {
+              ...routine.routine_days[0].routine_exercises[0],
+              muscle_group: "Chest",
+            },
+          ],
+        },
+      ],
+    };
+    const days = mapRoutineToTrainingDays(withMuscle);
+    expect(days[0].exercises[0].muscleGroup).toBe("Chest");
   });
 });
