@@ -20,7 +20,11 @@ Presentational workout UI. Props in, events up — no Supabase or routing here.
 | `analytics-card.tsx` | Chart shell + `ChartPlaceholder` |
 | `empty-state.tsx` | Icon + title + CTA pattern |
 | `upload-dropzone.tsx` | Excel file picker (used by routine import) |
-| `routine-editor-mock.tsx` | `/editor` prototype |
+| `routine-editor-client.tsx` | `/editor` orchestrator: wires `useRoutineEditor` to day cards + save footer |
+| `routine-editor-day-card.tsx` | Sortable day card: day fields, exercise list (own `DndContext`), add/delete |
+| `routine-editor-exercise-row.tsx` | Sortable exercise row: name/muscle/sets/reps/weight/rest/notes + delete |
+| `routine-editor-fields.tsx` | Reusable editor fields (`EditorField`, `Editor*Field`, `MuscleSelect`) + `StatusBanner`, `emptyToNull` |
+| `sortable-row.tsx` | dnd-kit helpers: `useEditorSensors`, `useSortableRow`, `DragHandle` |
 
 ## Set row behavior
 
@@ -41,6 +45,15 @@ Presentational workout UI. Props in, events up — no Supabase or routing here.
 - **Save workout**: enabled once at least one set is complete; first save vs re-save show different banner/toast copy.
 - **Edit workout**: reopens a saved session (`in_progress`) for edits; shows Save again when done.
 - **Reset day** (when saved): shown next to Edit workout in the footer; clears today’s session and exits read-only mode.
+
+## Routine editor
+
+- State + behavior live in `hooks/use-routine-editor.ts` (`useRoutineEditor`): working copy of days, dirty tracking, validation, patch-based save. Components stay presentational.
+- Receives `EditorRoutine` (`features/routines/editorTypes.ts`) loaded server-side on `/editor` from the active Supabase routine.
+- New days/exercises get `new-*` ids (`createNewId`) so the server treats them as inserts.
+- Drag via `@dnd-kit` through `sortable-row.tsx` helpers: outer sortable list reorders days, inner per-day list reorders exercises (handle = `DragHandle`). Each `DndContext` has a stable `id` to avoid SSR hydration mismatches.
+- Fields come from `routine-editor-fields.tsx`; muscle uses the fixed `MUSCLE_GROUPS` list (sentinel `MUSCLE_GROUP_NONE` = no selection).
+- On save: `validateRoutineDays` (zod) blocks invalid routines (empty day name, no exercises, invalid sets) and surfaces per-day errors; otherwise `computeRoutinePatch` sends only changes to `updateRoutine`, then `router.refresh()` re-seeds the baseline with persisted UUIDs. **Save routine** (footer) is disabled until dirty.
 
 ## Conventions
 
