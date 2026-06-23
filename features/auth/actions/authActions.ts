@@ -40,8 +40,12 @@ export async function signup(
     return { error: error.message };
   }
 
+  // No auto-login: sign out the session created by signUp so the user lands
+  // cleanly on the login page (the middleware redirects logged-in users away
+  // from /login). They confirm the success message and sign in manually.
+  await supabase.auth.signOut();
   revalidatePath("/", "layout");
-  redirect("/");
+  redirect("/login?registered=1");
 }
 
 export async function logout(): Promise<void> {

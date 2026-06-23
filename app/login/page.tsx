@@ -8,7 +8,13 @@ import {
 } from "@/components/ui/card";
 import { LoginForm } from "@/features/auth/components/LoginForm";
 
-export default function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ registered?: string }>;
+}) {
+  const { registered } = await searchParams;
+
   return (
     <div className="bg-background flex min-h-screen items-center justify-center px-4">
       <div className="w-full max-w-sm">
@@ -37,6 +43,14 @@ export default function LoginPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {registered && (
+              <p
+                role="status"
+                className="border-primary/20 bg-primary/5 text-foreground mb-4 rounded-md border px-3 py-2 text-sm"
+              >
+                Cuenta creada con éxito. Inicia sesión para continuar.
+              </p>
+            )}
             <LoginForm />
           </CardContent>
         </Card>
