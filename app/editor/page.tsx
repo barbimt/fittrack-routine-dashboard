@@ -32,7 +32,7 @@ export default async function EditorPage() {
 
   return (
     <AppShell>
-      <PageContent width="4xl">
+      <PageContent className="max-w-4xl">
         <header className="mb-6">
           <h1 className="text-foreground text-2xl font-bold tracking-tight">
             Routine Editor
