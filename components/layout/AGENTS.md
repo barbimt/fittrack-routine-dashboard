@@ -8,7 +8,7 @@ Navigation chrome shared across all authenticated screens.
 |------|------|
 | `sidebar.tsx` | Desktop nav (`lg+`), mobile drawer content, `navItems` export |
 | `header.tsx` | Mobile top bar + menu trigger |
-| `mobile-navigation.tsx` | Bottom tab bar (first 5 routes from `navItems`) |
+| `mobile-navigation.tsx` | Bottom tab bar (first 5 routes); in document flow on mobile (not `fixed`) |
 
 ## Adding a route
 

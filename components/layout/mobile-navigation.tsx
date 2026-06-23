@@ -13,7 +13,7 @@ export function MobileNavigation() {
 
   return (
     <nav
-      className="border-border bg-background/95 supports-[backdrop-filter]:bg-background/60 fixed right-0 bottom-0 left-0 z-30 border-t backdrop-blur lg:hidden"
+      className="border-border bg-background/95 supports-[backdrop-filter]:bg-background/60 z-30 shrink-0 border-t backdrop-blur lg:hidden"
       aria-label="Mobile navigation"
     >
       <div className="safe-area-pb flex items-center justify-around py-1.5">

@@ -31,7 +31,7 @@ export default async function EditorPage() {
 
   return (
     <AppShell>
-      <div className="mx-auto max-w-4xl px-4 py-6 pb-24 lg:px-8 lg:py-8 lg:pb-8">
+      <div className="mx-auto max-w-4xl px-4 py-6 pb-6 lg:px-8 lg:py-8 lg:pb-8">
         <header className="mb-6">
           <h1 className="text-foreground text-2xl font-bold tracking-tight">
             Routine Editor

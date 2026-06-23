@@ -135,7 +135,6 @@ export function SetRow({
             set.completed && "border-success/30 bg-success/10",
             !editable && "cursor-default opacity-90"
           )}
-          placeholder="—"
           aria-label={`Actual reps for set ${set.setNumber}`}
         />
       </div>

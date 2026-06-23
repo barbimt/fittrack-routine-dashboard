@@ -34,7 +34,7 @@ const muscleGroupVolume = [
 export default function ProgressPage() {
   return (
     <AppShell>
-      <div className="mx-auto max-w-5xl px-4 py-6 pb-24 lg:px-8 lg:py-8 lg:pb-8">
+      <div className="mx-auto max-w-5xl px-4 py-6 pb-6 lg:px-8 lg:py-8 lg:pb-8">
         <header className="mb-6">
           <h1 className="text-foreground mb-1 text-2xl font-bold">Progress</h1>
           <p className="text-muted-foreground">
