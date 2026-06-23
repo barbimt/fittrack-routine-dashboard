@@ -14,7 +14,7 @@ Navigation chrome shared across all authenticated screens.
 ## Adding a route
 
 1. Create `app/{route}/page.tsx` wrapped in `<AppShell>`
-2. Use `<PageContent width="…">` for standard padding (or pass `className` for one-offs)
+2. Use `<PageContent>` (default `max-w-4xl`) or pass `className="max-w-5xl"` etc.
 3. Add entry to `navItems` in `sidebar.tsx` — appears in desktop sidebar and mobile drawer
 
 ## Related

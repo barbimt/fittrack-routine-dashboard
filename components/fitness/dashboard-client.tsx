@@ -94,7 +94,7 @@ export function DashboardClient({
         />
       }
     >
-      <PageContent width="4xl" className="flex-1 lg:px-0 lg:py-0">
+      <PageContent className="flex-1 lg:px-0 lg:py-0">
         <header className="mb-6">
           <div className="text-muted-foreground mb-1 flex items-center gap-2 text-sm">
             <Calendar className="h-4 w-4" aria-hidden />

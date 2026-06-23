@@ -26,10 +26,7 @@ export function AppShell({ children, aside }: AppShellProps) {
 
         <main className="flex flex-1 flex-col">
           {aside ? (
-            <PageContent
-              width="7xl"
-              className="flex w-full flex-1 gap-8 xl:px-10"
-            >
+            <PageContent className="flex w-full max-w-7xl flex-1 gap-8 xl:px-10">
               <div className="min-w-0 flex-1">{children}</div>
               {aside}
             </PageContent>

@@ -25,7 +25,7 @@ import { User, Bell, Palette, Database, HelpCircle } from "lucide-react";
 export default function SettingsPage() {
   return (
     <AppShell>
-      <PageContent width="3xl">
+      <PageContent className="max-w-3xl">
         <header className="mb-6">
           <h1 className="text-foreground mb-1 text-2xl font-bold">Settings</h1>
           <p className="text-muted-foreground">Manage your app preferences</p>

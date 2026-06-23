@@ -18,7 +18,7 @@ import { FileSpreadsheet, Download, CheckCircle2 } from "lucide-react";
 export default function UploadPage() {
   return (
     <AppShell>
-      <PageContent width="3xl">
+      <PageContent className="max-w-3xl">
         <header className="mb-8">
           <h1 className="text-foreground text-2xl font-bold tracking-tight">
             Upload Routine
