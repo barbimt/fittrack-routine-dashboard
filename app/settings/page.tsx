@@ -1,6 +1,7 @@
 "use client";
 
 import { AppShell } from "@/components/app-shell";
+import { PageContent } from "@/components/layout/page-content";
 import {
   Card,
   CardContent,
@@ -24,7 +25,7 @@ import { User, Bell, Palette, Database, HelpCircle } from "lucide-react";
 export default function SettingsPage() {
   return (
     <AppShell>
-      <div className="mx-auto max-w-3xl px-4 py-6 lg:px-8 lg:py-8">
+      <PageContent width="3xl">
         <header className="mb-6">
           <h1 className="text-foreground mb-1 text-2xl font-bold">Settings</h1>
           <p className="text-muted-foreground">Manage your app preferences</p>
@@ -195,7 +196,7 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
         </div>
-      </div>
+      </PageContent>
     </AppShell>
   );
 }

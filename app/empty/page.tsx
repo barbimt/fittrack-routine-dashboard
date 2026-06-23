@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
+import { PageContent } from "@/components/layout/page-content";
 import { EmptyState } from "@/components/fitness/empty-state";
 import { Button } from "@/components/fitness/button";
 import { Dumbbell, Upload, Sparkles } from "lucide-react";
@@ -12,7 +13,10 @@ export default function EmptyRoutinePage() {
 
   return (
     <AppShell>
-      <div className="mx-auto flex min-h-[70vh] max-w-lg flex-col items-center justify-center px-4 py-12 pb-28 lg:pb-12">
+      <PageContent
+        width="lg"
+        className="flex min-h-[70vh] flex-col items-center justify-center py-12"
+      >
         <EmptyState
           icon={
             <div className="bg-accent-soft flex h-16 w-16 items-center justify-center rounded-2xl">
@@ -45,7 +49,7 @@ export default function EmptyRoutinePage() {
             </Link>
           </Button>
         </div>
-      </div>
+      </PageContent>
     </AppShell>
   );
 }

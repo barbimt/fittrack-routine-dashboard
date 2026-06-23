@@ -20,7 +20,7 @@ One `page.tsx` per screen. See root `AGENTS.md` for the route list.
 - Wrap main screens in `<AppShell>` from `@/components/app-shell`
 - `"use client"` only when hooks, events, or browser APIs are needed
 - Server Components for Supabase reads on `/` (auth + routine fetch)
-- Content width: `max-w-4xl` or `max-w-5xl`, `px-4 py-6 lg:px-8 lg:py-8`
+- Content width: wrap pages in `<PageContent width="4xl" | "5xl" | … />` from `@/components/layout/page-content`
 
 ## Home page flow (`/`)
 

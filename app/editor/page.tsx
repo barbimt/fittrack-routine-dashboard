@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { mapRoutineToEditor } from "@/features/routines/editorTypes";
 import type { RoutineWithDays } from "@/features/routines/types";
 import { AppShell } from "@/components/app-shell";
+import { PageContent } from "@/components/layout/page-content";
 import { RoutineEditorClient } from "@/components/fitness/routine-editor-client";
 
 export default async function EditorPage() {
@@ -31,7 +32,7 @@ export default async function EditorPage() {
 
   return (
     <AppShell>
-      <div className="mx-auto max-w-4xl px-4 py-6 lg:px-8 lg:py-8">
+      <PageContent width="4xl">
         <header className="mb-6">
           <h1 className="text-foreground text-2xl font-bold tracking-tight">
             Routine Editor
@@ -43,7 +44,7 @@ export default async function EditorPage() {
         </header>
 
         <RoutineEditorClient routine={routine} />
-      </div>
+      </PageContent>
     </AppShell>
   );
 }
