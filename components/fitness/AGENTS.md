@@ -32,6 +32,7 @@ Presentational workout UI. Props in, events up — no Supabase or routing here.
 - Typing updates parent via `onRepsChange`; persist via `onRepsSave` on blur or after 400ms debounce.
 - Entering reps ≥ 1 auto-checks the set; clearing to 0 auto-unchecks.
 - Tap/click anywhere on the row toggles completion (except the actual-reps input area); checkbox keeps keyboard focus.
+- Mobile actual-reps input uses `text-lg` (≥16px) to avoid iOS browser zoom; label shows set number + target beside the field.
 
 ## Dashboard client
 
