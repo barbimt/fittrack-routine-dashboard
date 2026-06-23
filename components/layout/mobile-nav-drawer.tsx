@@ -33,11 +33,11 @@ export function MobileNavDrawer({ open, onOpenChange }: MobileNavDrawerProps) {
         aria-hidden={!open}
         aria-label="Mobile navigation menu"
       >
-        <div className="bg-sidebar relative flex h-full flex-col shadow-xl">
+        <div className="bg-sidebar safe-area-pt relative flex h-full flex-col shadow-xl">
           <Button
             variant="ghost"
             size="icon"
-            className="absolute top-3 right-3 z-10 h-11 w-11"
+            className="absolute top-[calc(0.75rem+env(safe-area-inset-top,0px))] right-3 z-10 h-11 w-11"
             onClick={close}
             aria-label="Close navigation menu"
           >

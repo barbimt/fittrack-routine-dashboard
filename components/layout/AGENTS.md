@@ -7,7 +7,7 @@ Navigation chrome shared across all authenticated screens.
 | File | Role |
 |------|------|
 | `sidebar.tsx` | Desktop nav (`lg+`), mobile drawer content, `navItems` export (single source of routes) |
-| `header.tsx` | Mobile top bar + hamburger menu trigger (`lg:hidden`) |
+| `header.tsx` | Mobile top bar + hamburger menu trigger (`lg:hidden`); `safe-area-pt` + solid `bg-background` for iOS browser chrome |
 | `mobile-nav-drawer.tsx` | Mobile overlay + slide-in drawer; reuses `Sidebar` |
 | `page-content.tsx` | Shared page padding/max-width wrapper for routes inside `AppShell` |
 
