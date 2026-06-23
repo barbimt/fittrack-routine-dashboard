@@ -13,9 +13,7 @@ export default function EmptyRoutinePage() {
 
   return (
     <AppShell>
-      <PageContent
-        className="flex min-h-[70vh] max-w-lg flex-col items-center justify-center py-12"
-      >
+      <PageContent className="flex min-h-[70vh] max-w-lg flex-col items-center justify-center py-12">
         <EmptyState
           icon={
             <div className="bg-accent-soft flex h-16 w-16 items-center justify-center rounded-2xl">

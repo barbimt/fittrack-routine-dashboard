@@ -16,9 +16,7 @@ describe("PageContent", () => {
 
   it("merges Tailwind width and layout overrides via className", () => {
     const { container } = render(
-      <PageContent className="max-w-5xl flex-1 lg:px-0">
-        child
-      </PageContent>
+      <PageContent className="max-w-5xl flex-1 lg:px-0">child</PageContent>
     );
     const el = container.firstElementChild;
 
