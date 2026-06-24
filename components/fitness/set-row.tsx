@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import type { ExerciseSet } from "@/lib/mock-data";
 import { Checkbox } from "@/components/ui/checkbox";
+import { SetTargetLabel } from "./weight-label";
 import { Input } from "./input";
 
 interface SetRowProps {
@@ -111,9 +112,11 @@ export function SetRow({
       </span>
 
       <div className="flex flex-1 items-center gap-2">
-        <span className="text-muted-foreground text-sm">
-          Target: {set.targetReps}
-        </span>
+        <SetTargetLabel
+          targetReps={set.targetReps}
+          targetWeight={set.targetWeight}
+          className="text-muted-foreground"
+        />
       </div>
 
       <div

@@ -40,7 +40,9 @@ export default function UploadPage() {
             <CardDescription>
               One sheet per training day. Row 1 must include{" "}
               {COLUMN_LABELS.EXERCISE} and {COLUMN_LABELS.SETS_X_REPS} (English
-              headers).
+              headers). Put the full prescription in{" "}
+              <span className="font-medium">{COLUMN_LABELS.SETS_X_REPS}</span> —
+              including per-set weight when it changes.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -67,13 +69,23 @@ export default function UploadPage() {
                     <td className="px-3 py-2">Hip Thrust</td>
                     <td className="px-3 py-2">4x10</td>
                     <td className="px-3 py-2">60kg</td>
-                    <td className="px-3 py-2">2s pause at top</td>
+                    <td className="px-3 py-2">
+                      Same reps and weight for every set
+                    </td>
                   </tr>
                   <tr className="border-border/50 border-b">
-                    <td className="px-3 py-2">RDL</td>
-                    <td className="px-3 py-2">3x8</td>
-                    <td className="px-3 py-2">45kg</td>
-                    <td className="px-3 py-2">—</td>
+                    <td className="px-3 py-2">Dumbbell Row</td>
+                    <td className="px-3 py-2 font-medium">
+                      1x12 15kg-3x12 20kg
+                    </td>
+                    <td className="text-muted-foreground px-3 py-2">(empty)</td>
+                    <td className="px-3 py-2">Variable weight per set</td>
+                  </tr>
+                  <tr className="border-border/50 border-b">
+                    <td className="px-3 py-2">Leg Press</td>
+                    <td className="px-3 py-2">3x10-2x8</td>
+                    <td className="px-3 py-2">80kg</td>
+                    <td className="px-3 py-2">Variable reps, same weight</td>
                   </tr>
                   <tr>
                     <td className="px-3 py-2">Bulgarian Split Squat</td>
@@ -87,6 +99,19 @@ export default function UploadPage() {
             <p className="text-muted-foreground mt-3 text-xs">
               Sheet name example:{" "}
               <span className="font-medium">Day 1 - FULL BODY</span>
+            </p>
+            <p className="text-muted-foreground mt-2 text-xs">
+              <span className="font-medium">{COLUMN_LABELS.SETS_X_REPS}</span>{" "}
+              formats: <span className="font-mono">4x10</span> (simple),{" "}
+              <span className="font-mono">3x10-2x8</span> (reps change per
+              block), <span className="font-mono">1x12 15kg-3x12 20kg</span>{" "}
+              (reps and weight per block, separated by{" "}
+              <span className="font-mono">-</span>),{" "}
+              <span className="font-mono">@</span> or{" "}
+              <span className="font-mono">con</span> also work instead of a
+              space before kg. Use{" "}
+              <span className="font-medium">{COLUMN_LABELS.WEIGHT}</span> only
+              when every set shares the same load.
             </p>
             <div className="border-border mt-4 border-t pt-4">
               <Button

@@ -4,10 +4,12 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import type { Exercise } from "@/lib/mock-data";
 import { getExerciseProgress } from "@/lib/mock-data";
+import { getPrescriptionBlockSummaries } from "@/features/routine-import/utils/parsePrescription";
 import { SetRow } from "./set-row";
 import { Badge } from "./badge";
 import { Button } from "./button";
-import { ChevronDown, Clock, Weight, Info, RotateCcw } from "lucide-react";
+import { PrescriptionBlockLine, WeightLabel } from "./weight-label";
+import { ChevronDown, Clock, Info, RotateCcw } from "lucide-react";
 
 interface ExerciseCardProps {
   exercise: Exercise;
@@ -34,6 +36,11 @@ export function ExerciseCard({
   const progress = getExerciseProgress(exercise);
   const progressPercentage = (progress.completed / progress.total) * 100;
   const hasRestTime = exercise.restTime && exercise.restTime !== "—";
+  const fallbackWeight = exercise.weight !== "—" ? exercise.weight : null;
+  const prescriptionBlocks = exercise.prescription
+    ? getPrescriptionBlockSummaries(exercise.prescription, fallbackWeight)
+    : [];
+  const showBlockLines = prescriptionBlocks.length > 0;
 
   return (
     <div className="bg-card border-border overflow-hidden rounded-2xl border shadow-sm">
@@ -53,17 +60,27 @@ export function ExerciseCard({
             </Badge>
           </div>
 
-          <div className="text-muted-foreground mt-2 flex items-center gap-4 text-sm">
-            <span className="flex items-center gap-1">
-              <span className="text-foreground font-medium">
-                {exercise.targetSets}
-              </span>{" "}
-              x {exercise.targetReps}
-            </span>
-            {exercise.weight !== "—" && (
-              <span className="flex items-center gap-1">
-                <Weight className="h-3.5 w-3.5" aria-hidden />
-                {exercise.weight}
+          <div className="text-muted-foreground mt-2 flex flex-col gap-1 text-sm">
+            {showBlockLines ? (
+              prescriptionBlocks.map((block) => (
+                <PrescriptionBlockLine
+                  key={`${block.sets}-${block.reps}-${block.weight ?? ""}`}
+                  sets={block.sets}
+                  reps={block.reps}
+                  weight={block.weight}
+                />
+              ))
+            ) : (
+              <span className="flex items-center gap-4">
+                <span className="flex items-center gap-1">
+                  <span className="text-foreground font-medium">
+                    {exercise.targetSets}
+                  </span>{" "}
+                  x {exercise.targetReps}
+                </span>
+                {exercise.weight !== "—" && (
+                  <WeightLabel weight={exercise.weight} />
+                )}
               </span>
             )}
             {hasRestTime && (

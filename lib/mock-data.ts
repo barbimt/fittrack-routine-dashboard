@@ -2,6 +2,7 @@ export interface ExerciseSet {
   id: string;
   setNumber: number;
   targetReps: number;
+  targetWeight?: string | null;
   actualReps: number | null;
   completed: boolean;
 }
@@ -12,6 +13,8 @@ export interface Exercise {
   muscleGroup: string;
   targetSets: number;
   targetReps: number | string;
+  /** Raw prescription from import/DB — source of truth for per-set targets. */
+  prescription?: string;
   weight: string;
   restTime: string;
   notes?: string;

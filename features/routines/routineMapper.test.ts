@@ -139,4 +139,92 @@ describe("mapRoutineToTrainingDays", () => {
     const days = mapRoutineToTrainingDays(withMuscle);
     expect(days[0].exercises[0].muscleGroup).toBe("Chest");
   });
+
+  it("expands variable prescriptions into per-set targets", () => {
+    const variable: RoutineWithDays = {
+      ...routine,
+      routine_days: [
+        {
+          ...routine.routine_days[0],
+          routine_exercises: [
+            {
+              ...routine.routine_days[0].routine_exercises[0],
+              prescription: "1x12@15kg-3x12@20kg",
+              planned_sets: 4,
+              target_reps: "12",
+              weight: null,
+            },
+          ],
+        },
+      ],
+    };
+
+    const exercise = mapRoutineToTrainingDays(variable)[0].exercises[0];
+    expect(exercise.sets).toHaveLength(4);
+    expect(exercise.sets[0]).toMatchObject({
+      setNumber: 1,
+      targetReps: 12,
+      targetWeight: "15kg",
+    });
+    expect(exercise.sets[3]).toMatchObject({
+      setNumber: 4,
+      targetReps: 12,
+      targetWeight: "20kg",
+    });
+  });
+
+  it("applies column weight to simple prescriptions", () => {
+    const exercise = mapRoutineToTrainingDays(routine)[0].exercises[0];
+    expect(exercise.sets).toHaveLength(3);
+    expect(exercise.sets.every((set) => set.targetWeight === "40kg")).toBe(
+      true
+    );
+    expect(exercise.prescription).toBe("3x10");
+  });
+
+  it("matches column weight when load is embedded in prescription", () => {
+    const embedded: RoutineWithDays = {
+      ...routine,
+      routine_days: [
+        {
+          ...routine.routine_days[0],
+          routine_exercises: [
+            {
+              ...routine.routine_days[0].routine_exercises[0],
+              prescription: "3x10 40kg",
+              weight: null,
+            },
+          ],
+        },
+      ],
+    };
+
+    const fromColumn = mapRoutineToTrainingDays(routine)[0].exercises[0].sets;
+    const fromPrescription =
+      mapRoutineToTrainingDays(embedded)[0].exercises[0].sets;
+
+    expect(fromPrescription).toEqual(fromColumn);
+  });
+
+  it("leaves targetWeight null when no load is provided", () => {
+    const noWeight: RoutineWithDays = {
+      ...routine,
+      routine_days: [
+        {
+          ...routine.routine_days[0],
+          routine_exercises: [
+            {
+              ...routine.routine_days[0].routine_exercises[0],
+              prescription: "3x10",
+              weight: null,
+            },
+          ],
+        },
+      ],
+    };
+
+    const exercise = mapRoutineToTrainingDays(noWeight)[0].exercises[0];
+    expect(exercise.sets.every((set) => set.targetWeight === null)).toBe(true);
+    expect(exercise.weight).toBe("—");
+  });
 });

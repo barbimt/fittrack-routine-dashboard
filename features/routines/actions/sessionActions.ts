@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { expandPrescriptionToSets } from "@/features/routine-import/utils/parsePrescription";
 import type { WorkoutSetLog, WorkoutSessionStatus } from "../types";
 
 export type DaySessionResult =
@@ -64,13 +65,30 @@ export async function getOrCreateDaySession(
 
     const { data: exercises } = await supabase
       .from("routine_exercises")
-      .select("id, planned_sets, target_reps")
+      .select("id, prescription, planned_sets, target_reps, weight")
       .eq("user_id", user.id)
       .eq("routine_day_id", routineDayId)
       .order("sort_order");
 
     if (exercises && exercises.length > 0) {
       const setLogs = exercises.flatMap((ex) => {
+        const expanded = expandPrescriptionToSets(
+          ex.prescription as string,
+          (ex.weight as string | null) ?? null
+        );
+
+        if (expanded.length > 0) {
+          return expanded.map((target) => ({
+            user_id: user.id,
+            workout_session_id: sessionId,
+            routine_exercise_id: ex.id as string,
+            set_number: target.setNumber,
+            target_reps: String(target.targetReps),
+            actual_reps: null,
+            completed: false,
+          }));
+        }
+
         const count =
           typeof ex.planned_sets === "number" && ex.planned_sets > 0
             ? ex.planned_sets
@@ -119,7 +137,7 @@ export type UpdateRepsResult = { ok: true } | { ok: false; error: string };
 
 export async function updateSetReps(
   setLogId: string,
-  actualReps: number
+  actualReps: number | null
 ): Promise<UpdateRepsResult> {
   const supabase = await createClient();
 

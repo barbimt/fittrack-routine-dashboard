@@ -11,6 +11,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
+  interactiveWidget: "resizes-content",
   colorScheme: "light dark",
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: fitTrackThemeColor.light },
@@ -47,8 +48,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="bg-background">
-      <body className="min-h-screen font-sans antialiased">
+    <html
+      lang="en"
+      className="bg-background max-lg:h-dvh max-lg:overflow-hidden"
+    >
+      <body className="font-sans antialiased max-lg:h-full max-lg:overflow-hidden lg:min-h-screen">
         {children}
         {process.env.NODE_ENV === "production" && <Analytics />}
       </body>

@@ -11,6 +11,8 @@ Navigation chrome shared across all authenticated screens.
 | `mobile-nav-drawer.tsx` | Mobile overlay + slide-in drawer; reuses `Sidebar` |
 | `page-content.tsx` | Shared page padding/max-width wrapper for routes inside `AppShell` |
 
+Mobile viewport: `AppShell` uses `h-dvh` + internal scroll on `<main>` with `safe-area-pb`; `app/layout.tsx` sets `viewportFit: cover` and `interactiveWidget: resizes-content`.
+
 ## Adding a route
 
 1. Create `app/{route}/page.tsx` wrapped in `<AppShell>`

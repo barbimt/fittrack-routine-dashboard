@@ -16,6 +16,7 @@ export interface RoutineExerciseUpsert {
   dayId: string;
   name: string;
   muscleGroup: string | null;
+  prescription: string | null;
   plannedSets: number | null;
   targetReps: string | null;
   weight: string | null;
@@ -100,6 +101,7 @@ export function computeRoutinePatch(
         baseExercise.index !== exerciseIndex ||
         baseExercise.exercise.name !== exercise.name ||
         baseExercise.exercise.muscleGroup !== exercise.muscleGroup ||
+        baseExercise.exercise.prescription !== exercise.prescription ||
         baseExercise.exercise.plannedSets !== exercise.plannedSets ||
         baseExercise.exercise.targetReps !== exercise.targetReps ||
         baseExercise.exercise.weight !== exercise.weight ||
@@ -112,6 +114,7 @@ export function computeRoutinePatch(
           dayId: day.id,
           name: exercise.name,
           muscleGroup: exercise.muscleGroup,
+          prescription: exercise.prescription,
           plannedSets: exercise.plannedSets,
           targetReps: exercise.targetReps,
           weight: exercise.weight,

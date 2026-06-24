@@ -1,5 +1,9 @@
 import type { RoutineWithDays, WorkoutSetLog } from "./types";
 import type { TrainingDay, Exercise, ExerciseSet } from "@/lib/mock-data";
+import {
+  expandPrescriptionToSets,
+  parsePrescription,
+} from "@/features/routine-import/utils/parsePrescription";
 
 function parseRepsToNumber(reps: string | null): number {
   if (!reps) return 0;
@@ -9,16 +13,34 @@ function parseRepsToNumber(reps: string | null): number {
 
 function generateSets(
   exerciseId: string,
+  prescription: string,
   plannedSets: number | null,
-  targetReps: string | null
+  targetReps: string | null,
+  fallbackWeight: string | null
 ): ExerciseSet[] {
+  const expanded = expandPrescriptionToSets(prescription, fallbackWeight);
+
+  if (expanded.length > 0) {
+    return expanded.map((target) => ({
+      id: `${exerciseId}-set-${target.setNumber}`,
+      setNumber: target.setNumber,
+      targetReps: target.targetReps,
+      targetWeight: target.targetWeight,
+      actualReps: null,
+      completed: false,
+    }));
+  }
+
   const count = plannedSets && plannedSets > 0 ? plannedSets : 3;
   const repsNum = parseRepsToNumber(targetReps);
+  const weight =
+    fallbackWeight && fallbackWeight !== "—" ? fallbackWeight : null;
 
   return Array.from({ length: count }, (_, i) => ({
     id: `${exerciseId}-set-${i + 1}`,
     setNumber: i + 1,
     targetReps: repsNum,
+    targetWeight: weight,
     actualReps: null,
     completed: false,
   }));
@@ -39,11 +61,14 @@ export function mergeSetLogsIntoDay(
       sets: exercise.sets.map((set) => {
         const log = logMap.get(`${exercise.id}-${set.setNumber}`);
         if (!log) return set;
+
+        const loggedReps = parseRepsToNumber(log.target_reps);
         return {
           ...set,
           id: log.id,
           completed: log.completed,
           actualReps: log.actual_reps,
+          ...(loggedReps > 0 ? { targetReps: loggedReps } : {}),
         };
       }),
     })),
@@ -58,17 +83,29 @@ export function mapRoutineToTrainingDays(
     .map((day) => {
       const exercises: Exercise[] = [...day.routine_exercises]
         .sort((a, b) => a.sort_order - b.sort_order)
-        .map((ex) => ({
-          id: ex.id,
-          name: ex.name,
-          muscleGroup: ex.muscle_group ?? day.focus ?? day.name,
-          targetSets: ex.planned_sets ?? 0,
-          targetReps: ex.target_reps ?? ex.prescription,
-          weight: ex.weight ?? "—",
-          restTime: ex.rest_time ?? "—",
-          notes: ex.notes ?? undefined,
-          sets: generateSets(ex.id, ex.planned_sets, ex.target_reps),
-        }));
+        .map((ex) => {
+          const weight = ex.weight ?? "—";
+          const parsed = parsePrescription(ex.prescription, weight);
+
+          return {
+            id: ex.id,
+            name: ex.name,
+            muscleGroup: ex.muscle_group ?? day.focus ?? day.name,
+            targetSets: parsed.plannedSets ?? ex.planned_sets ?? 0,
+            targetReps: parsed.targetReps ?? ex.target_reps ?? ex.prescription,
+            prescription: ex.prescription,
+            weight,
+            restTime: ex.rest_time ?? "—",
+            notes: ex.notes ?? undefined,
+            sets: generateSets(
+              ex.id,
+              ex.prescription,
+              parsed.plannedSets ?? ex.planned_sets,
+              parsed.targetReps ?? ex.target_reps,
+              weight !== "—" ? weight : null
+            ),
+          };
+        });
 
       return {
         id: day.id,

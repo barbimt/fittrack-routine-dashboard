@@ -7,6 +7,7 @@ function exercise(overrides: Partial<EditorExercise> = {}): EditorExercise {
     id: "ex-1",
     name: "Hip Thrust",
     muscleGroup: "Glutes",
+    prescription: "4x10",
     plannedSets: 4,
     targetReps: "10",
     weight: "60kg",

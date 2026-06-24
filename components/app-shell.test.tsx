@@ -33,6 +33,7 @@ describe("AppShell", () => {
     ).not.toBeInTheDocument();
     expect(screen.getByText("Page content")).toBeInTheDocument();
     expect(document.querySelector("header")).toHaveClass("safe-area-pt");
+    expect(document.querySelector("main")).toHaveClass("safe-area-pb");
   });
 
   it("opens the hamburger drawer with all sidebar nav links", async () => {

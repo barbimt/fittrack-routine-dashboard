@@ -105,7 +105,10 @@ function parseSheet(
       continue;
     }
 
-    const parsedPrescription = parsePrescription(prescription);
+    const parsedPrescription = parsePrescription(
+      prescription,
+      getCell(row, headerMap.WEIGHT) || null
+    );
     if (!parsedPrescription.parsed) {
       warnings.push({
         type: "unparsed_prescription",

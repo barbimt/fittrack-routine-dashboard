@@ -28,3 +28,14 @@ Client-side Excel (`.xlsx`) parse and server-side save to Supabase.
 
 - `docs/ROUTINE-IMPORT.md`
 - `app/upload/page.tsx`
+
+## Spreadsheet columns
+
+| Column | Required | Use |
+|--------|----------|-----|
+| EXERCISE | Yes | Exercise name |
+| SETS x REPS | Yes | Full prescription — simple (`4x10`), variable reps (`3x10-2x8`), or reps+weight per block (`1x12 15kg-3x12 20kg`; `@` / `con` also OK) |
+| WEIGHT | No | Same load for **all** sets; leave empty when weight is in SETS x REPS |
+| NOTES | No | Coaching cues (not parsed) |
+
+Separate prescription blocks with `-`. Spanish aliases: `SERIES x REPS`, `PESO`, etc.
