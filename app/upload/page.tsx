@@ -69,12 +69,16 @@ export default function UploadPage() {
                     <td className="px-3 py-2">Hip Thrust</td>
                     <td className="px-3 py-2">4x10</td>
                     <td className="px-3 py-2">60kg</td>
-                    <td className="px-3 py-2">Same reps and weight for every set</td>
+                    <td className="px-3 py-2">
+                      Same reps and weight for every set
+                    </td>
                   </tr>
                   <tr className="border-border/50 border-b">
                     <td className="px-3 py-2">Dumbbell Row</td>
-                    <td className="px-3 py-2 font-medium">1x12 15kg-3x12 20kg</td>
-                    <td className="px-3 py-2 text-muted-foreground">(empty)</td>
+                    <td className="px-3 py-2 font-medium">
+                      1x12 15kg-3x12 20kg
+                    </td>
+                    <td className="text-muted-foreground px-3 py-2">(empty)</td>
                     <td className="px-3 py-2">Variable weight per set</td>
                   </tr>
                   <tr className="border-border/50 border-b">
@@ -100,9 +104,8 @@ export default function UploadPage() {
               <span className="font-medium">{COLUMN_LABELS.SETS_X_REPS}</span>{" "}
               formats: <span className="font-mono">4x10</span> (simple),{" "}
               <span className="font-mono">3x10-2x8</span> (reps change per
-              block),{" "}
-              <span className="font-mono">1x12 15kg-3x12 20kg</span> (reps and
-              weight per block, separated by{" "}
+              block), <span className="font-mono">1x12 15kg-3x12 20kg</span>{" "}
+              (reps and weight per block, separated by{" "}
               <span className="font-mono">-</span>),{" "}
               <span className="font-mono">@</span> or{" "}
               <span className="font-mono">con</span> also work instead of a

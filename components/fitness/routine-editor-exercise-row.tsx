@@ -91,7 +91,7 @@ export function RoutineEditorExerciseRow({
         />
 
         {prescriptionPreview.length > 0 ? (
-          <div className="md:col-span-6 flex flex-col gap-1 rounded-lg border border-border/60 bg-background/60 px-3 py-2">
+          <div className="border-border/60 bg-background/60 flex flex-col gap-1 rounded-lg border px-3 py-2 md:col-span-6">
             <p className="text-muted-foreground text-xs font-medium">Preview</p>
             {prescriptionPreview.map((block) => (
               <PrescriptionBlockLine
@@ -104,7 +104,7 @@ export function RoutineEditorExerciseRow({
           </div>
         ) : null}
 
-        <div className="md:col-span-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:col-span-6 lg:grid-cols-4">
           <EditorNumberField
             id={`${exercise.id}-sets`}
             label="Sets"

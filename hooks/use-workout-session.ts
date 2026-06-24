@@ -141,8 +141,7 @@ export function useWorkoutSession({
     if (!currentSet) return;
 
     const nextCompleted = !currentSet.completed;
-    const shouldAutoFillReps =
-      nextCompleted && currentSet.actualReps == null;
+    const shouldAutoFillReps = nextCompleted && currentSet.actualReps == null;
     const shouldClearReps = !nextCompleted;
 
     setDaysData((prev) =>

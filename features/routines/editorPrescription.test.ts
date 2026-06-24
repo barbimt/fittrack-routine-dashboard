@@ -8,9 +8,7 @@ import {
 
 describe("editorPatchFromPrescription", () => {
   it("parses variable blocks into sets and reps", () => {
-    expect(
-      editorPatchFromPrescription("1x12 15kg-3x12 20kg", null)
-    ).toEqual({
+    expect(editorPatchFromPrescription("1x12 15kg-3x12 20kg", null)).toEqual({
       prescription: "1x12 15kg-3x12 20kg",
       plannedSets: 4,
       targetReps: "12",

@@ -68,7 +68,10 @@ export function getPrescriptionEditorUiState(
 export function editorPatchFromPrescription(
   prescription: string,
   fallbackWeight: string | null
-): Pick<EditorExercise, "prescription" | "plannedSets" | "targetReps" | "weight"> {
+): Pick<
+  EditorExercise,
+  "prescription" | "plannedSets" | "targetReps" | "weight"
+> {
   const trimmed = prescription.trim();
   const parsed = parsePrescription(trimmed, fallbackWeight);
   const ui = getPrescriptionEditorUiState(trimmed || null);

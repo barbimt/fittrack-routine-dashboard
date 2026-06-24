@@ -48,8 +48,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="bg-background max-lg:h-dvh max-lg:overflow-hidden">
-      <body className="max-lg:h-full max-lg:overflow-hidden lg:min-h-screen font-sans antialiased">
+    <html
+      lang="en"
+      className="bg-background max-lg:h-dvh max-lg:overflow-hidden"
+    >
+      <body className="font-sans antialiased max-lg:h-full max-lg:overflow-hidden lg:min-h-screen">
         {children}
         {process.env.NODE_ENV === "production" && <Analytics />}
       </body>

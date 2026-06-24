@@ -109,7 +109,9 @@ describe("useRoutineEditor", () => {
 
     act(() => result.current.addExercise(DAY_ID));
 
-    const added = result.current.days[0].exercises.find((ex) => ex.id !== EX_ID);
+    const added = result.current.days[0].exercises.find(
+      (ex) => ex.id !== EX_ID
+    );
     expect(added).toMatchObject({
       prescription: "3x12",
       plannedSets: 3,
@@ -135,12 +137,14 @@ describe("useRoutineEditor", () => {
     });
 
     expect(updateRoutineMock).toHaveBeenCalledTimes(1);
-    expect(updateRoutineMock.mock.calls[0][0].upsertExercises[0]).toMatchObject({
-      id: EX_ID,
-      prescription: "1x12 15kg-3x12 20kg",
-      plannedSets: 4,
-      weight: null,
-    });
+    expect(updateRoutineMock.mock.calls[0][0].upsertExercises[0]).toMatchObject(
+      {
+        id: EX_ID,
+        prescription: "1x12 15kg-3x12 20kg",
+        plannedSets: 4,
+        weight: null,
+      }
+    );
   });
 
   it("reorders days", () => {

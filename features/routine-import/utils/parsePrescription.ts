@@ -158,12 +158,12 @@ export function parsePrescriptionBlocks(
       ? fallbackWeight.trim()
       : null;
 
-  return segments.filter(
-    (segment): segment is PrescriptionBlock => segment !== null
-  ).map((block) => ({
-    ...block,
-    weight: block.weight ?? normalizedFallback,
-  }));
+  return segments
+    .filter((segment): segment is PrescriptionBlock => segment !== null)
+    .map((block) => ({
+      ...block,
+      weight: block.weight ?? normalizedFallback,
+    }));
 }
 
 export function expandPrescriptionToSets(
