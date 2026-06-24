@@ -7,7 +7,7 @@ Presentational workout UI. Props in, events up — no Supabase or routing here.
 | Component | Purpose |
 |-----------|---------|
 | `button.tsx`, `input.tsx`, `badge.tsx` | FitTrack-themed wrappers over `components/ui/*` |
-| `set-row.tsx` | One set: 2-row CSS grid on mobile (checkbox + set + actual on row 1, target on row 2); checkbox, target reps, editable actual reps (debounced save + auto-complete) |
+| `set-row.tsx` | One set: 2-row CSS grid below `lg` (checkbox + set + actual, then target); single-row flex on desktop; checkbox, target reps, editable actual reps (debounced save + auto-complete) |
 | `weight-label.tsx` | Shared load icon + `SetTargetLabel` / `PrescriptionBlockLine` for exercise and set targets |
 | `exercise-card.tsx` | Collapsible exercise block; lists `SetRow`s; optional per-exercise reset |
 | `day-selector.tsx` | Horizontal day pills |

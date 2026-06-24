@@ -39,7 +39,7 @@ export function SetTargetLabel({
   return (
     <span
       className={cn(
-        "inline-flex min-w-0 flex-wrap items-center gap-x-1 gap-y-0 text-sm",
+        "inline-flex min-w-0 flex-wrap items-center gap-x-1 gap-y-0 text-sm lg:flex-nowrap",
         className
       )}
     >
