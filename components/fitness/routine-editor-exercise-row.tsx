@@ -3,12 +3,20 @@
 import { Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { EditorExercise } from "@/features/routines/editorTypes";
+import {
+  editorPatchFromPrescription,
+  editorPatchFromSimpleFields,
+  getPrescriptionEditorUiState,
+} from "@/features/routines/editorPrescription";
+import { getPrescriptionBlockSummaries } from "@/features/routine-import/utils/parsePrescription";
+import { PrescriptionBlockLine } from "./weight-label";
 import { Button } from "./button";
 import { DragHandle, useSortableRow } from "./sortable-row";
 import {
   EditorField,
   EditorNumberField,
   EditorPlainTextField,
+  EditorReadOnlyField,
   EditorTextField,
   MuscleSelect,
 } from "./routine-editor-fields";
@@ -26,6 +34,11 @@ export function RoutineEditorExerciseRow({
 }: RoutineEditorExerciseRowProps) {
   const { setNodeRef, setActivatorNodeRef, style, isDragging, handleProps } =
     useSortableRow(exercise.id);
+
+  const prescriptionPreview = exercise.prescription
+    ? getPrescriptionBlockSummaries(exercise.prescription, exercise.weight)
+    : [];
+  const prescriptionUi = getPrescriptionEditorUiState(exercise.prescription);
 
   return (
     <div
@@ -62,30 +75,90 @@ export function RoutineEditorExerciseRow({
             onValueChange={(muscleGroup) => onChange({ muscleGroup })}
           />
         </EditorField>
-        <EditorNumberField
-          id={`${exercise.id}-sets`}
-          label="Sets"
-          value={exercise.plannedSets}
-          onValueChange={(plannedSets) => onChange({ plannedSets })}
-        />
+
         <EditorTextField
-          id={`${exercise.id}-reps`}
-          label="Reps"
-          value={exercise.targetReps}
-          onValueChange={(targetReps) => onChange({ targetReps })}
+          id={`${exercise.id}-prescription`}
+          label="Prescription (SETS x REPS)"
+          value={exercise.prescription}
+          placeholder="1x12 15kg-3x12 20kg"
+          hint="Same format as Excel import. Use for variable reps or weight per set."
+          onValueChange={(prescription) =>
+            onChange(
+              editorPatchFromPrescription(prescription ?? "", exercise.weight)
+            )
+          }
+          className="md:col-span-6"
         />
-        <EditorTextField
-          id={`${exercise.id}-weight`}
-          label="Weight"
-          value={exercise.weight}
-          onValueChange={(weight) => onChange({ weight })}
-        />
-        <EditorTextField
-          id={`${exercise.id}-rest`}
-          label="Rest"
-          value={exercise.restTime}
-          onValueChange={(restTime) => onChange({ restTime })}
-        />
+
+        {prescriptionPreview.length > 0 ? (
+          <div className="md:col-span-6 flex flex-col gap-1 rounded-lg border border-border/60 bg-background/60 px-3 py-2">
+            <p className="text-muted-foreground text-xs font-medium">Preview</p>
+            {prescriptionPreview.map((block) => (
+              <PrescriptionBlockLine
+                key={`${block.sets}-${block.reps}-${block.weight ?? ""}`}
+                sets={block.sets}
+                reps={block.reps}
+                weight={block.weight}
+              />
+            ))}
+          </div>
+        ) : null}
+
+        <div className="md:col-span-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <EditorNumberField
+            id={`${exercise.id}-sets`}
+            label="Sets"
+            value={exercise.plannedSets}
+            disabled={!prescriptionUi.setsRepsEditable}
+            hint={prescriptionUi.setsRepsNote}
+            onValueChange={(plannedSets) =>
+              onChange(
+                editorPatchFromSimpleFields(
+                  plannedSets,
+                  exercise.targetReps,
+                  exercise.weight
+                )
+              )
+            }
+          />
+          <EditorTextField
+            id={`${exercise.id}-reps`}
+            label="Reps"
+            value={exercise.targetReps}
+            disabled={!prescriptionUi.setsRepsEditable}
+            onValueChange={(targetReps) =>
+              onChange(
+                editorPatchFromSimpleFields(
+                  exercise.plannedSets,
+                  targetReps,
+                  exercise.weight
+                )
+              )
+            }
+          />
+          {prescriptionUi.weightMode === "in-prescription" ? (
+            <EditorReadOnlyField
+              id={`${exercise.id}-weight`}
+              label="Weight"
+              value={prescriptionUi.weightNote}
+              hint="No need to fill — loads are in Prescription above."
+            />
+          ) : (
+            <EditorTextField
+              id={`${exercise.id}-weight`}
+              label="Weight"
+              value={exercise.weight}
+              hint={prescriptionUi.weightNote}
+              onValueChange={(weight) => onChange({ weight })}
+            />
+          )}
+          <EditorTextField
+            id={`${exercise.id}-rest`}
+            label="Rest"
+            value={exercise.restTime}
+            onValueChange={(restTime) => onChange({ restTime })}
+          />
+        </div>
         <EditorTextField
           id={`${exercise.id}-notes`}
           label="Notes"

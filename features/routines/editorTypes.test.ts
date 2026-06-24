@@ -85,12 +85,41 @@ describe("mapRoutineToEditor", () => {
     expect(pulldown).toMatchObject({
       name: "Pulldown",
       muscleGroup: null,
+      prescription: "3x12",
       plannedSets: 3,
       targetReps: "12",
       weight: "30kg",
       restTime: null,
     });
     expect(editor.days[1].exercises[1].muscleGroup).toBe("Back");
+  });
+
+  it("maps variable prescriptions from the database", () => {
+    const variable: RoutineWithDays = {
+      ...routine,
+      routine_days: [
+        {
+          ...routine.routine_days[1],
+          routine_exercises: [
+            {
+              ...routine.routine_days[1].routine_exercises[0],
+              prescription: "1x12 15kg-3x12 20kg",
+              planned_sets: 4,
+              target_reps: "12",
+              weight: null,
+            },
+          ],
+        },
+      ],
+    };
+
+    const exercise = mapRoutineToEditor(variable).days[0].exercises[0];
+    expect(exercise).toMatchObject({
+      prescription: "1x12 15kg-3x12 20kg",
+      plannedSets: 4,
+      targetReps: "12",
+      weight: null,
+    });
   });
 
   it("uses original_name as the editable day name, falling back to name", () => {

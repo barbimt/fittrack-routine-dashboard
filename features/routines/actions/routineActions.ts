@@ -3,20 +3,22 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { isUuid } from "@/lib/uuid";
-import { buildPrescription } from "../prescription";
+import { resolvePrescriptionForSave } from "../editorPrescription";
 import type { RoutineEditPatch, RoutineExerciseUpsert } from "../routinePatch";
 
 export type UpdateRoutineResult = { ok: true } | { ok: false; error: string };
 
 function exerciseFields(exercise: RoutineExerciseUpsert) {
+  const resolved = resolvePrescriptionForSave(exercise);
+
   return {
     name: exercise.name,
-    prescription: buildPrescription(exercise.plannedSets, exercise.targetReps),
+    prescription: resolved.prescription,
     planned_sets:
-      exercise.plannedSets && exercise.plannedSets > 0
-        ? exercise.plannedSets
+      resolved.plannedSets && resolved.plannedSets > 0
+        ? resolved.plannedSets
         : null,
-    target_reps: exercise.targetReps,
+    target_reps: resolved.targetReps,
     weight: exercise.weight,
     rest_time: exercise.restTime,
     notes: exercise.notes,

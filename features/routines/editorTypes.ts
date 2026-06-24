@@ -11,6 +11,8 @@ export interface EditorExercise {
   id: string;
   name: string;
   muscleGroup: string | null;
+  /** Full sets×reps string (same as Excel SETS x REPS), e.g. `1x12 15kg-3x12 20kg`. */
+  prescription: string | null;
   plannedSets: number | null;
   targetReps: string | null;
   weight: string | null;
@@ -49,6 +51,7 @@ export function mapRoutineToEditor(routine: RoutineWithDays): EditorRoutine {
           id: ex.id,
           name: ex.name,
           muscleGroup: ex.muscle_group,
+          prescription: ex.prescription,
           plannedSets: ex.planned_sets,
           targetReps: ex.target_reps,
           weight: ex.weight,

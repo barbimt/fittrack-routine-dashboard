@@ -7,6 +7,7 @@ function exercise(overrides: Partial<EditorExercise> = {}): EditorExercise {
     id: "11111111-1111-4111-8111-111111111111",
     name: "Hip Thrust",
     muscleGroup: "Glutes",
+    prescription: "4x10",
     plannedSets: 4,
     targetReps: "10",
     weight: "60kg",
@@ -54,6 +55,23 @@ describe("computeRoutinePatch", () => {
     expect(patch.upsertDays).toHaveLength(0);
     expect(patch.deleteDayIds).toHaveLength(0);
     expect(patch.deleteExerciseIds).toHaveLength(0);
+  });
+
+  it("detects prescription text changes", () => {
+    const baseline = [day()];
+    const current = structuredClone(baseline);
+    current[0].exercises[0].prescription = "1x12 15kg-3x12 20kg";
+    current[0].exercises[0].plannedSets = 4;
+    current[0].exercises[0].weight = null;
+
+    const patch = computeRoutinePatch("routine-1", baseline, current);
+
+    expect(patch.upsertExercises).toHaveLength(1);
+    expect(patch.upsertExercises[0]).toMatchObject({
+      prescription: "1x12 15kg-3x12 20kg",
+      plannedSets: 4,
+      weight: null,
+    });
   });
 
   it("detects reordering via array position, not the stored sortOrder", () => {

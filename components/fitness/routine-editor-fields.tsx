@@ -37,7 +37,7 @@ export function EditorField({
   children,
 }: EditorFieldProps) {
   return (
-    <div className={className}>
+    <div className={cn("min-w-0", className)}>
       <label htmlFor={id} className="text-muted-foreground mb-1 block text-xs">
         {label}
       </label>
@@ -52,6 +52,9 @@ interface EditorTextFieldProps {
   value: string | null;
   onValueChange: (value: string | null) => void;
   className?: string;
+  placeholder?: string;
+  hint?: string;
+  disabled?: boolean;
 }
 
 /** Nullable single-line text field (empty input → null). */
@@ -61,15 +64,23 @@ export function EditorTextField({
   value,
   onValueChange,
   className,
+  placeholder,
+  hint,
+  disabled = false,
 }: EditorTextFieldProps) {
   return (
     <EditorField id={id} label={label} className={className}>
       <Input
         id={id}
         value={value ?? ""}
+        placeholder={placeholder}
+        disabled={disabled}
         onChange={(e) => onValueChange(emptyToNull(e.target.value))}
         className="h-9"
       />
+      {hint ? (
+        <p className="text-muted-foreground mt-1 text-xs">{hint}</p>
+      ) : null}
     </EditorField>
   );
 }
@@ -109,6 +120,8 @@ interface EditorNumberFieldProps {
   onValueChange: (value: number | null) => void;
   className?: string;
   min?: number;
+  disabled?: boolean;
+  hint?: string;
 }
 
 /** Positive-integer field; non-positive or empty values become null. */
@@ -119,6 +132,8 @@ export function EditorNumberField({
   onValueChange,
   className,
   min = 1,
+  disabled = false,
+  hint,
 }: EditorNumberFieldProps) {
   return (
     <EditorField id={id} label={label} className={className}>
@@ -127,12 +142,47 @@ export function EditorNumberField({
         type="number"
         min={min}
         value={value ?? ""}
+        disabled={disabled}
         onChange={(e) => {
           const parsed = Number.parseInt(e.target.value, 10);
           onValueChange(Number.isFinite(parsed) && parsed > 0 ? parsed : null);
         }}
         className="h-9"
       />
+      {hint ? (
+        <p className="text-muted-foreground mt-1 text-xs">{hint}</p>
+      ) : null}
+    </EditorField>
+  );
+}
+
+interface EditorReadOnlyFieldProps {
+  id: string;
+  label: string;
+  value: string;
+  hint?: string;
+  className?: string;
+}
+
+/** Non-editable field — used when another input owns the value (e.g. weight in prescription). */
+export function EditorReadOnlyField({
+  id,
+  label,
+  value,
+  hint,
+  className,
+}: EditorReadOnlyFieldProps) {
+  return (
+    <EditorField id={id} label={label} className={className}>
+      <div
+        id={id}
+        className="border-input bg-muted/40 text-muted-foreground flex min-h-9 items-center rounded-md border px-3 py-2 text-sm leading-snug"
+      >
+        {value}
+      </div>
+      {hint ? (
+        <p className="text-muted-foreground mt-1 text-xs">{hint}</p>
+      ) : null}
     </EditorField>
   );
 }

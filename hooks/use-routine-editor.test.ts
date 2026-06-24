@@ -37,6 +37,7 @@ function makeRoutine(): EditorRoutine {
             id: EX_ID,
             name: "Hip Thrust",
             muscleGroup: "Glutes",
+            prescription: "4x10",
             plannedSets: 4,
             targetReps: "10",
             weight: "60kg",
@@ -101,6 +102,45 @@ describe("useRoutineEditor", () => {
     expect(result.current.days[0].exercises.some((ex) => ex.id === EX_ID)).toBe(
       false
     );
+  });
+
+  it("defaults new exercises to a simple prescription", () => {
+    const { result } = renderHook(() => useRoutineEditor(makeRoutine()));
+
+    act(() => result.current.addExercise(DAY_ID));
+
+    const added = result.current.days[0].exercises.find((ex) => ex.id !== EX_ID);
+    expect(added).toMatchObject({
+      prescription: "3x12",
+      plannedSets: 3,
+      targetReps: "12",
+      weight: null,
+    });
+  });
+
+  it("saves variable prescription changes in the patch", async () => {
+    const { result } = renderHook(() => useRoutineEditor(makeRoutine()));
+
+    act(() =>
+      result.current.updateExercise(DAY_ID, EX_ID, {
+        prescription: "1x12 15kg-3x12 20kg",
+        plannedSets: 4,
+        targetReps: "12",
+        weight: null,
+      })
+    );
+
+    await act(async () => {
+      await result.current.save();
+    });
+
+    expect(updateRoutineMock).toHaveBeenCalledTimes(1);
+    expect(updateRoutineMock.mock.calls[0][0].upsertExercises[0]).toMatchObject({
+      id: EX_ID,
+      prescription: "1x12 15kg-3x12 20kg",
+      plannedSets: 4,
+      weight: null,
+    });
   });
 
   it("reorders days", () => {

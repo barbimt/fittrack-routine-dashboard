@@ -8,6 +8,7 @@ Presentational workout UI. Props in, events up — no Supabase or routing here.
 |-----------|---------|
 | `button.tsx`, `input.tsx`, `badge.tsx` | FitTrack-themed wrappers over `components/ui/*` |
 | `set-row.tsx` | One set: checkbox, target reps, editable actual reps (debounced save + auto-complete) |
+| `weight-label.tsx` | Shared load icon + `SetTargetLabel` / `PrescriptionBlockLine` for exercise and set targets |
 | `exercise-card.tsx` | Collapsible exercise block; lists `SetRow`s; optional per-exercise reset |
 | `day-selector.tsx` | Horizontal day pills |
 | `daily-progress-card.tsx` | Selected day progress (`completed/total` sets) |
@@ -35,6 +36,11 @@ Presentational workout UI. Props in, events up — no Supabase or routing here.
 - Unchecking a set clears actual reps in state and persists `null` via `updateSetReps`.
 - Tap/click anywhere on the row toggles completion (except the actual-reps input area); checkbox keeps keyboard focus.
 
+## Prescription display
+
+- Variable blocks (`1x12 15kg-3x12 20kg`) expand to per-set `targetReps` + `targetWeight` via `parsePrescription` / `routineMapper`.
+- Exercise header uses `getPrescriptionBlockSummaries`; each set uses `SetTargetLabel` from `weight-label.tsx`.
+
 ## Dashboard client
 
 - State and handlers: `hooks/use-workout-session.ts`
@@ -55,6 +61,7 @@ Presentational workout UI. Props in, events up — no Supabase or routing here.
 - New days/exercises get `new-*` ids (`createNewId`) so the server treats them as inserts.
 - Drag via `@dnd-kit` through `sortable-row.tsx` helpers: outer sortable list reorders days, inner per-day list reorders exercises (handle = `DragHandle`). Each `DndContext` has a stable `id` to avoid SSR hydration mismatches.
 - Fields come from `routine-editor-fields.tsx`; muscle uses the fixed `MUSCLE_GROUPS` list (sentinel `MUSCLE_GROUP_NONE` = no selection).
+- **Prescription field** (`routine-editor-exercise-row.tsx`): same format as Excel import (e.g. `1x12 15kg-3x12 20kg`). Editing it syncs Sets/Reps via `editorPatchFromPrescription`; preview uses `PrescriptionBlockLine`. When loads are in the prescription text, Weight shows as read-only (“Per set — see preview above”); Sets/Reps lock with “Synced from prescription”. Simple `3x12` routines use Sets/Reps/Weight as before. Save resolves via `resolvePrescriptionForSave` in `features/routines/editorPrescription.ts`.
 - On save: `validateRoutineDays` (zod) blocks invalid routines (empty day name, no exercises, invalid sets) and surfaces per-day errors; otherwise `computeRoutinePatch` sends only changes to `updateRoutine`, then `router.refresh()` re-seeds the baseline with persisted UUIDs. **Save routine** (footer) is disabled until dirty.
 
 ## Conventions
