@@ -37,13 +37,19 @@ export function SetTargetLabel({
   className,
 }: SetTargetLabelProps) {
   return (
-    <span className={cn("flex items-center gap-1 text-sm", className)}>
-      Target: {targetReps}
+    <span
+      className={cn(
+        "inline-flex min-w-0 flex-wrap items-center gap-x-1 gap-y-0 text-sm lg:flex-nowrap",
+        className
+      )}
+    >
+      <span className="shrink-0">Target: {targetReps}</span>
       {targetWeight ? (
         <>
-          <span className="text-muted-foreground">·</span>
+          <span className="text-muted-foreground shrink-0">·</span>
           <WeightLabel
             weight={targetWeight}
+            className="min-w-0"
             iconClassName="text-muted-foreground"
           />
         </>

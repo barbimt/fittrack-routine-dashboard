@@ -87,7 +87,7 @@ export function SetRow({
     <div
       onClick={handleRowClick}
       className={cn(
-        "flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors",
+        "grid grid-cols-[auto_minmax(0,1fr)_auto] grid-rows-[auto_auto] items-center gap-x-2 gap-y-1 rounded-lg px-3 py-2.5 transition-colors lg:flex lg:gap-3",
         set.completed ? "bg-success/10" : "bg-muted/50",
         canToggle && "cursor-pointer"
       )}
@@ -98,29 +98,27 @@ export function SetRow({
         disabled={readOnly}
         onCheckedChange={() => onToggle?.(set.id)}
         onClick={stopRowToggle}
-        className="h-5 w-5 rounded-md border-2"
+        className="row-span-2 h-5 w-5 shrink-0 self-center rounded-md border-2 lg:row-span-1"
         aria-label={`Mark set ${set.setNumber} as ${set.completed ? "incomplete" : "complete"}`}
       />
 
       <span
         className={cn(
-          "min-w-[50px] text-sm font-medium",
+          "self-center text-sm font-medium lg:min-w-[50px] lg:shrink-0",
           set.completed ? "text-muted-foreground" : "text-foreground"
         )}
       >
         Set {set.setNumber}
       </span>
 
-      <div className="flex flex-1 items-center gap-2">
-        <SetTargetLabel
-          targetReps={set.targetReps}
-          targetWeight={set.targetWeight}
-          className="text-muted-foreground"
-        />
-      </div>
+      <SetTargetLabel
+        targetReps={set.targetReps}
+        targetWeight={set.targetWeight}
+        className="text-muted-foreground col-span-2 col-start-2 row-start-2 min-w-0 lg:order-3 lg:flex-1"
+      />
 
       <div
-        className="flex items-center gap-2"
+        className="flex shrink-0 items-center justify-end gap-1.5 self-center lg:order-4 lg:gap-2"
         onClick={stopRowToggle}
         onPointerDown={stopRowToggle}
       >
@@ -134,7 +132,7 @@ export function SetRow({
           onFocus={handleFocus}
           onBlur={handleBlur}
           className={cn(
-            "h-10 w-[4.5rem] text-center text-sm",
+            "h-9 w-14 min-w-0 shrink-0 text-center text-sm lg:h-10 lg:w-[4.5rem]",
             set.completed && "border-success/30 bg-success/10",
             !editable && "cursor-default opacity-90"
           )}
