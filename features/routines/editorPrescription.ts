@@ -80,7 +80,7 @@ export function editorPatchFromPrescription(
     prescription: trimmed.length > 0 ? trimmed : null,
     plannedSets: parsed.plannedSets,
     targetReps: parsed.targetReps,
-    ...(ui.weightMode === "in-prescription" ? { weight: null } : {}),
+    weight: ui.weightMode === "in-prescription" ? null : fallbackWeight,
   };
 }
 

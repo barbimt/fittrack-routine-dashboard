@@ -21,6 +21,7 @@ describe("editorPatchFromPrescription", () => {
       prescription: "3x12",
       plannedSets: 3,
       targetReps: "12",
+      weight: "10kg",
     });
   });
 
@@ -38,6 +39,7 @@ describe("editorPatchFromPrescription", () => {
       prescription: null,
       plannedSets: null,
       targetReps: null,
+      weight: "10kg",
     });
   });
 });
