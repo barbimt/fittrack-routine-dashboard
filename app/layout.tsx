@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
+import { fitTrackThemeColor } from "@/lib/design-tokens";
 import "./globals.css";
 
 const _geist = Geist({ subsets: ["latin"] });
@@ -10,6 +11,11 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
+  colorScheme: "light dark",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: fitTrackThemeColor.light },
+    { media: "(prefers-color-scheme: dark)", color: fitTrackThemeColor.dark },
+  ],
 };
 
 export const metadata: Metadata = {

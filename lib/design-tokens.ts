@@ -17,6 +17,12 @@ export const fitTrackPalette = {
   danger: "oklch(0.60 0.18 25)",
 } as const;
 
+/** Hex for `theme-color` meta — keep in sync with `--background` / `.dark --background` in globals.css */
+export const fitTrackThemeColor = {
+  light: "#f7f6f4",
+  dark: "#292725",
+} as const;
+
 export const fitTrackNavItems = [
   { label: "Today", href: "/", icon: "home" as const },
   { label: "Upload Routine", href: "/upload", icon: "upload" as const },
