@@ -119,7 +119,7 @@ export type UpdateRepsResult = { ok: true } | { ok: false; error: string };
 
 export async function updateSetReps(
   setLogId: string,
-  actualReps: number
+  actualReps: number | null
 ): Promise<UpdateRepsResult> {
   const supabase = await createClient();
 

@@ -141,19 +141,38 @@ export function useWorkoutSession({
     if (!currentSet) return;
 
     const nextCompleted = !currentSet.completed;
+    const shouldAutoFillReps =
+      nextCompleted && currentSet.actualReps == null;
+    const shouldClearReps = !nextCompleted;
 
     setDaysData((prev) =>
-      updateSetInDays(prev, setId, { completed: nextCompleted })
+      updateSetInDays(prev, setId, {
+        completed: nextCompleted,
+        ...(shouldAutoFillReps
+          ? { actualReps: currentSet.targetReps }
+          : shouldClearReps
+            ? { actualReps: null }
+            : {}),
+      })
     );
 
     if (currentSessionId) {
       markSessionEditable(currentSessionId);
     }
 
+    if (shouldAutoFillReps) {
+      updateSetReps(setId, currentSet.targetReps);
+    } else if (shouldClearReps) {
+      updateSetReps(setId, null);
+    }
+
     toggleSetLog(setId, nextCompleted).then((result) => {
       if (!result.ok) {
         setDaysData((prev) =>
-          updateSetInDays(prev, setId, { completed: currentSet.completed })
+          updateSetInDays(prev, setId, {
+            completed: currentSet.completed,
+            actualReps: currentSet.actualReps,
+          })
         );
         toast({
           title: "Could not update set",
