@@ -1,6 +1,6 @@
 "use client";
 
-import { AppShell } from "@/components/app-shell";
+import { PublicAppShell } from "@/components/public-app-shell";
 import { PageContent } from "@/components/layout/page-content";
 import { WeeklyDayCard } from "@/components/fitness/weekly-day-card";
 import { StatCard } from "@/components/fitness/stat-card";
@@ -29,7 +29,7 @@ export default function WeekOverviewPage() {
   ).length;
 
   return (
-    <AppShell>
+    <PublicAppShell>
       <PageContent className="max-w-5xl">
         <header className="mb-6">
           <h1 className="text-foreground mb-1 text-2xl font-bold">
@@ -138,6 +138,6 @@ export default function WeekOverviewPage() {
           </div>
         </section>
       </PageContent>
-    </AppShell>
+    </PublicAppShell>
   );
 }

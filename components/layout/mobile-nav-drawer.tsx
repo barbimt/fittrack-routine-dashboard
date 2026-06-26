@@ -1,17 +1,24 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { Sidebar } from "@/components/layout/sidebar";
+import { Sidebar, type NavItem } from "@/components/layout/sidebar";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 
 interface MobileNavDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  navItems?: NavItem[];
+  footer?: React.ReactNode;
 }
 
 /** Mobile hamburger drawer — reuses `Sidebar` nav links (all routes). */
-export function MobileNavDrawer({ open, onOpenChange }: MobileNavDrawerProps) {
+export function MobileNavDrawer({
+  open,
+  onOpenChange,
+  navItems,
+  footer,
+}: MobileNavDrawerProps) {
   const close = () => onOpenChange(false);
 
   return (
@@ -43,7 +50,12 @@ export function MobileNavDrawer({ open, onOpenChange }: MobileNavDrawerProps) {
           >
             <X className="h-5 w-5" />
           </Button>
-          <Sidebar onNavigate={close} className="h-full w-full" />
+          <Sidebar
+            onNavigate={close}
+            className="h-full w-full"
+            navItems={navItems}
+            footer={footer}
+          />
         </div>
       </aside>
     </>

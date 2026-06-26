@@ -40,7 +40,7 @@ export default function EmptyRoutinePage() {
             </Link>
           </Button>
           <Button variant="ghost" asChild>
-            <Link href="/" className="text-muted-foreground gap-2">
+            <Link href="/demo" className="text-muted-foreground gap-2">
               <Sparkles className="h-4 w-4" aria-hidden />
               Preview dashboard
             </Link>
