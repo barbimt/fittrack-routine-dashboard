@@ -14,8 +14,6 @@
     "test": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "e2e": "playwright test",
-    "e2e:ui": "playwright test --ui",
     "supabase:start": "supabase start",
     "supabase:stop": "supabase stop",
     "supabase:status": "supabase status",
@@ -79,7 +77,6 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
-    "@playwright/test": "^1.60.0",
     "@tailwindcss/postcss": "^4.2.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",

@@ -19,6 +19,5 @@ export default defineConfig([
     "build/**",
     "coverage/**",
     "next-env.d.ts",
-    "e2e/**",
   ]),
 ]);
