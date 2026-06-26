@@ -70,12 +70,6 @@ export function SummaryPanel({
             {weeklyCompleted} / {weeklyTotal} sets across all days
           </p>
         </div>
-
-        <div className="border-border bg-surface-muted/50 rounded-2xl border border-dashed p-4 text-center">
-          <p className="text-muted-foreground text-xs">
-            Prototype panel — wire live stats in Cursor
-          </p>
-        </div>
       </div>
     </aside>
   );
