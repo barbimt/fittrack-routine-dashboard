@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Dumbbell } from "lucide-react";
 import {
   Card,
@@ -52,6 +53,15 @@ export default async function LoginPage({
               </p>
             )}
             <LoginForm />
+            <p className="text-muted-foreground mt-6 text-center text-sm">
+              Want to explore first?{" "}
+              <Link
+                href="/demo"
+                className="text-primary font-medium hover:underline"
+              >
+                Try the interactive demo
+              </Link>
+            </p>
           </CardContent>
         </Card>
       </div>

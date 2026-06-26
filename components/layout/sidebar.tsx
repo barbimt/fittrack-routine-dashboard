@@ -52,9 +52,16 @@ export const navItems: NavItem[] = [
 interface SidebarProps {
   onNavigate?: () => void;
   className?: string;
+  navItems?: NavItem[];
+  footer?: React.ReactNode;
 }
 
-export function Sidebar({ onNavigate, className }: SidebarProps) {
+export function Sidebar({
+  onNavigate,
+  className,
+  navItems: items = navItems,
+  footer,
+}: SidebarProps) {
   const pathname = usePathname();
 
   return (
@@ -82,7 +89,7 @@ export function Sidebar({ onNavigate, className }: SidebarProps) {
       </div>
 
       <nav className="flex-1 space-y-1 px-3 py-4" aria-label="Main navigation">
-        {navItems.map((item) => (
+        {items.map((item) => (
           <Link
             key={item.href}
             href={item.href}
@@ -102,7 +109,7 @@ export function Sidebar({ onNavigate, className }: SidebarProps) {
       </nav>
 
       <div className="border-sidebar-border border-t px-3 py-3">
-        <LogoutButton />
+        {footer ?? <LogoutButton />}
       </div>
     </aside>
   );

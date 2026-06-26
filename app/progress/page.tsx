@@ -1,6 +1,6 @@
 "use client";
 
-import { AppShell } from "@/components/app-shell";
+import { PublicAppShell } from "@/components/public-app-shell";
 import { PageContent } from "@/components/layout/page-content";
 import { StatCard } from "@/components/fitness/stat-card";
 import {
@@ -34,7 +34,7 @@ const muscleGroupVolume = [
 
 export default function ProgressPage() {
   return (
-    <AppShell>
+    <PublicAppShell>
       <PageContent className="max-w-5xl">
         <header className="mb-6">
           <h1 className="text-foreground mb-1 text-2xl font-bold">Progress</h1>
@@ -214,6 +214,6 @@ export default function ProgressPage() {
           />
         </AnalyticsCard>
       </PageContent>
-    </AppShell>
+    </PublicAppShell>
   );
 }
