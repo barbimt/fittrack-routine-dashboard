@@ -126,7 +126,10 @@ export function appendExerciseToDay(
   exercise: RoutineExercise,
   setLogs: WorkoutSetLog[]
 ): TrainingDay {
-  const nextExercise = mapRoutineExerciseToTrainingExercise(exercise, day.focus);
+  const nextExercise = mapRoutineExerciseToTrainingExercise(
+    exercise,
+    day.focus
+  );
   const mergedExercise = mergeSetLogsIntoDay(
     { ...day, exercises: [nextExercise] },
     setLogs

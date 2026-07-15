@@ -243,12 +243,12 @@ describe("useWorkoutSession day session sync", () => {
 
     expect(getOrCreateDaySession).toHaveBeenCalledWith(ROUTINE_ID, DAY_2_ID);
     expect(result.current.selectedDayId).toBe(DAY_2_ID);
-    expect(result.current.daysData.find((d) => d.id === DAY_2_ID)?.exercises).toHaveLength(
-      1
-    );
     expect(
-      result.current.daysData.find((d) => d.id === DAY_2_ID)?.exercises[0].sets[0]
-        .targetWeight
+      result.current.daysData.find((d) => d.id === DAY_2_ID)?.exercises
+    ).toHaveLength(1);
+    expect(
+      result.current.daysData.find((d) => d.id === DAY_2_ID)?.exercises[0]
+        .sets[0].targetWeight
     ).toBe("40kg");
   });
 });

@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { buildSetLogRowsForExercise, buildSetLogRowsForExercises } from "./materializeSetLogs";
+import {
+  buildSetLogRowsForExercise,
+  buildSetLogRowsForExercises,
+} from "./materializeSetLogs";
 
 describe("buildSetLogRowsForExercise", () => {
   it("snapshots exercise name and per-set weight from prescription", () => {
@@ -59,14 +62,14 @@ describe("buildSetLogRowsForExercise", () => {
     ]);
 
     expect(rows).toHaveLength(5);
-    expect(rows.filter((row) => row.routine_exercise_id === "ex-1")).toHaveLength(
-      2
-    );
-    expect(rows.filter((row) => row.routine_exercise_id === "ex-2")).toHaveLength(
-      3
-    );
-    expect(rows.every((row) => row.exercise_name && row.completed === false)).toBe(
-      true
-    );
+    expect(
+      rows.filter((row) => row.routine_exercise_id === "ex-1")
+    ).toHaveLength(2);
+    expect(
+      rows.filter((row) => row.routine_exercise_id === "ex-2")
+    ).toHaveLength(3);
+    expect(
+      rows.every((row) => row.exercise_name && row.completed === false)
+    ).toBe(true);
   });
 });

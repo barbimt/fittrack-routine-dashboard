@@ -9,7 +9,11 @@ import {
   type ExerciseForSetLogs,
 } from "../materializeSetLogs";
 import { buildTrainingDayFromSession } from "../routineMapper";
-import type { RoutineExercise, WorkoutSetLog, WorkoutSessionStatus } from "../types";
+import type {
+  RoutineExercise,
+  WorkoutSetLog,
+  WorkoutSessionStatus,
+} from "../types";
 import type { TrainingDay } from "@/lib/mock-data";
 
 export type DaySessionResult =
@@ -74,7 +78,8 @@ async function fetchDaySessionPayload(
   const mergedDay = buildTrainingDayFromSession(
     {
       id: dayRow.id as string,
-      dayName: (dayRow.original_name as string | null) ?? (dayRow.name as string),
+      dayName:
+        (dayRow.original_name as string | null) ?? (dayRow.name as string),
       focus: (dayRow.focus as string | null) ?? (dayRow.name as string),
     },
     (exercises ?? []) as RoutineExercise[],
@@ -338,7 +343,9 @@ export async function addExerciseToDay(
     .maybeSingle();
 
   const sortOrder =
-    typeof lastExercise?.sort_order === "number" ? lastExercise.sort_order + 1 : 0;
+    typeof lastExercise?.sort_order === "number"
+      ? lastExercise.sort_order + 1
+      : 0;
 
   const resolved = resolvePrescriptionForSave({
     id: "new-exercise",
@@ -394,9 +401,9 @@ export async function addExerciseToDay(
     return { ok: false, error: "Exercise saved but session logs failed." };
   }
 
-  const setLogs = (await fetchSetLogsForSession(supabase, user.id, sessionId)).filter(
-    (log) => log.routine_exercise_id === exercise.id
-  );
+  const setLogs = (
+    await fetchSetLogsForSession(supabase, user.id, sessionId)
+  ).filter((log) => log.routine_exercise_id === exercise.id);
 
   revalidatePath("/");
   revalidatePath("/editor");

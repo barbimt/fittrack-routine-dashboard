@@ -142,7 +142,10 @@ export interface AddExerciseButtonProps {
   onClick: () => void;
 }
 
-export function AddExerciseButton({ disabled, onClick }: AddExerciseButtonProps) {
+export function AddExerciseButton({
+  disabled,
+  onClick,
+}: AddExerciseButtonProps) {
   return (
     <Button
       type="button"

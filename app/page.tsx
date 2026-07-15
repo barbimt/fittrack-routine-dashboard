@@ -34,9 +34,7 @@ export default async function HomePage() {
   const sessionResult = await getOrCreateDaySession(routineId, firstDay.id);
 
   const mergedDays = sessionResult.ok
-    ? days.map((d) =>
-        d.id === firstDay.id ? sessionResult.mergedDay : d
-      )
+    ? days.map((d) => (d.id === firstDay.id ? sessionResult.mergedDay : d))
     : days;
 
   return (
