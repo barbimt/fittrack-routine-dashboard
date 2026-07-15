@@ -9,6 +9,10 @@ import { ExerciseCard } from "@/components/fitness/exercise-card";
 import { SummaryPanel } from "@/components/fitness/summary-panel";
 import { WorkoutSavePanel } from "@/components/fitness/workout-save-panel";
 import { ResetDayDialog } from "@/components/fitness/reset-day-dialog";
+import {
+  AddExerciseButton,
+  AddExerciseDialog,
+} from "@/components/fitness/add-exercise-dialog";
 import { Button } from "@/components/fitness/button";
 import type { TrainingDay } from "@/lib/mock-data";
 import { useWorkoutSession } from "@/hooks/use-workout-session";
@@ -32,6 +36,7 @@ export function DashboardClient({
   initialSessionCompleted = false,
 }: DashboardClientProps) {
   const [resetDayDialogOpen, setResetDayDialogOpen] = useState(false);
+  const [addExerciseDialogOpen, setAddExerciseDialogOpen] = useState(false);
 
   const workout = useWorkoutSession({
     initialDays,
@@ -58,6 +63,7 @@ export function DashboardClient({
     isSaving,
     isReopening,
     isResetting,
+    isAddingExercise,
     setRowRevision,
     handleSelectDay,
     handleSetToggle,
@@ -67,6 +73,7 @@ export function DashboardClient({
     handleResetDay,
     handleSaveWorkout,
     handleEditWorkout,
+    handleAddExercise,
   } = workout;
 
   const today = new Date().toLocaleDateString("en-US", {
@@ -160,6 +167,12 @@ export function DashboardClient({
               readOnly={isReadOnly}
             />
           ))}
+          {!isReadOnly ? (
+            <AddExerciseButton
+              disabled={isPending || isAddingExercise}
+              onClick={() => setAddExerciseDialogOpen(true)}
+            />
+          ) : null}
         </section>
 
         <WorkoutSavePanel
@@ -184,6 +197,17 @@ export function DashboardClient({
           dayName={selectedDay.dayName}
           isResetting={isResetting}
           onConfirm={confirmResetDay}
+        />
+
+        <AddExerciseDialog
+          open={addExerciseDialogOpen}
+          onOpenChange={setAddExerciseDialogOpen}
+          dayName={selectedDay.dayName}
+          isSubmitting={isAddingExercise}
+          onSubmit={async (input) => {
+            await handleAddExercise(input);
+            setAddExerciseDialogOpen(false);
+          }}
         />
       </PageContent>
     </AppShell>

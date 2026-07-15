@@ -4,6 +4,7 @@ import {
   expandPrescriptionToSets,
   parsePrescription,
 } from "@/features/routine-import/utils/parsePrescription";
+import type { RoutineExercise } from "./types";
 
 function parseRepsToNumber(reps: string | null): number {
   if (!reps) return 0;
@@ -69,9 +70,71 @@ export function mergeSetLogsIntoDay(
           completed: log.completed,
           actualReps: log.actual_reps,
           ...(loggedReps > 0 ? { targetReps: loggedReps } : {}),
+          ...(log.target_weight ? { targetWeight: log.target_weight } : {}),
         };
       }),
     })),
+  };
+}
+
+export function mapRoutineExerciseToTrainingExercise(
+  ex: RoutineExercise,
+  dayFocus: string
+): Exercise {
+  const weight = ex.weight ?? "—";
+  const parsed = parsePrescription(ex.prescription, weight);
+
+  return {
+    id: ex.id,
+    name: ex.name,
+    muscleGroup: ex.muscle_group ?? dayFocus,
+    targetSets: parsed.plannedSets ?? ex.planned_sets ?? 0,
+    targetReps: parsed.targetReps ?? ex.target_reps ?? ex.prescription,
+    prescription: ex.prescription,
+    weight,
+    restTime: ex.rest_time ?? "—",
+    notes: ex.notes ?? undefined,
+    sets: generateSets(
+      ex.id,
+      ex.prescription,
+      parsed.plannedSets ?? ex.planned_sets,
+      parsed.targetReps ?? ex.target_reps,
+      weight !== "—" ? weight : null
+    ),
+  };
+}
+
+export function buildTrainingDayFromSession(
+  day: Pick<TrainingDay, "id" | "dayName" | "focus">,
+  exercises: RoutineExercise[],
+  setLogs: WorkoutSetLog[]
+): TrainingDay {
+  const mappedDay: TrainingDay = {
+    ...day,
+    exercises: [...exercises]
+      .sort((a, b) => a.sort_order - b.sort_order)
+      .map((exercise) =>
+        mapRoutineExerciseToTrainingExercise(exercise, day.focus)
+      ),
+  };
+
+  return mergeSetLogsIntoDay(mappedDay, setLogs);
+}
+
+export function appendExerciseToDay(
+  day: TrainingDay,
+  exercise: RoutineExercise,
+  setLogs: WorkoutSetLog[]
+): TrainingDay {
+  const nextExercise = mapRoutineExerciseToTrainingExercise(exercise, day.focus);
+  const mergedExercise = mergeSetLogsIntoDay(
+    { ...day, exercises: [nextExercise] },
+    setLogs
+  ).exercises[0];
+
+  return {
+    ...day,
+    exercises: [...day.exercises, mergedExercise],
   };
 }
 

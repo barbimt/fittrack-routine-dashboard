@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
-import type { RoutineWithDays, WorkoutSetLog } from "./types";
-import { mapRoutineToTrainingDays, mergeSetLogsIntoDay } from "./routineMapper";
+import type { RoutineExercise, RoutineWithDays, WorkoutSetLog } from "./types";
+import {
+  appendExerciseToDay,
+  buildTrainingDayFromSession,
+  mapRoutineToTrainingDays,
+  mergeSetLogsIntoDay,
+} from "./routineMapper";
 import type { TrainingDay } from "@/lib/mock-data";
 
 const baseDay: TrainingDay = {
@@ -46,6 +51,8 @@ describe("mergeSetLogsIntoDay", () => {
         routine_exercise_id: "ex-1",
         set_number: 1,
         target_reps: "10",
+        target_weight: "60kg",
+        exercise_name: "Hip Thrust",
         actual_reps: 12,
         completed: true,
         created_at: "2026-01-01T00:00:00Z",
@@ -63,6 +70,129 @@ describe("mergeSetLogsIntoDay", () => {
       actualReps: 12,
     });
     expect(secondSet.completed).toBe(false);
+  });
+
+  it("overlays target_weight from set logs", () => {
+    const logs: WorkoutSetLog[] = [
+      {
+        id: "log-uuid-1",
+        user_id: "user-1",
+        workout_session_id: "session-1",
+        routine_exercise_id: "ex-1",
+        set_number: 1,
+        target_reps: "10",
+        target_weight: "7kg cada lado",
+        exercise_name: "Hip Thrust",
+        actual_reps: null,
+        completed: false,
+        created_at: "2026-01-01T00:00:00Z",
+        updated_at: "2026-01-01T00:00:00Z",
+      },
+    ];
+
+    const merged = mergeSetLogsIntoDay(baseDay, logs);
+    expect(merged.exercises[0].sets[0].targetWeight).toBe("7kg cada lado");
+  });
+});
+
+const routineExerciseFixture: RoutineExercise = {
+  id: "ex-new",
+  user_id: "user-1",
+  routine_day_id: "day-1",
+  name: "Face pull",
+  prescription: "3x12",
+  planned_sets: 3,
+  target_reps: "12",
+  weight: "15kg",
+  rest_time: null,
+  notes: null,
+  muscle_group: "Shoulders",
+  sort_order: 2,
+  created_at: "2026-01-01T00:00:00Z",
+  updated_at: "2026-01-01T00:00:00Z",
+};
+
+describe("buildTrainingDayFromSession", () => {
+  it("maps exercises from DB rows and merges session logs", () => {
+    const logs: WorkoutSetLog[] = [
+      {
+        id: "log-1",
+        user_id: "user-1",
+        workout_session_id: "session-1",
+        routine_exercise_id: "ex-1",
+        set_number: 1,
+        target_reps: "10",
+        target_weight: "60kg",
+        exercise_name: "Hip Thrust",
+        actual_reps: 11,
+        completed: true,
+        created_at: "2026-01-01T00:00:00Z",
+        updated_at: "2026-01-01T00:00:00Z",
+      },
+    ];
+
+    const day = buildTrainingDayFromSession(
+      { id: "day-1", dayName: "Monday", focus: "Glutes" },
+      [
+        {
+          id: "ex-1",
+          user_id: "user-1",
+          routine_day_id: "day-1",
+          name: "Hip Thrust",
+          prescription: "2x10",
+          planned_sets: 2,
+          target_reps: "10",
+          weight: "60kg",
+          rest_time: "90s",
+          notes: null,
+          muscle_group: "Glutes",
+          sort_order: 1,
+          created_at: "2026-01-01T00:00:00Z",
+          updated_at: "2026-01-01T00:00:00Z",
+        },
+      ],
+      logs
+    );
+
+    expect(day.exercises).toHaveLength(1);
+    expect(day.exercises[0].sets[0]).toMatchObject({
+      id: "log-1",
+      completed: true,
+      actualReps: 11,
+      targetWeight: "60kg",
+    });
+    expect(day.exercises[0].sets[1].completed).toBe(false);
+  });
+});
+
+describe("appendExerciseToDay", () => {
+  it("appends a new exercise with materialised set log ids", () => {
+    const logs: WorkoutSetLog[] = [
+      {
+        id: "log-new-1",
+        user_id: "user-1",
+        workout_session_id: "session-1",
+        routine_exercise_id: "ex-new",
+        set_number: 1,
+        target_reps: "12",
+        target_weight: "15kg",
+        exercise_name: "Face pull",
+        actual_reps: null,
+        completed: false,
+        created_at: "2026-01-01T00:00:00Z",
+        updated_at: "2026-01-01T00:00:00Z",
+      },
+    ];
+
+    const next = appendExerciseToDay(baseDay, routineExerciseFixture, logs);
+
+    expect(next.exercises).toHaveLength(2);
+    expect(next.exercises[1].name).toBe("Face pull");
+    expect(next.exercises[1].sets[0]).toMatchObject({
+      id: "log-new-1",
+      targetWeight: "15kg",
+      completed: false,
+    });
   });
 });
 
