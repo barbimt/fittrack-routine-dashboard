@@ -223,8 +223,8 @@ CREATE OR REPLACE TRIGGER trg_workout_sessions_updated_at
 -- One row per set attempted in a workout session.
 -- completed is toggled via the checkbox UI.
 -- actual_reps is filled in when the user edits the rep count post-set.
--- target_reps is copied from the exercise at session-creation time for a
--- stable historical record (the routine may change later).
+-- target_reps, target_weight, and exercise_name are copied at session-creation
+-- time for a stable historical record (the routine may change later).
 --
 -- Composite FKs enforce that both the session and the exercise belong to
 -- the same user as the log row.
@@ -240,6 +240,8 @@ CREATE TABLE IF NOT EXISTS workout_set_logs (
   routine_exercise_id  uuid        NOT NULL,
   set_number           integer     NOT NULL,
   target_reps          text,
+  target_weight        text,
+  exercise_name        text,
   actual_reps          integer,
   completed            boolean     NOT NULL DEFAULT false,
   created_at           timestamptz NOT NULL DEFAULT now(),

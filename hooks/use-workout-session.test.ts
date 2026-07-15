@@ -7,6 +7,7 @@ vi.mock("@/features/routines/actions/sessionActions", () => ({
   toggleSetLog: vi.fn().mockResolvedValue({ ok: true }),
   updateSetReps: vi.fn().mockResolvedValue({ ok: true }),
   getOrCreateDaySession: vi.fn(),
+  addExerciseToDay: vi.fn(),
   resetExerciseSets: vi.fn(),
   resetDaySession: vi.fn(),
   completeDaySession: vi.fn(),
@@ -18,9 +19,12 @@ vi.mock("@/hooks/use-toast", () => ({
 }));
 
 import {
+  addExerciseToDay,
+  getOrCreateDaySession,
   toggleSetLog,
   updateSetReps,
 } from "@/features/routines/actions/sessionActions";
+import type { RoutineExercise } from "@/features/routines/types";
 
 const SET_ID = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee";
 const DAY_ID = "day-1";
@@ -156,5 +160,182 @@ describe("useWorkoutSession handleSetToggle", () => {
     expect(set.actualReps).toBeNull();
     expect(updateSetReps).toHaveBeenCalledWith(SET_ID, null);
     expect(toggleSetLog).toHaveBeenCalledWith(SET_ID, false);
+  });
+});
+
+const DAY_2_ID = "day-2";
+
+const mergedDayFromServer: TrainingDay = {
+  id: DAY_2_ID,
+  dayName: "Tuesday",
+  focus: "Push",
+  exercises: [
+    {
+      id: "ex-2",
+      name: "Bench",
+      muscleGroup: "Chest",
+      targetSets: 1,
+      targetReps: 10,
+      weight: "40kg",
+      restTime: "90s",
+      sets: [
+        {
+          id: "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+          setNumber: 1,
+          targetReps: 10,
+          targetWeight: "40kg",
+          actualReps: null,
+          completed: false,
+        },
+      ],
+    },
+  ],
+};
+
+const addedExercise: RoutineExercise = {
+  id: "ex-added",
+  user_id: "user-1",
+  routine_day_id: DAY_ID,
+  name: "Face pull",
+  prescription: "3x12",
+  planned_sets: 3,
+  target_reps: "12",
+  weight: "15kg",
+  rest_time: null,
+  notes: null,
+  muscle_group: "Shoulders",
+  sort_order: 2,
+  created_at: "2026-01-01T00:00:00Z",
+  updated_at: "2026-01-01T00:00:00Z",
+};
+
+describe("useWorkoutSession day session sync", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("replaces the selected day with mergedDay from getOrCreateDaySession", async () => {
+    vi.mocked(getOrCreateDaySession).mockResolvedValue({
+      ok: true,
+      sessionId: "session-day-2",
+      sessionStatus: "in_progress",
+      setLogs: [],
+      mergedDay: mergedDayFromServer,
+    });
+
+    const daysWithSecondDay: TrainingDay[] = [
+      ...initialDays,
+      { id: DAY_2_ID, dayName: "Tuesday", focus: "Push", exercises: [] },
+    ];
+
+    const { result } = renderHook(() =>
+      useWorkoutSession({
+        initialDays: daysWithSecondDay,
+        routineId: ROUTINE_ID,
+        initialDayId: DAY_ID,
+        initialSessionId: SESSION_ID,
+      })
+    );
+
+    await act(async () => {
+      result.current.handleSelectDay(DAY_2_ID);
+    });
+
+    expect(getOrCreateDaySession).toHaveBeenCalledWith(ROUTINE_ID, DAY_2_ID);
+    expect(result.current.selectedDayId).toBe(DAY_2_ID);
+    expect(
+      result.current.daysData.find((d) => d.id === DAY_2_ID)?.exercises
+    ).toHaveLength(1);
+    expect(
+      result.current.daysData.find((d) => d.id === DAY_2_ID)?.exercises[0]
+        .sets[0].targetWeight
+    ).toBe("40kg");
+  });
+});
+
+describe("useWorkoutSession handleAddExercise", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("appends the new exercise when addExerciseToDay succeeds", async () => {
+    vi.mocked(addExerciseToDay).mockResolvedValue({
+      ok: true,
+      exercise: addedExercise,
+      setLogs: [
+        {
+          id: "cccccccc-cccc-cccc-cccc-cccccccccccc",
+          user_id: "user-1",
+          workout_session_id: SESSION_ID,
+          routine_exercise_id: "ex-added",
+          set_number: 1,
+          target_reps: "12",
+          target_weight: "15kg",
+          exercise_name: "Face pull",
+          actual_reps: null,
+          completed: false,
+          created_at: "2026-01-01T00:00:00Z",
+          updated_at: "2026-01-01T00:00:00Z",
+        },
+      ],
+    });
+
+    const { result } = renderHook(() =>
+      useWorkoutSession({
+        initialDays,
+        routineId: ROUTINE_ID,
+        initialDayId: DAY_ID,
+        initialSessionId: SESSION_ID,
+      })
+    );
+
+    await act(async () => {
+      await result.current.handleAddExercise({
+        name: "Face pull",
+        plannedSets: 3,
+        targetReps: "12",
+        weight: "15kg",
+        muscleGroup: "Shoulders",
+      });
+    });
+
+    expect(addExerciseToDay).toHaveBeenCalledWith(DAY_ID, SESSION_ID, {
+      name: "Face pull",
+      plannedSets: 3,
+      targetReps: "12",
+      weight: "15kg",
+      muscleGroup: "Shoulders",
+    });
+    expect(result.current.daysData[0].exercises).toHaveLength(2);
+    expect(result.current.daysData[0].exercises[1].name).toBe("Face pull");
+    expect(result.current.daysData[0].exercises[1].sets[0].id).toBe(
+      "cccccccc-cccc-cccc-cccc-cccccccccccc"
+    );
+  });
+
+  it("does not append when addExerciseToDay fails", async () => {
+    vi.mocked(addExerciseToDay).mockResolvedValue({
+      ok: false,
+      error: "Session not found.",
+    });
+
+    const { result } = renderHook(() =>
+      useWorkoutSession({
+        initialDays,
+        routineId: ROUTINE_ID,
+        initialDayId: DAY_ID,
+        initialSessionId: SESSION_ID,
+      })
+    );
+
+    await act(async () => {
+      await result.current.handleAddExercise({
+        name: "Face pull",
+        plannedSets: 3,
+        targetReps: "12",
+      });
+    });
+
+    expect(result.current.daysData[0].exercises).toHaveLength(1);
   });
 });

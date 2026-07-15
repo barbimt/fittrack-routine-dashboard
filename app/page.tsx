@@ -1,9 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import {
-  mapRoutineToTrainingDays,
-  mergeSetLogsIntoDay,
-} from "@/features/routines/routineMapper";
+import { mapRoutineToTrainingDays } from "@/features/routines/routineMapper";
 import { getOrCreateDaySession } from "@/features/routines/actions/sessionActions";
 import type { RoutineWithDays } from "@/features/routines/types";
 import { DashboardClient } from "@/components/fitness/dashboard-client";
@@ -37,9 +34,7 @@ export default async function HomePage() {
   const sessionResult = await getOrCreateDaySession(routineId, firstDay.id);
 
   const mergedDays = sessionResult.ok
-    ? days.map((d) =>
-        d.id === firstDay.id ? mergeSetLogsIntoDay(d, sessionResult.setLogs) : d
-      )
+    ? days.map((d) => (d.id === firstDay.id ? sessionResult.mergedDay : d))
     : days;
 
   return (

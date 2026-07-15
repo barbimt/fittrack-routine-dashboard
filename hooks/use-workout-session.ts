@@ -4,7 +4,7 @@ import { useRef, useState, useTransition } from "react";
 import { getCompletedSets, getTotalSets } from "@/lib/mock-data";
 import type { TrainingDay } from "@/lib/mock-data";
 import { isUuid } from "@/lib/uuid";
-import { mergeSetLogsIntoDay } from "@/features/routines/routineMapper";
+import { appendExerciseToDay } from "@/features/routines/routineMapper";
 import {
   canSaveWorkoutForDay,
   findSetInDays,
@@ -13,6 +13,7 @@ import {
   updateSetInDays,
 } from "@/features/routines/dashboardDayState";
 import {
+  addExerciseToDay,
   completeDaySession,
   getOrCreateDaySession,
   reopenDaySession,
@@ -21,6 +22,7 @@ import {
   toggleSetLog,
   updateSetReps,
 } from "@/features/routines/actions/sessionActions";
+import type { AddExerciseToDayInput } from "@/features/routines/actions/sessionActions";
 import type { SessionSavedNotice } from "@/features/routines/types";
 import { toast } from "@/hooks/use-toast";
 
@@ -51,6 +53,7 @@ export function useWorkoutSession({
   const [isSaving, setIsSaving] = useState(false);
   const [isReopening, setIsReopening] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
+  const [isAddingExercise, setIsAddingExercise] = useState(false);
   const [completedSessionIds, setCompletedSessionIds] = useState<
     Record<string, boolean>
   >(
@@ -216,9 +219,7 @@ export function useWorkoutSession({
       }
 
       setDaysData((prev) =>
-        prev.map((d) =>
-          d.id === dayId ? mergeSetLogsIntoDay(d, result.setLogs) : d
-        )
+        prev.map((d) => (d.id === dayId ? result.mergedDay : d))
       );
     });
   };
@@ -317,6 +318,41 @@ export function useWorkoutSession({
     });
   };
 
+  const handleAddExercise = async (input: AddExerciseToDayInput) => {
+    const sessionId = getSelectedSessionId();
+    if (!sessionId || isReadOnly) return;
+
+    setIsAddingExercise(true);
+    const result = await addExerciseToDay(selectedDayId, sessionId, input);
+    setIsAddingExercise(false);
+
+    if (!result.ok) {
+      toast({
+        title: "Could not add exercise",
+        description: result.error,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setDaysData((prev) =>
+      prev.map((day) =>
+        day.id === selectedDayId
+          ? appendExerciseToDay(day, result.exercise, result.setLogs)
+          : day
+      )
+    );
+
+    if (currentSessionId) {
+      markSessionEditable(currentSessionId);
+    }
+
+    toast({
+      title: "Exercise added",
+      description: `${result.exercise.name} is ready in today’s session.`,
+    });
+  };
+
   const handleEditWorkout = async () => {
     const sessionId = getSelectedSessionId();
     if (!sessionId) return;
@@ -358,6 +394,7 @@ export function useWorkoutSession({
     isSaving,
     isReopening,
     isResetting,
+    isAddingExercise,
     setRowRevision,
     handleSelectDay,
     handleSetToggle,
@@ -367,5 +404,6 @@ export function useWorkoutSession({
     handleResetDay,
     handleSaveWorkout,
     handleEditWorkout,
+    handleAddExercise,
   };
 }

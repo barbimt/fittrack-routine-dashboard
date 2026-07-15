@@ -68,6 +68,8 @@ export interface WorkoutSetLog {
   routine_exercise_id: string;
   set_number: number;
   target_reps: string | null;
+  target_weight: string | null;
+  exercise_name: string | null;
   actual_reps: number | null;
   completed: boolean;
   created_at: string;
