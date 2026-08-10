@@ -10,8 +10,8 @@ import { Input } from "./input";
 interface SetRowProps {
   set: ExerciseSet;
   onToggle?: (setId: string) => void;
-  onRepsChange?: (setId: string, reps: number) => void;
-  onRepsSave?: (setId: string, reps: number) => void;
+  onRepsChange?: (setId: string, reps: number | null) => void;
+  onRepsSave?: (setId: string, reps: number | null) => void;
   readOnly?: boolean;
 }
 
@@ -38,29 +38,35 @@ export function SetRow({
     setLocalValue(set.actualReps != null ? String(set.actualReps) : "");
   }, [set.actualReps, set.completed]);
 
+  const scheduleRepsSave = (reps: number | null) => {
+    clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => onRepsSave?.(set.id, reps), 400);
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value;
     setLocalValue(raw);
-    if (raw === "" && set.completed) {
-      onToggle?.(set.id);
+
+    if (raw.trim() === "") {
+      onRepsChange?.(set.id, null);
+      scheduleRepsSave(null);
+      return;
     }
+
     const val = parseInt(raw, 10);
     if (!Number.isNaN(val) && val >= 0) {
       onRepsChange?.(set.id, val);
-      if (val >= 1 && !set.completed) {
-        onToggle?.(set.id);
-      }
-      if (val === 0 && set.completed) {
-        onToggle?.(set.id);
-      }
-      clearTimeout(saveTimer.current);
-      saveTimer.current = setTimeout(() => onRepsSave?.(set.id, val), 400);
+      scheduleRepsSave(val);
     }
   };
 
   const handleBlur = () => {
     isFocused.current = false;
     clearTimeout(saveTimer.current);
+    if (localValue.trim() === "") {
+      onRepsSave?.(set.id, null);
+      return;
+    }
     const val = parseInt(localValue, 10);
     if (!Number.isNaN(val) && val >= 0) {
       onRepsSave?.(set.id, val);
@@ -87,7 +93,7 @@ export function SetRow({
     <div
       onClick={handleRowClick}
       className={cn(
-        "grid grid-cols-[auto_minmax(0,1fr)_auto] grid-rows-[auto_auto] items-center gap-x-2 gap-y-1 rounded-lg px-3 py-2.5 transition-colors lg:flex lg:gap-3",
+        "flex items-center gap-2.5 rounded-lg px-3 py-2.5 transition-colors",
         set.completed ? "bg-success/10" : "bg-muted/50",
         canToggle && "cursor-pointer"
       )}
@@ -98,31 +104,31 @@ export function SetRow({
         disabled={readOnly}
         onCheckedChange={() => onToggle?.(set.id)}
         onClick={stopRowToggle}
-        className="row-span-2 h-5 w-5 shrink-0 self-center rounded-md border-2 lg:row-span-1"
+        className="h-5 w-5 shrink-0 rounded-md border-2"
         aria-label={`Mark set ${set.setNumber} as ${set.completed ? "incomplete" : "complete"}`}
       />
 
       <span
         className={cn(
-          "self-center text-sm font-medium lg:min-w-[50px] lg:shrink-0",
+          "w-5 shrink-0 text-center text-sm font-medium tabular-nums",
           set.completed ? "text-muted-foreground" : "text-foreground"
         )}
+        aria-label={`Set ${set.setNumber}`}
       >
-        Set {set.setNumber}
+        {set.setNumber}
       </span>
 
       <SetTargetLabel
         targetReps={set.targetReps}
         targetWeight={set.targetWeight}
-        className="text-muted-foreground col-span-2 col-start-2 row-start-2 min-w-0 lg:order-3 lg:flex-1"
+        className="text-muted-foreground min-w-0 flex-1"
       />
 
       <div
-        className="flex shrink-0 items-center justify-end gap-1.5 self-center lg:order-4 lg:gap-2"
+        className="flex shrink-0 items-center"
         onClick={stopRowToggle}
         onPointerDown={stopRowToggle}
       >
-        <span className="text-muted-foreground text-xs">Actual:</span>
         <Input
           type="number"
           min={0}
@@ -132,7 +138,7 @@ export function SetRow({
           onFocus={handleFocus}
           onBlur={handleBlur}
           className={cn(
-            "h-9 w-14 min-w-0 shrink-0 text-center text-sm lg:h-10 lg:w-[4.5rem]",
+            "h-9 w-14 min-w-0 shrink-0 text-center text-sm",
             set.completed && "border-success/30 bg-success/10",
             !editable && "cursor-default opacity-90"
           )}

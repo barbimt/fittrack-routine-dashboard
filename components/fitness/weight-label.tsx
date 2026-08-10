@@ -30,7 +30,7 @@ interface SetTargetLabelProps {
   className?: string;
 }
 
-/** Target reps with optional weight for a single set row. */
+/** Compact target: `12 · 40kg` (no “Target:” label — keeps mobile rows short). */
 export function SetTargetLabel({
   targetReps,
   targetWeight,
@@ -39,11 +39,12 @@ export function SetTargetLabel({
   return (
     <span
       className={cn(
-        "inline-flex min-w-0 flex-wrap items-center gap-x-1 gap-y-0 text-sm lg:flex-nowrap",
+        "inline-flex min-w-0 flex-wrap items-center gap-x-1 gap-y-0 text-sm",
         className
       )}
     >
-      <span className="shrink-0">Target: {targetReps}</span>
+      <span className="sr-only">Target: </span>
+      <span className="shrink-0 tabular-nums">{targetReps}</span>
       {targetWeight ? (
         <>
           <span className="text-muted-foreground shrink-0">·</span>

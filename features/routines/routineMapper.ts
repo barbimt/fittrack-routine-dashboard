@@ -63,14 +63,14 @@ export function mergeSetLogsIntoDay(
         const log = logMap.get(`${exercise.id}-${set.setNumber}`);
         if (!log) return set;
 
-        const loggedReps = parseRepsToNumber(log.target_reps);
+        // Planned targets always come from the current routine prescription.
+        // Logs only carry session progress (completed / actual reps) so editor
+        // weight changes show up immediately on Today.
         return {
           ...set,
           id: log.id,
           completed: log.completed,
           actualReps: log.actual_reps,
-          ...(loggedReps > 0 ? { targetReps: loggedReps } : {}),
-          ...(log.target_weight ? { targetWeight: log.target_weight } : {}),
         };
       }),
     })),
@@ -138,6 +138,29 @@ export function appendExerciseToDay(
   return {
     ...day,
     exercises: [...day.exercises, mergedExercise],
+  };
+}
+
+/** Replace one exercise in the day using updated DB row + session logs. */
+export function replaceExerciseInDay(
+  day: TrainingDay,
+  exercise: RoutineExercise,
+  setLogs: WorkoutSetLog[]
+): TrainingDay {
+  const nextExercise = mapRoutineExerciseToTrainingExercise(
+    exercise,
+    day.focus
+  );
+  const mergedExercise = mergeSetLogsIntoDay(
+    { ...day, exercises: [nextExercise] },
+    setLogs
+  ).exercises[0];
+
+  return {
+    ...day,
+    exercises: day.exercises.map((ex) =>
+      ex.id === exercise.id ? mergedExercise : ex
+    ),
   };
 }
 

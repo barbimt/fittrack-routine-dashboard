@@ -64,6 +64,7 @@ export function DashboardClient({
     isReopening,
     isResetting,
     isAddingExercise,
+    editingExerciseId,
     setRowRevision,
     handleSelectDay,
     handleSetToggle,
@@ -74,6 +75,7 @@ export function DashboardClient({
     handleSaveWorkout,
     handleEditWorkout,
     handleAddExercise,
+    handleEditExercise,
   } = workout;
 
   const today = new Date().toLocaleDateString("en-US", {
@@ -162,7 +164,10 @@ export function DashboardClient({
               onRepsChange={handleRepsChange}
               onRepsSave={handleRepsSave}
               onResetExercise={isReadOnly ? undefined : handleResetExercise}
+              onEditExercise={isReadOnly ? undefined : handleEditExercise}
               resetDisabled={isPending}
+              editDisabled={isPending || isAddingExercise}
+              isEditing={editingExerciseId === exercise.id}
               setRowRevision={setRowRevision[exercise.id] ?? 0}
               readOnly={isReadOnly}
             />

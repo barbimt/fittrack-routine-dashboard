@@ -89,15 +89,24 @@ export function useDemoWorkoutSession({
     }
   };
 
-  const handleRepsChange = (setId: string, reps: number) => {
+  const handleRepsChange = (setId: string, reps: number | null) => {
     if (isReadOnly) return;
-    setDaysData((prev) => updateSetInDays(prev, setId, { actualReps: reps }));
+    setDaysData((prev) =>
+      updateSetInDays(prev, setId, {
+        actualReps: reps,
+        ...(reps === null || reps === 0
+          ? { completed: false }
+          : reps >= 1
+            ? { completed: true }
+            : {}),
+      })
+    );
     if (isSessionSaved) {
       setIsSessionSaved(false);
     }
   };
 
-  const handleRepsSave = (_setId: string, _reps: number) => {
+  const handleRepsSave = (_setId: string, _reps: number | null) => {
     // Demo mode — reps live in local state only.
   };
 

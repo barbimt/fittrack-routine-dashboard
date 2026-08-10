@@ -65,11 +65,11 @@ describe("SetRow", () => {
       <SetRow set={{ ...baseSet, completed: false }} onToggle={onToggle} />
     );
 
-    await userEvent.click(screen.getByText("Set 1"));
+    await userEvent.click(screen.getByText("1"));
     expect(onToggle).toHaveBeenCalledWith("set-1");
 
     onToggle.mockClear();
-    await userEvent.click(screen.getByText(/Target:/));
+    await userEvent.click(screen.getByText("10"));
     expect(onToggle).toHaveBeenCalledWith("set-1");
   });
 
@@ -84,5 +84,30 @@ describe("SetRow", () => {
 
     await userEvent.click(screen.getByLabelText(/Actual reps/i));
     expect(onToggle).not.toHaveBeenCalled();
+  });
+
+  it("saves reps through onRepsChange/onRepsSave without calling onToggle", async () => {
+    const onToggle = vi.fn();
+    const onRepsChange = vi.fn();
+    const onRepsSave = vi.fn();
+
+    render(
+      <SetRow
+        set={{ ...baseSet, completed: false, actualReps: null }}
+        onToggle={onToggle}
+        onRepsChange={onRepsChange}
+        onRepsSave={onRepsSave}
+      />
+    );
+
+    const input = screen.getByLabelText(/Actual reps/i);
+    await userEvent.type(input, "12");
+
+    expect(onRepsChange).toHaveBeenCalled();
+    expect(onRepsChange.mock.calls.some((call) => call[1] === 12)).toBe(true);
+    expect(onToggle).not.toHaveBeenCalled();
+
+    await userEvent.tab();
+    expect(onRepsSave).toHaveBeenCalledWith("set-1", 12);
   });
 });

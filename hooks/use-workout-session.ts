@@ -4,7 +4,7 @@ import { useRef, useState, useTransition } from "react";
 import { getCompletedSets, getTotalSets } from "@/lib/mock-data";
 import type { TrainingDay } from "@/lib/mock-data";
 import { isUuid } from "@/lib/uuid";
-import { appendExerciseToDay } from "@/features/routines/routineMapper";
+import { appendExerciseToDay, replaceExerciseInDay } from "@/features/routines/routineMapper";
 import {
   canSaveWorkoutForDay,
   findSetInDays,
@@ -19,10 +19,13 @@ import {
   reopenDaySession,
   resetDaySession,
   resetExerciseSets,
-  toggleSetLog,
-  updateSetReps,
+  updateExerciseInDay,
+  updateSetLogProgress,
 } from "@/features/routines/actions/sessionActions";
-import type { AddExerciseToDayInput } from "@/features/routines/actions/sessionActions";
+import type {
+  AddExerciseToDayInput,
+  UpdateExerciseInDayInput,
+} from "@/features/routines/actions/sessionActions";
 import type { SessionSavedNotice } from "@/features/routines/types";
 import { toast } from "@/hooks/use-toast";
 
@@ -54,6 +57,9 @@ export function useWorkoutSession({
   const [isReopening, setIsReopening] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
   const [isAddingExercise, setIsAddingExercise] = useState(false);
+  const [editingExerciseId, setEditingExerciseId] = useState<string | null>(
+    null
+  );
   const [completedSessionIds, setCompletedSessionIds] = useState<
     Record<string, boolean>
   >(
@@ -146,15 +152,18 @@ export function useWorkoutSession({
     const nextCompleted = !currentSet.completed;
     const shouldAutoFillReps = nextCompleted && currentSet.actualReps == null;
     const shouldClearReps = !nextCompleted;
+    const nextActualReps = shouldAutoFillReps
+      ? currentSet.targetReps
+      : shouldClearReps
+        ? null
+        : currentSet.actualReps;
 
     setDaysData((prev) =>
       updateSetInDays(prev, setId, {
         completed: nextCompleted,
-        ...(shouldAutoFillReps
-          ? { actualReps: currentSet.targetReps }
-          : shouldClearReps
-            ? { actualReps: null }
-            : {}),
+        ...(shouldAutoFillReps || shouldClearReps
+          ? { actualReps: nextActualReps }
+          : {}),
       })
     );
 
@@ -162,13 +171,12 @@ export function useWorkoutSession({
       markSessionEditable(currentSessionId);
     }
 
-    if (shouldAutoFillReps) {
-      updateSetReps(setId, currentSet.targetReps);
-    } else if (shouldClearReps) {
-      updateSetReps(setId, null);
-    }
+    const progressPatch =
+      shouldAutoFillReps || shouldClearReps
+        ? { completed: nextCompleted, actualReps: nextActualReps }
+        : { completed: nextCompleted };
 
-    toggleSetLog(setId, nextCompleted).then((result) => {
+    updateSetLogProgress(setId, progressPatch).then((result) => {
       if (!result.ok) {
         setDaysData((prev) =>
           updateSetInDays(prev, setId, {
@@ -185,19 +193,39 @@ export function useWorkoutSession({
     });
   };
 
-  const handleRepsChange = (setId: string, reps: number) => {
+  const handleRepsChange = (setId: string, reps: number | null) => {
     if (isReadOnly || !isUuid(setId)) return;
 
-    setDaysData((prev) => updateSetInDays(prev, setId, { actualReps: reps }));
+    setDaysData((prev) =>
+      updateSetInDays(prev, setId, {
+        actualReps: reps,
+        ...(reps === null || reps === 0
+          ? { completed: false }
+          : reps >= 1
+            ? { completed: true }
+            : {}),
+      })
+    );
 
     if (currentSessionId) {
       markSessionEditable(currentSessionId);
     }
   };
 
-  const handleRepsSave = (setId: string, reps: number) => {
+  const handleRepsSave = (setId: string, reps: number | null) => {
     if (!isUuid(setId)) return;
-    updateSetReps(setId, reps);
+
+    if (reps === null || reps === 0) {
+      updateSetLogProgress(setId, { actualReps: reps, completed: false });
+      return;
+    }
+
+    if (reps >= 1) {
+      updateSetLogProgress(setId, { actualReps: reps, completed: true });
+      return;
+    }
+
+    updateSetLogProgress(setId, { actualReps: reps });
   };
 
   const handleSelectDay = (dayId: string) => {
@@ -353,6 +381,50 @@ export function useWorkoutSession({
     });
   };
 
+  const handleEditExercise = async (
+    exerciseId: string,
+    input: UpdateExerciseInDayInput
+  ) => {
+    const sessionId = getSelectedSessionId();
+    if (!sessionId || isReadOnly) return;
+
+    setEditingExerciseId(exerciseId);
+    const result = await updateExerciseInDay(
+      selectedDayId,
+      sessionId,
+      exerciseId,
+      input
+    );
+    setEditingExerciseId(null);
+
+    if (!result.ok) {
+      toast({
+        title: "Could not update exercise",
+        description: result.error,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setDaysData((prev) =>
+      prev.map((day) =>
+        day.id === selectedDayId
+          ? replaceExerciseInDay(day, result.exercise, result.setLogs)
+          : day
+      )
+    );
+    bumpSetRowRevision([exerciseId]);
+
+    if (currentSessionId) {
+      markSessionEditable(currentSessionId);
+    }
+
+    toast({
+      title: "Exercise updated",
+      description: "Targets refreshed for today’s session.",
+    });
+  };
+
   const handleEditWorkout = async () => {
     const sessionId = getSelectedSessionId();
     if (!sessionId) return;
@@ -395,6 +467,7 @@ export function useWorkoutSession({
     isReopening,
     isResetting,
     isAddingExercise,
+    editingExerciseId,
     setRowRevision,
     handleSelectDay,
     handleSetToggle,
@@ -405,5 +478,6 @@ export function useWorkoutSession({
     handleSaveWorkout,
     handleEditWorkout,
     handleAddExercise,
+    handleEditExercise,
   };
 }

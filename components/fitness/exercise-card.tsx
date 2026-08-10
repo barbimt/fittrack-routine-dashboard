@@ -4,20 +4,26 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import type { Exercise } from "@/lib/mock-data";
 import { getExerciseProgress } from "@/lib/mock-data";
-import { getPrescriptionBlockSummaries } from "@/features/routine-import/utils/parsePrescription";
+import type { UpdateExerciseInDayInput } from "@/features/routines/actions/sessionActions";
 import { SetRow } from "./set-row";
 import { Badge } from "./badge";
 import { Button } from "./button";
-import { PrescriptionBlockLine, WeightLabel } from "./weight-label";
-import { ChevronDown, Clock, Info, RotateCcw } from "lucide-react";
+import { EditExerciseDialog } from "./edit-exercise-dialog";
+import { ChevronDown, Clock, Info, Pencil, RotateCcw } from "lucide-react";
 
 interface ExerciseCardProps {
   exercise: Exercise;
   onSetToggle?: (setId: string) => void;
-  onRepsChange?: (setId: string, reps: number) => void;
-  onRepsSave?: (setId: string, reps: number) => void;
+  onRepsChange?: (setId: string, reps: number | null) => void;
+  onRepsSave?: (setId: string, reps: number | null) => void;
   onResetExercise?: (exerciseId: string) => void;
+  onEditExercise?: (
+    exerciseId: string,
+    input: UpdateExerciseInDayInput
+  ) => void | Promise<void>;
   resetDisabled?: boolean;
+  editDisabled?: boolean;
+  isEditing?: boolean;
   setRowRevision?: number;
   readOnly?: boolean;
 }
@@ -28,76 +34,55 @@ export function ExerciseCard({
   onRepsChange,
   onRepsSave,
   onResetExercise,
+  onEditExercise,
   resetDisabled = false,
+  editDisabled = false,
+  isEditing = false,
   setRowRevision = 0,
   readOnly = false,
 }: ExerciseCardProps) {
   const [expanded, setExpanded] = useState(true);
+  const [editOpen, setEditOpen] = useState(false);
   const progress = getExerciseProgress(exercise);
   const progressPercentage = (progress.completed / progress.total) * 100;
-  const hasRestTime = exercise.restTime && exercise.restTime !== "—";
-  const fallbackWeight = exercise.weight !== "—" ? exercise.weight : null;
-  const prescriptionBlocks = exercise.prescription
-    ? getPrescriptionBlockSummaries(exercise.prescription, fallbackWeight)
-    : [];
-  const showBlockLines = prescriptionBlocks.length > 0;
+  const hasRestTime = Boolean(
+    exercise.restTime && exercise.restTime !== "—"
+  );
+  const canEdit = !readOnly && Boolean(onEditExercise);
 
   return (
     <div className="bg-card border-border overflow-hidden rounded-2xl border shadow-sm">
-      <button
-        onClick={() => setExpanded(!expanded)}
-        className="hover:bg-muted/30 flex w-full items-start justify-between p-4 text-left transition-colors"
-        aria-expanded={expanded}
-        aria-controls={`exercise-${exercise.id}-content`}
-      >
-        <div className="min-w-0 flex-1">
-          <div className="mb-1 flex flex-wrap items-center gap-2">
-            <h3 className="text-card-foreground text-base font-semibold">
-              {exercise.name}
-            </h3>
-            <Badge variant="muscle" className="text-xs">
-              {exercise.muscleGroup}
-            </Badge>
-          </div>
+      <div className="flex items-start gap-1 p-4">
+        <button
+          type="button"
+          onClick={() => setExpanded(!expanded)}
+          className="hover:bg-muted/30 -m-2 flex min-w-0 flex-1 items-start justify-between rounded-xl p-2 text-left transition-colors"
+          aria-expanded={expanded}
+          aria-controls={`exercise-${exercise.id}-content`}
+        >
+          <div className="min-w-0 flex-1">
+            <div className="mb-1 flex flex-wrap items-center gap-2">
+              <h3 className="text-card-foreground text-base font-semibold">
+                {exercise.name}
+              </h3>
+              <Badge variant="muscle" className="text-xs">
+                {exercise.muscleGroup}
+              </Badge>
+            </div>
 
-          <div className="text-muted-foreground mt-2 flex flex-col gap-1 text-sm">
-            {showBlockLines ? (
-              prescriptionBlocks.map((block) => (
-                <PrescriptionBlockLine
-                  key={`${block.sets}-${block.reps}-${block.weight ?? ""}`}
-                  sets={block.sets}
-                  reps={block.reps}
-                  weight={block.weight}
-                />
-              ))
-            ) : (
-              <span className="flex items-center gap-4">
-                <span className="flex items-center gap-1">
-                  <span className="text-foreground font-medium">
-                    {exercise.targetSets}
-                  </span>{" "}
-                  x {exercise.targetReps}
-                </span>
-                {exercise.weight !== "—" && (
-                  <WeightLabel weight={exercise.weight} />
-                )}
-              </span>
-            )}
-            {hasRestTime && (
-              <span
-                className="flex items-center gap-1"
+            {hasRestTime ? (
+              <div
+                className="text-muted-foreground mt-1 flex items-center gap-1 text-sm"
                 title="Rest between sets"
               >
                 <Clock className="h-3.5 w-3.5" aria-hidden />
                 <span>{exercise.restTime} rest</span>
-              </span>
-            )}
+              </div>
+            ) : null}
           </div>
-        </div>
 
-        <div className="ml-4 flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <div className="relative h-10 w-10">
+          <div className="ml-3 flex items-center gap-2">
+            <div className="relative h-10 w-10 shrink-0">
               <svg className="h-10 w-10 -rotate-90">
                 <circle
                   cx="20"
@@ -127,16 +112,30 @@ export function ExerciseCard({
                 {progress.completed}/{progress.total}
               </span>
             </div>
-          </div>
 
-          <ChevronDown
-            className={cn(
-              "text-muted-foreground h-5 w-5 transition-transform",
-              expanded && "rotate-180"
-            )}
-          />
-        </div>
-      </button>
+            <ChevronDown
+              className={cn(
+                "text-muted-foreground h-5 w-5 shrink-0 transition-transform",
+                expanded && "rotate-180"
+              )}
+            />
+          </div>
+        </button>
+
+        {canEdit ? (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            disabled={editDisabled || isEditing}
+            className="text-muted-foreground hover:text-foreground mt-0.5 h-10 w-10 shrink-0"
+            aria-label={`Edit ${exercise.name}`}
+            onClick={() => setEditOpen(true)}
+          >
+            <Pencil className="h-4 w-4" aria-hidden />
+          </Button>
+        ) : null}
+      </div>
 
       {exercise.notes && expanded && (
         <div className="px-4 pb-2">
@@ -180,6 +179,20 @@ export function ExerciseCard({
           )}
         </div>
       )}
+
+      {canEdit && editOpen ? (
+        <EditExerciseDialog
+          key={`${exercise.id}-${setRowRevision}`}
+          open={editOpen}
+          onOpenChange={setEditOpen}
+          exercise={exercise}
+          isSubmitting={isEditing}
+          onSubmit={async (input) => {
+            await onEditExercise?.(exercise.id, input);
+            setEditOpen(false);
+          }}
+        />
+      ) : null}
     </div>
   );
 }

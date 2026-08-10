@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildSetLogRowsForExercise,
   buildSetLogRowsForExercises,
+  planSetLogReconciliation,
 } from "./materializeSetLogs";
 
 describe("buildSetLogRowsForExercise", () => {
@@ -71,5 +72,46 @@ describe("buildSetLogRowsForExercise", () => {
     expect(
       rows.every((row) => row.exercise_name && row.completed === false)
     ).toBe(true);
+  });
+});
+
+describe("planSetLogReconciliation", () => {
+  it("updates matching sets, inserts new ones, deletes extras", () => {
+    const plan = planSetLogReconciliation(
+      "user-1",
+      "session-1",
+      {
+        id: "ex-1",
+        name: "Squat",
+        prescription: "1x12 40kg-1x12 35kg-1x12 40kg",
+        planned_sets: 3,
+        target_reps: "12",
+        weight: null,
+      },
+      [
+        { id: "log-1", set_number: 1 },
+        { id: "log-2", set_number: 2 },
+        { id: "log-extra", set_number: 4 },
+      ]
+    );
+
+    expect(plan.updates).toEqual([
+      {
+        id: "log-1",
+        target_reps: "12",
+        target_weight: "40kg",
+        exercise_name: "Squat",
+      },
+      {
+        id: "log-2",
+        target_reps: "12",
+        target_weight: "35kg",
+        exercise_name: "Squat",
+      },
+    ]);
+    expect(plan.inserts).toHaveLength(1);
+    expect(plan.inserts[0].set_number).toBe(3);
+    expect(plan.inserts[0].target_weight).toBe("40kg");
+    expect(plan.deleteIds).toEqual(["log-extra"]);
   });
 });

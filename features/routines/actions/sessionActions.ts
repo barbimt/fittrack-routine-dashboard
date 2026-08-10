@@ -6,6 +6,7 @@ import { resolvePrescriptionForSave } from "../editorPrescription";
 import {
   buildSetLogRowsForExercise,
   buildSetLogRowsForExercises,
+  planSetLogReconciliation,
   type ExerciseForSetLogs,
 } from "../materializeSetLogs";
 import { buildTrainingDayFromSession } from "../routineMapper";
@@ -411,12 +412,27 @@ export async function addExerciseToDay(
   return { ok: true, exercise, setLogs };
 }
 
-export type UpdateRepsResult = { ok: true } | { ok: false; error: string };
+export type UpdateExerciseInDayInput = {
+  name: string;
+  muscleGroup: string | null;
+  prescription: string | null;
+  plannedSets: number | null;
+  targetReps: string | null;
+  weight: string | null;
+  restTime: string | null;
+  notes: string | null;
+};
 
-export async function updateSetReps(
-  setLogId: string,
-  actualReps: number | null
-): Promise<UpdateRepsResult> {
+export type UpdateExerciseInDayResult =
+  | { ok: true; exercise: RoutineExercise; setLogs: WorkoutSetLog[] }
+  | { ok: false; error: string };
+
+export async function updateExerciseInDay(
+  routineDayId: string,
+  sessionId: string,
+  exerciseId: string,
+  input: UpdateExerciseInDayInput
+): Promise<UpdateExerciseInDayResult> {
   const supabase = await createClient();
 
   const {
@@ -427,9 +443,200 @@ export async function updateSetReps(
     return { ok: false, error: "Not authenticated." };
   }
 
+  const trimmedName = input.name.trim();
+  if (!trimmedName) {
+    return { ok: false, error: "Exercise name is required." };
+  }
+
+  const { data: session, error: sessionError } = await supabase
+    .from("workout_sessions")
+    .select("id, status, routine_day_id")
+    .eq("id", sessionId)
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (sessionError || !session) {
+    return { ok: false, error: "Workout session not found." };
+  }
+
+  if (session.routine_day_id !== routineDayId) {
+    return { ok: false, error: "Session does not match this training day." };
+  }
+
+  if (session.status !== "in_progress") {
+    return {
+      ok: false,
+      error: "Edit the workout before changing exercises in a saved session.",
+    };
+  }
+
+  const { data: existing, error: existingError } = await supabase
+    .from("routine_exercises")
+    .select("id, sort_order, routine_day_id")
+    .eq("id", exerciseId)
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (existingError || !existing) {
+    return { ok: false, error: "Exercise not found." };
+  }
+
+  if (existing.routine_day_id !== routineDayId) {
+    return { ok: false, error: "Exercise does not belong to this day." };
+  }
+
+  const resolved = resolvePrescriptionForSave({
+    id: exerciseId,
+    dayId: routineDayId,
+    name: trimmedName,
+    muscleGroup: input.muscleGroup,
+    prescription: input.prescription,
+    plannedSets: input.plannedSets,
+    targetReps: input.targetReps,
+    weight: input.weight,
+    restTime: input.restTime,
+    notes: input.notes,
+    sortOrder:
+      typeof existing.sort_order === "number" ? existing.sort_order : 0,
+  });
+
+  const { data: updated, error: updateError } = await supabase
+    .from("routine_exercises")
+    .update({
+      name: trimmedName,
+      prescription: resolved.prescription,
+      planned_sets: resolved.plannedSets,
+      target_reps: resolved.targetReps,
+      weight: input.weight,
+      rest_time: input.restTime,
+      notes: input.notes,
+      muscle_group: input.muscleGroup,
+    })
+    .eq("id", exerciseId)
+    .eq("user_id", user.id)
+    .select("*")
+    .single();
+
+  if (updateError || !updated) {
+    return { ok: false, error: "Failed to update exercise." };
+  }
+
+  const exercise = updated as RoutineExercise;
+
+  const { data: existingLogs, error: logsFetchError } = await supabase
+    .from("workout_set_logs")
+    .select("id, set_number")
+    .eq("user_id", user.id)
+    .eq("workout_session_id", sessionId)
+    .eq("routine_exercise_id", exerciseId);
+
+  if (logsFetchError) {
+    return { ok: false, error: "Failed to load set logs for sync." };
+  }
+
+  const plan = planSetLogReconciliation(
+    user.id,
+    sessionId,
+    {
+      id: exercise.id,
+      name: exercise.name,
+      prescription: exercise.prescription,
+      planned_sets: exercise.planned_sets,
+      target_reps: exercise.target_reps,
+      weight: exercise.weight,
+    },
+    (existingLogs ?? []).map((log) => ({
+      id: log.id as string,
+      set_number: log.set_number as number,
+    }))
+  );
+
+  for (const patch of plan.updates) {
+    const { error } = await supabase
+      .from("workout_set_logs")
+      .update({
+        target_reps: patch.target_reps,
+        target_weight: patch.target_weight,
+        exercise_name: patch.exercise_name,
+      })
+      .eq("id", patch.id)
+      .eq("user_id", user.id);
+
+    if (error) {
+      return { ok: false, error: "Failed to sync set targets." };
+    }
+  }
+
+  if (plan.inserts.length > 0) {
+    const { error } = await supabase
+      .from("workout_set_logs")
+      .insert(plan.inserts);
+    if (error) {
+      return { ok: false, error: "Failed to add new set logs." };
+    }
+  }
+
+  if (plan.deleteIds.length > 0) {
+    const { error } = await supabase
+      .from("workout_set_logs")
+      .delete()
+      .eq("user_id", user.id)
+      .in("id", plan.deleteIds);
+    if (error) {
+      return { ok: false, error: "Failed to remove extra set logs." };
+    }
+  }
+
+  const setLogs = (
+    await fetchSetLogsForSession(supabase, user.id, sessionId)
+  ).filter((log) => log.routine_exercise_id === exercise.id);
+
+  revalidatePath("/");
+  revalidatePath("/editor");
+
+  return { ok: true, exercise, setLogs };
+}
+
+export type UpdateSetLogProgressInput = {
+  completed?: boolean;
+  /** Pass `null` to clear; omit to leave unchanged. */
+  actualReps?: number | null;
+};
+
+export type UpdateSetLogProgressResult =
+  | { ok: true }
+  | { ok: false; error: string };
+
+/** Single write for set completion and/or actual reps (one POST / DB update). */
+export async function updateSetLogProgress(
+  setLogId: string,
+  patch: UpdateSetLogProgressInput
+): Promise<UpdateSetLogProgressResult> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { ok: false, error: "Not authenticated." };
+  }
+
+  const update: { completed?: boolean; actual_reps?: number | null } = {};
+  if (patch.completed !== undefined) {
+    update.completed = patch.completed;
+  }
+  if ("actualReps" in patch) {
+    update.actual_reps = patch.actualReps ?? null;
+  }
+
+  if (Object.keys(update).length === 0) {
+    return { ok: true };
+  }
+
   const { error } = await supabase
     .from("workout_set_logs")
-    .update({ actual_reps: actualReps })
+    .update(update)
     .eq("id", setLogId)
     .eq("user_id", user.id);
 
@@ -440,33 +647,22 @@ export async function updateSetReps(
   return { ok: true };
 }
 
-export type ToggleResult = { ok: true } | { ok: false; error: string };
+export type UpdateRepsResult = UpdateSetLogProgressResult;
+
+export async function updateSetReps(
+  setLogId: string,
+  actualReps: number | null
+): Promise<UpdateRepsResult> {
+  return updateSetLogProgress(setLogId, { actualReps });
+}
+
+export type ToggleResult = UpdateSetLogProgressResult;
 
 export async function toggleSetLog(
   setLogId: string,
   completed: boolean
 ): Promise<ToggleResult> {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return { ok: false, error: "Not authenticated." };
-  }
-
-  const { error } = await supabase
-    .from("workout_set_logs")
-    .update({ completed })
-    .eq("id", setLogId)
-    .eq("user_id", user.id);
-
-  if (error) {
-    return { ok: false, error: error.message };
-  }
-
-  return { ok: true };
+  return updateSetLogProgress(setLogId, { completed });
 }
 
 export type ResetResult = { ok: true } | { ok: false; error: string };
