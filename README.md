@@ -14,10 +14,22 @@ FitTrack lets authenticated users import or edit a weekly workout routine, log s
 |------|-------------|
 | Today's workout (`/`) | Active routine from Supabase; day selection; set checkboxes and rep logging; save / edit / reset session |
 | Onboarding (`/`) | When there is no active routine, the dashboard shows import / create-from-scratch CTAs |
-| Excel import (`/upload`) | Client-side `.xlsx` parse; one sheet per training day; save redirects to the dashboard |
-| Routine editor (`/editor`) | Create a routine from scratch or edit the active one; persists to Supabase |
+| Excel import (`/upload`) | Client-side `.xlsx` parse; one sheet per training day; template-first upload UX; save redirects to the dashboard |
+| Routine editor (`/editor`) | Create a routine from scratch or edit the active one; persists to Supabase; fixed save bar |
 | Auth | Email/password signup (lands on `/`), Google OAuth, login; protected routes via middleware |
-| Weekly overview (`/week`), analytics (`/progress`) | UI prototypes with mock data (not wired to sessions yet) |
+| Rest timer | Manual rest countdown on Today (start / pause / resume) with shared notifications |
+
+### Not shipped yet (feature-gated)
+
+Week Overview (`/week`) and Progress (`/progress`) are **UI prototypes** and stay **off by default** — hidden from nav and blocked in middleware until ready.
+
+| How | Where |
+|-----|--------|
+| Catalog + access rules | [`lib/features/`](./lib/features/) |
+| Full guide | [`lib/features/README.md`](./lib/features/README.md) |
+| Env overrides | [`.env.example`](./.env.example) (`NEXT_PUBLIC_FEATURE_*`) |
+
+Audiences supported in the catalog: `public` · `authenticated` · `paid` (paid wiring comes later with billing).
 
 ## Tech stack
 
@@ -36,6 +48,8 @@ FitTrack lets authenticated users import or edit a weekly workout routine, log s
 | `features/auth/` | Login, signup, Google OAuth, logout |
 | `features/routine-import/` | Excel parser, preview, save routine |
 | `features/routines/` | Session actions, editor types, create/update routine, DB mapper |
+| `lib/features/` | Product feature catalog, release flags, audience access |
+| `lib/notify.ts` | App-wide toast helpers (`notify.*` / `notify.workout.*`) |
 | `lib/mock-data.ts` | UI types (`TrainingDay`, etc.) and week/progress helpers |
 | `supabase/` | Schema, migrations, reset SQL |
 
@@ -47,7 +61,7 @@ FitTrack lets authenticated users import or edit a weekly workout routine, log s
 
 ## Development
 
-Requires Node.js 20+, pnpm, and Docker (for local Supabase). Copy `supabase/env.local.example` to `.env.local` and set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` from `pnpm supabase:status -o env`.
+Requires Node.js 20+, pnpm, and Docker (for local Supabase). Copy `.env.example` to `.env.local` and set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` from `pnpm supabase:status -o env` (see also `supabase/README.md`).
 
 ```bash
 pnpm install
@@ -60,7 +74,7 @@ pnpm dev
 1. Sign up with email → should land on `/` with the empty dashboard if you have no routine.
 2. Optional Google: set `SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID` / `SECRET` (see `supabase/README.md`), restart Supabase, use **Continue with Google**.
 3. From `/`, **Create from scratch** → `/editor` → add day + exercise → save → open `/`.
-4. Or **Import routine** → save Excel → redirects to `/`.
+4. Or **Import routine** → download FitTrack template → fill → upload → save → redirects to `/`.
 
 ```bash
 pnpm build     # production build

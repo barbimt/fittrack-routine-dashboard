@@ -36,6 +36,35 @@ describe("AppShell", () => {
     expect(document.querySelector("main")).toHaveClass("safe-area-pb");
   });
 
+  it("docks bottomChrome outside the scroll region", () => {
+    renderWithProviders(
+      <AppShell bottomChrome={<button type="button">Save</button>}>
+        <p>Page content</p>
+      </AppShell>
+    );
+
+    const main = document.querySelector("main");
+    expect(main).not.toHaveClass("safe-area-pb");
+    expect(main?.querySelector(".app-bottom-chrome")).toBeTruthy();
+    expect(
+      screen.getByRole("button", { name: "Save" })
+    ).toBeInTheDocument();
+    expect(screen.getByText("Page content")).toBeInTheDocument();
+  });
+
+  it("keeps page content in the scroll region when bottomChrome is set", () => {
+    const { container } = renderWithProviders(
+      <AppShell bottomChrome={<div>Chrome</div>}>
+        <h1>Routine Editor</h1>
+      </AppShell>
+    );
+
+    const scrollRegion = container.querySelector("main > div.h-0");
+    expect(scrollRegion).toBeTruthy();
+    expect(scrollRegion).toHaveTextContent("Routine Editor");
+    expect(scrollRegion).not.toHaveTextContent("Chrome");
+  });
+
   it("opens the hamburger drawer with all sidebar nav links", async () => {
     renderWithProviders(
       <AppShell>

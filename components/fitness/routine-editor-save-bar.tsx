@@ -13,7 +13,10 @@ interface RoutineEditorSaveBarProps {
   onSave: () => void;
 }
 
-/** Fixed bottom save actions — stays reachable while editing long routines. */
+/**
+ * Editor save chrome — render via AppShell `bottomChrome` (in layout flow),
+ * not `position: fixed`, so scrollable content is never covered on mobile.
+ */
 export function RoutineEditorSaveBar({
   isNew,
   isDirty,
@@ -38,8 +41,7 @@ export function RoutineEditorSaveBar({
   return (
     <div
       className={cn(
-        "border-border bg-card/95 fixed inset-x-0 bottom-0 z-40 border-t shadow-[0_-8px_24px_rgba(0,0,0,0.06)] backdrop-blur-md",
-        "pb-[max(0.75rem,env(safe-area-inset-bottom))] lg:left-64"
+        "border-border bg-card/95 border-t shadow-[0_-8px_24px_rgba(0,0,0,0.06)] backdrop-blur-md"
       )}
     >
       <div className="mx-auto flex max-w-4xl flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">

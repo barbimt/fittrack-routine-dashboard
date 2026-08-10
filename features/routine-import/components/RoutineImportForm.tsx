@@ -92,10 +92,10 @@ export function RoutineImportForm() {
                   aria-hidden
                 />
               }
-              title="No file selected"
-              description="Drop your .xlsx routine file here or browse from your device."
+              title="Upload your FitTrack template"
+              description="Choose the .xlsx you filled from the FitTrack template — not a random gym spreadsheet."
               primaryAction={{
-                label: "Choose file",
+                label: "Choose .xlsx file",
                 onClick: () => {
                   document.getElementById(inputId)?.click();
                 },

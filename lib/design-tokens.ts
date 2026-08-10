@@ -26,8 +26,7 @@ export const fitTrackThemeColor = {
 export const fitTrackNavItems = [
   { label: "Today", href: "/", icon: "home" as const },
   { label: "Upload Routine", href: "/upload", icon: "upload" as const },
-  { label: "Week Overview", href: "/week", icon: "calendar" as const },
-  { label: "Progress", href: "/progress", icon: "chart" as const },
+  // Week Overview + Progress: see lib/features/catalog.ts + docs/FEATURES.md
   { label: "Routine Editor", href: "/editor", icon: "edit" as const },
   { label: "Settings", href: "/settings", icon: "settings" as const },
 ] as const;

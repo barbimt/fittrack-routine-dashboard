@@ -61,16 +61,16 @@ export function ExerciseCard({
 
   return (
     <div className="bg-card border-border overflow-hidden rounded-2xl border shadow-sm">
-      <div className="flex items-start gap-1 p-4">
+      <div className="flex items-center gap-1 p-4">
         <button
           type="button"
           onClick={() => setExpanded(!expanded)}
-          className="hover:bg-muted/30 -m-2 flex min-w-0 flex-1 items-start justify-between rounded-xl p-2 text-left transition-colors"
+          className="hover:bg-muted/30 -m-2 flex min-w-0 flex-1 items-center justify-between rounded-xl p-2 text-left transition-colors"
           aria-expanded={expanded}
           aria-controls={`exercise-${exercise.id}-content`}
         >
           <div className="min-w-0 flex-1">
-            <div className="mb-1 flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <h3 className="text-card-foreground text-base font-semibold">
                 {exercise.name}
               </h3>
@@ -137,7 +137,7 @@ export function ExerciseCard({
             variant="ghost"
             size="icon"
             disabled={editDisabled || isEditing}
-            className="text-muted-foreground hover:text-foreground mt-0.5 h-10 w-10 shrink-0"
+            className="text-muted-foreground hover:text-foreground h-10 w-10 shrink-0"
             aria-label={`Edit ${exercise.name}`}
             onClick={() => setEditOpen(true)}
           >

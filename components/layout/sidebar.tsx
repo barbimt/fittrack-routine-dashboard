@@ -13,6 +13,7 @@ import {
   Home,
 } from "lucide-react";
 import { LogoutButton } from "@/features/auth/components/LogoutButton";
+import { filterEnabledNavItems } from "@/lib/features";
 
 export interface NavItem {
   label: string;
@@ -20,7 +21,7 @@ export interface NavItem {
   icon: React.ReactNode;
 }
 
-export const navItems: NavItem[] = [
+const ALL_NAV_ITEMS: NavItem[] = [
   { label: "Today", href: "/", icon: <Home className="h-5 w-5" aria-hidden /> },
   {
     label: "Upload Routine",
@@ -48,6 +49,11 @@ export const navItems: NavItem[] = [
     icon: <Settings className="h-5 w-5" aria-hidden />,
   },
 ];
+
+/** App sidebar — signed-in shell; respects feature release + audience. */
+export const navItems: NavItem[] = filterEnabledNavItems(ALL_NAV_ITEMS, {
+  isAuthenticated: true,
+});
 
 interface SidebarProps {
   onNavigate?: () => void;

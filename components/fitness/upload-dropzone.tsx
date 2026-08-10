@@ -119,10 +119,10 @@ export function UploadDropzone({
         </div>
 
         <h3 className="text-card-foreground mb-1 text-lg font-semibold">
-          {isUploading ? "Uploading..." : "Drop your routine file here"}
+          {isUploading ? "Reading file…" : "Drop your FitTrack .xlsx here"}
         </h3>
         <p className="text-muted-foreground mb-4 text-sm">
-          or click to browse your files
+          or click to browse — use the filled template, not any spreadsheet
         </p>
 
         {error ? (
@@ -130,7 +130,7 @@ export function UploadDropzone({
         ) : (
           <div className="text-muted-foreground flex items-center gap-2 text-sm">
             <FileSpreadsheet className="h-4 w-4" />
-            <span>Accepts .xlsx files only</span>
+            <span>FitTrack template · .xlsx only</span>
           </div>
         )}
       </div>
