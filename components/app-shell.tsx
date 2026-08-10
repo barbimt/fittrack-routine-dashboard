@@ -43,7 +43,7 @@ export function AppShell({
   );
 
   return (
-    <div className="bg-background flex h-dvh max-h-dvh min-h-0 overflow-hidden lg:min-h-screen lg:max-h-none">
+    <div className="bg-background flex h-dvh max-h-dvh min-h-0 overflow-hidden lg:max-h-none lg:min-h-screen">
       <Sidebar
         className="hidden lg:fixed lg:inset-y-0 lg:z-20 lg:flex lg:w-64"
         {...shellNavProps}

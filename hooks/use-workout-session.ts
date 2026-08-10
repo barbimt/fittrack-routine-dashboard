@@ -4,7 +4,10 @@ import { useRef, useState, useTransition } from "react";
 import { getCompletedSets, getTotalSets } from "@/lib/mock-data";
 import type { TrainingDay } from "@/lib/mock-data";
 import { isUuid } from "@/lib/uuid";
-import { appendExerciseToDay, replaceExerciseInDay } from "@/features/routines/routineMapper";
+import {
+  appendExerciseToDay,
+  replaceExerciseInDay,
+} from "@/features/routines/routineMapper";
 import {
   canSaveWorkoutForDay,
   findSetInDays,

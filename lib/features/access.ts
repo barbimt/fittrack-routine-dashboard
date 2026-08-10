@@ -45,18 +45,13 @@ export function audienceAllows(
   }
 }
 
-export function canAccessFeature(
-  id: FeatureId,
-  ctx: AccessContext
-): boolean {
+export function canAccessFeature(id: FeatureId, ctx: AccessContext): boolean {
   const feature = FEATURE_CATALOG[id];
   if (getFeatureRelease(feature) === "off") return false;
   return audienceAllows(feature.audience, ctx);
 }
 
-export function findFeatureByPath(
-  pathname: string
-): FeatureDefinition | null {
+export function findFeatureByPath(pathname: string): FeatureDefinition | null {
   for (const feature of Object.values(FEATURE_CATALOG)) {
     if (pathname === feature.path || pathname.startsWith(`${feature.path}/`)) {
       return feature;
@@ -69,10 +64,7 @@ export function findFeatureByPath(
  * Whether this path may be served for the given user.
  * Ungated routes (no catalog entry) always return true.
  */
-export function canAccessPath(
-  pathname: string,
-  ctx: AccessContext
-): boolean {
+export function canAccessPath(pathname: string, ctx: AccessContext): boolean {
   const feature = findFeatureByPath(pathname);
   if (!feature) return true;
   return canAccessFeature(feature.id, ctx);

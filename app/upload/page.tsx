@@ -98,7 +98,9 @@ export default function UploadPage() {
             </Button>
             <p className="text-muted-foreground text-xs">
               File name:{" "}
-              <span className="font-medium">fittrack-routine-template.xlsx</span>
+              <span className="font-medium">
+                fittrack-routine-template.xlsx
+              </span>
               . Rename it after filling (e.g.{" "}
               <span className="font-medium">my-routine-fittrack.xlsx</span>) if
               you like — format matters more than the name.
@@ -187,9 +189,7 @@ export default function UploadPage() {
         <Card className="rounded-2xl shadow-sm">
           <CardHeader>
             <CardTitle className="text-base">Quick checklist</CardTitle>
-            <CardDescription>
-              Checked when you select a file
-            </CardDescription>
+            <CardDescription>Checked when you select a file</CardDescription>
           </CardHeader>
           <CardContent>
             <ul className="space-y-3">

@@ -78,11 +78,7 @@ export function RestTimerBar({
 }
 
 /** Renders the bottom bar when a rest timer from `useRestTimer` is active. */
-export function WorkoutRestTimerBar({
-  timer,
-}: {
-  timer: RestTimerViewModel;
-}) {
+export function WorkoutRestTimerBar({ timer }: { timer: RestTimerViewModel }) {
   if (!timer.active) return null;
 
   return (

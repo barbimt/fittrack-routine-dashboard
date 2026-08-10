@@ -14,7 +14,9 @@ export default function GettingStartedPage() {
             Create from scratch
           </strong>{" "}
           to build days and exercises in the Routine Editor, or{" "}
-          <strong className="text-foreground font-medium">Import routine</strong>{" "}
+          <strong className="text-foreground font-medium">
+            Import routine
+          </strong>{" "}
           to upload a FitTrack Excel template.
         </p>
       </section>
@@ -24,7 +26,9 @@ export default function GettingStartedPage() {
         <p>
           Open Today, pick the training day you are doing, then mark each set as
           you complete it. FitTrack tracks progress by{" "}
-          <strong className="text-foreground font-medium">completed sets</strong>
+          <strong className="text-foreground font-medium">
+            completed sets
+          </strong>
           , not by reps alone.
         </p>
       </section>

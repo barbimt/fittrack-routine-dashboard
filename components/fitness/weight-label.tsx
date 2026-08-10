@@ -36,8 +36,7 @@ export function SetTargetLabel({
   targetWeight,
   className,
 }: SetTargetLabelProps) {
-  const weight =
-    targetWeight && targetWeight !== "—" ? targetWeight : null;
+  const weight = targetWeight && targetWeight !== "—" ? targetWeight : null;
 
   return (
     <span

@@ -11,7 +11,11 @@ interface HelpArticleProps {
 }
 
 /** Shared shell for Settings → Help pages. Edit page bodies to expand content. */
-export function HelpArticle({ title, description, children }: HelpArticleProps) {
+export function HelpArticle({
+  title,
+  description,
+  children,
+}: HelpArticleProps) {
   return (
     <AppShell>
       <PageContent className="max-w-3xl">
@@ -34,7 +38,7 @@ export function HelpArticle({ title, description, children }: HelpArticleProps) 
           <p className="text-muted-foreground">{description}</p>
         </header>
 
-        <article className="text-foreground space-y-6 text-sm leading-relaxed [&_h2]:text-base [&_h2]:font-semibold [&_h2]:tracking-tight [&_ol]:list-decimal [&_ol]:space-y-2 [&_ol]:pl-5 [&_p]:text-muted-foreground [&_ul]:list-disc [&_ul]:space-y-2 [&_ul]:pl-5">
+        <article className="text-foreground [&_p]:text-muted-foreground space-y-6 text-sm leading-relaxed [&_h2]:text-base [&_h2]:font-semibold [&_h2]:tracking-tight [&_ol]:list-decimal [&_ol]:space-y-2 [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:space-y-2 [&_ul]:pl-5">
           {children}
         </article>
       </PageContent>

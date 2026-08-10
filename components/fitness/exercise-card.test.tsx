@@ -81,9 +81,7 @@ describe("ExerciseCard", () => {
       />
     );
 
-    expect(
-      screen.getByRole("button", { name: /Rest · 0:45/i })
-    ).toBeDisabled();
+    expect(screen.getByRole("button", { name: /Rest · 0:45/i })).toBeDisabled();
 
     rerender(
       <ExerciseCard

@@ -30,12 +30,10 @@ describe("feature catalog", () => {
 
   it("blocks released authenticated features for visitors", () => {
     vi.stubEnv("NEXT_PUBLIC_FEATURE_PROGRESS", "on");
-    expect(
-      canAccessFeature("progress", { isAuthenticated: false })
-    ).toBe(false);
-    expect(
-      canAccessFeature("progress", { isAuthenticated: true })
-    ).toBe(true);
+    expect(canAccessFeature("progress", { isAuthenticated: false })).toBe(
+      false
+    );
+    expect(canAccessFeature("progress", { isAuthenticated: true })).toBe(true);
   });
 
   it("requires isPaid for paid audience", () => {

@@ -26,7 +26,9 @@ export default function SupportPage() {
           <li>The email on your FitTrack account</li>
           <li>What you were trying to do (import, editor, Today session)</li>
           <li>Roughly when it happened and what you saw on screen</li>
-          <li>Browser and device (for example iPhone Safari, desktop Chrome)</li>
+          <li>
+            Browser and device (for example iPhone Safari, desktop Chrome)
+          </li>
         </ul>
       </section>
 

@@ -25,18 +25,15 @@ export function RoutineEditorSaveBar({
   saved,
   onSave,
 }: RoutineEditorSaveBarProps) {
-  const hint = !isDirty && !saving
-    ? isNew
-      ? "Add at least one day and exercise to create your routine."
-      : "No changes to save yet."
-    : null;
+  const hint =
+    !isDirty && !saving
+      ? isNew
+        ? "Add at least one day and exercise to create your routine."
+        : "No changes to save yet."
+      : null;
 
   const success =
-    saved && !isDirty
-      ? isNew
-        ? "Routine created."
-        : "Routine saved."
-      : null;
+    saved && !isDirty ? (isNew ? "Routine created." : "Routine saved.") : null;
 
   return (
     <div
@@ -73,11 +70,7 @@ export function RoutineEditorSaveBar({
           onClick={onSave}
         >
           <Save className="h-4 w-4" aria-hidden />
-          {saving
-            ? "Saving…"
-            : isNew
-              ? "Create routine"
-              : "Save routine"}
+          {saving ? "Saving…" : isNew ? "Create routine" : "Save routine"}
         </Button>
       </div>
     </div>

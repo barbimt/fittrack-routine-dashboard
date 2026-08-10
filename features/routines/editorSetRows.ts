@@ -81,9 +81,7 @@ export function setRowsToExercisePatch(
   const repsValues = cleaned.map((row) => row.reps.trim() || "0");
   const uniqueReps = [...new Set(repsValues)];
   const targetRepsRaw =
-    uniqueReps.length === 1
-      ? uniqueReps[0]
-      : repsValues[repsValues.length - 1];
+    uniqueReps.length === 1 ? uniqueReps[0] : repsValues[repsValues.length - 1];
   const targetReps =
     !targetRepsRaw || targetRepsRaw === "0" ? null : targetRepsRaw;
 

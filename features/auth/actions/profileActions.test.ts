@@ -27,10 +27,7 @@ vi.mock("@/lib/supabase/server", () => ({
   })),
 }));
 
-import {
-  getUserProfile,
-  updateUserProfile,
-} from "./profileActions";
+import { getUserProfile, updateUserProfile } from "./profileActions";
 
 describe("profileActions", () => {
   beforeEach(() => {

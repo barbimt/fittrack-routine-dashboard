@@ -53,9 +53,7 @@ export function ExerciseCard({
   const [editOpen, setEditOpen] = useState(false);
   const progress = getExerciseProgress(exercise);
   const progressPercentage = (progress.completed / progress.total) * 100;
-  const hasRestTime = Boolean(
-    exercise.restTime && exercise.restTime !== "—"
-  );
+  const hasRestTime = Boolean(exercise.restTime && exercise.restTime !== "—");
   const canEdit = !readOnly && Boolean(onEditExercise);
   const canStartRest = !readOnly && hasRestTime && Boolean(onStartRest);
 

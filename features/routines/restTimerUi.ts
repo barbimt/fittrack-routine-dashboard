@@ -76,8 +76,7 @@ export function getRestStartButtonState(input: {
   status?: ExerciseRestTimerStatus | null;
 }): RestStartButtonState {
   const restIsActive = Boolean(input.status?.activeExerciseId);
-  const isForThisExercise =
-    input.status?.activeExerciseId === input.exerciseId;
+  const isForThisExercise = input.status?.activeExerciseId === input.exerciseId;
   const isPaused = Boolean(isForThisExercise && input.status?.isPaused);
   const label = isForThisExercise
     ? isPaused

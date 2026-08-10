@@ -54,9 +54,7 @@ export function EditorSetRowsField({
               value={row.weightKg}
               placeholder="0"
               aria-label={`Set ${index + 1} weight in kg`}
-              onChange={(e) =>
-                onUpdateRow(index, { weightKg: e.target.value })
-              }
+              onChange={(e) => onUpdateRow(index, { weightKg: e.target.value })}
               className="h-10 min-w-0 px-2 text-center text-base tabular-nums md:text-sm"
             />
             <Button

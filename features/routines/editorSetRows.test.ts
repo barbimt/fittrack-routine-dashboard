@@ -130,9 +130,7 @@ describe("update / add / remove editor set rows", () => {
   });
 
   it("appends a copy of the last row", () => {
-    expect(
-      addEditorSetRow([{ reps: "10", weightKg: "50" }])
-    ).toEqual([
+    expect(addEditorSetRow([{ reps: "10", weightKg: "50" }])).toEqual([
       { reps: "10", weightKg: "50" },
       { reps: "10", weightKg: "50" },
     ]);

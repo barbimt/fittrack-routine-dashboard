@@ -19,7 +19,9 @@ const {
     throw new Error("NEXT_REDIRECT");
   }),
   revalidatePathMock: vi.fn(),
-  headersMock: vi.fn(async () => new Headers({ origin: "http://localhost:3000" })),
+  headersMock: vi.fn(
+    async () => new Headers({ origin: "http://localhost:3000" })
+  ),
 }));
 
 vi.mock("@/lib/supabase/server", () => ({
@@ -46,11 +48,7 @@ vi.mock("next/headers", () => ({
   headers: headersMock,
 }));
 
-import {
-  login,
-  signup,
-  signInWithGoogle,
-} from "./authActions";
+import { login, signup, signInWithGoogle } from "./authActions";
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -69,9 +67,9 @@ describe("signup", () => {
       error: null,
     });
 
-    await expect(
-      signup(null, makeForm("a@b.com", "secret1"))
-    ).rejects.toThrow("NEXT_REDIRECT");
+    await expect(signup(null, makeForm("a@b.com", "secret1"))).rejects.toThrow(
+      "NEXT_REDIRECT"
+    );
 
     expect(signOutMock).not.toHaveBeenCalled();
     expect(revalidatePathMock).toHaveBeenCalledWith("/", "layout");
@@ -84,9 +82,9 @@ describe("signup", () => {
       error: null,
     });
 
-    await expect(
-      signup(null, makeForm("a@b.com", "secret1"))
-    ).rejects.toThrow("NEXT_REDIRECT");
+    await expect(signup(null, makeForm("a@b.com", "secret1"))).rejects.toThrow(
+      "NEXT_REDIRECT"
+    );
 
     expect(signOutMock).not.toHaveBeenCalled();
     expect(redirectMock).toHaveBeenCalledWith("/login?registered=1");
@@ -109,9 +107,9 @@ describe("login", () => {
   it("redirects to / on success", async () => {
     signInWithPasswordMock.mockResolvedValue({ error: null });
 
-    await expect(
-      login(null, makeForm("a@b.com", "secret1"))
-    ).rejects.toThrow("NEXT_REDIRECT");
+    await expect(login(null, makeForm("a@b.com", "secret1"))).rejects.toThrow(
+      "NEXT_REDIRECT"
+    );
 
     expect(redirectMock).toHaveBeenCalledWith("/");
   });

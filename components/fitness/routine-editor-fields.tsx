@@ -3,9 +3,7 @@
 import { useState, type ReactNode } from "react";
 import { AlertTriangle, CheckCircle2, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import {
-  MUSCLE_GROUPS,
-} from "@/features/routines/muscleGroups";
+import { MUSCLE_GROUPS } from "@/features/routines/muscleGroups";
 import {
   formatRestLabel,
   formatRestTime,
@@ -333,11 +331,7 @@ export function RestDurationField({
             >
               Clear
             </Button>
-            <Button
-              type="button"
-              size="sm"
-              onClick={() => setOpen(false)}
-            >
+            <Button type="button" size="sm" onClick={() => setOpen(false)}>
               Done
             </Button>
           </div>

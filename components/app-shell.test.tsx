@@ -46,9 +46,7 @@ describe("AppShell", () => {
     const main = document.querySelector("main");
     expect(main).not.toHaveClass("safe-area-pb");
     expect(main?.querySelector(".app-bottom-chrome")).toBeTruthy();
-    expect(
-      screen.getByRole("button", { name: "Save" })
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Save" })).toBeInTheDocument();
     expect(screen.getByText("Page content")).toBeInTheDocument();
   });
 
