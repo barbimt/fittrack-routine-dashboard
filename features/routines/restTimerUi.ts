@@ -21,7 +21,8 @@ export type RestTimerViewModel = {
   clear: () => void;
 };
 
-const REST_TIMER_PAGE_BASE = "flex-1 lg:px-0 lg:py-0";
+/** Tight mobile inset for Today; lg+ horizontal padding comes from AppShell. */
+const REST_TIMER_PAGE_BASE = "flex-1 px-2 pt-3 pb-6 lg:px-0 lg:py-0";
 
 /** Map hook state → props consumed by ExerciseCard. */
 export function toExerciseRestTimerStatus(

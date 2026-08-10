@@ -37,7 +37,7 @@ export function AppShell({ children, aside, navItems, footer }: AppShellProps) {
 
         <main className="safe-area-pb flex min-h-0 flex-1 flex-col max-lg:overflow-y-auto max-lg:overscroll-y-contain">
           {aside ? (
-            <PageContent className="flex w-full max-w-7xl flex-1 gap-8 xl:px-10">
+            <PageContent className="flex w-full max-w-7xl flex-1 gap-8 px-2 py-2 lg:px-8 lg:pt-3 lg:pb-8 xl:px-10">
               <div className="min-w-0 flex-1">{children}</div>
               {aside}
             </PageContent>

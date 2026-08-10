@@ -48,9 +48,12 @@ describe("exerciseCardRestProps", () => {
 });
 
 describe("restTimerPageClassName", () => {
-  it("adds bottom padding only while active", () => {
-    expect(restTimerPageClassName(false)).toBe("flex-1 lg:px-0 lg:py-0");
+  it("uses tight mobile padding and extra bottom space while the timer is active", () => {
+    expect(restTimerPageClassName(false)).toBe(
+      "flex-1 px-2 pt-3 pb-6 lg:px-0 lg:py-0"
+    );
     expect(restTimerPageClassName(true)).toContain("pb-28");
+    expect(restTimerPageClassName(true)).toContain("px-2");
   });
 });
 
