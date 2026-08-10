@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { updateUserProfile } from "@/features/auth/actions/profileActions";
 import { notify } from "@/lib/notify";
@@ -21,11 +21,6 @@ export function ProfileSettingsForm({
   const [displayName, setDisplayName] = useState(initialDisplayName);
   const [email, setEmail] = useState(initialEmail);
   const [isPending, startTransition] = useTransition();
-
-  useEffect(() => {
-    setDisplayName(initialDisplayName);
-    setEmail(initialEmail);
-  }, [initialDisplayName, initialEmail]);
 
   const isDirty =
     displayName.trim() !== initialDisplayName.trim() ||

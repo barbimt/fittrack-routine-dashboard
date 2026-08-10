@@ -65,6 +65,7 @@ export default async function SettingsPage() {
             </CardHeader>
             <CardContent>
               <ProfileSettingsForm
+                key={`${profile.displayName}:${profile.email}`}
                 initialDisplayName={profile.displayName}
                 initialEmail={profile.email}
               />
