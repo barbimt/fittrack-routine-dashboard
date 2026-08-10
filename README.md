@@ -1,22 +1,23 @@
 # FitTrack Routine Dashboard
 
-Premium, mobile-first web app for following a weekly strength routine. Progress is tracked by **completed sets** (not reps).
+Mobile-first web app for following a weekly strength routine. Progress is tracked by **completed sets** (not reps).
 
 **Live demo:** [fittrack-routine-dashboard.vercel.app](https://fittrack-routine-dashboard.vercel.app)
 
 ## Overview
 
-FitTrack lets authenticated users import or edit a weekly workout routine, log sets during training sessions, and track daily progress. Each user has isolated data via Supabase Row Level Security.
+FitTrack lets signed-in users import or edit a weekly workout routine, log sets during training sessions, and track daily progress. Each user has isolated data via Supabase Row Level Security.
 
 ## Features
 
 | Area | Description |
 |------|-------------|
-| Today's workout (`/`) | Active routine from Supabase; day selection; set checkboxes and rep logging; save / edit / reset session |
+| Today's workout (`/`) | Active routine from Supabase; day selection; set checkboxes and rep logging; session save / reset |
 | Excel import (`/upload`) | Client-side `.xlsx` parse; one sheet per training day; save as the active routine |
 | Routine editor (`/editor`) | Edit days, exercises, and prescriptions; persists to Supabase |
-| Auth | Email/password signup and login; protected routes via middleware |
-| Weekly overview (`/week`), analytics (`/progress`) | UI prototypes with mock data (not wired to sessions yet) |
+| Auth (`/login`, `/signup`) | Email/password signup and login; protected routes via middleware |
+| Demo (`/demo`) | Public sample dashboard from mock data (no database) |
+| Weekly overview (`/week`), analytics (`/progress`), settings (`/settings`) | UI with mock or non-persisted data (not wired to sessions yet) |
 
 ## Tech stack
 
@@ -37,6 +38,7 @@ FitTrack lets authenticated users import or edit a weekly workout routine, log s
 | `features/routines/` | Session actions, editor types, DB mapper |
 | `lib/mock-data.ts` | UI types (`TrainingDay`, etc.) and week/progress helpers |
 | `supabase/` | Schema, migrations, reset SQL |
+| `docs/` | Architecture, domain, import, and roadmap |
 
 ## Database
 
@@ -59,6 +61,8 @@ pnpm build     # production build
 pnpm test:run  # unit tests
 pnpm lint      # ESLint
 ```
+
+See [`docs/`](docs/README.md) for architecture and contributor notes. Local Supabase layout: [`supabase/README.md`](supabase/README.md).
 
 ## Design
 

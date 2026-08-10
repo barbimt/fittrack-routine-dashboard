@@ -29,9 +29,11 @@ next-env.d.ts
 # testing
 /coverage
 
-# Local-only docs & Cursor config (not published to remote)
-/docs/
-AGENTS.md
-**/AGENTS.md
+# Local-only Cursor config, learning notes, and scripts (not published)
 /.cursor/
+/docs/CURSOR.md
+/docs/next/
+/docs/react/
+/docs/supabase/
+/docs/typescript/
 /scripts/
