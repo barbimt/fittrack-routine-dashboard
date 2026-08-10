@@ -82,8 +82,10 @@ pnpm dev
 ```bash
 pnpm build     # production build
 pnpm test:run  # unit tests
-pnpm lint      # ESLint
+pnpm check     # lint + format:check + typecheck
 ```
+
+Git hooks (after `pnpm install`): **pre-commit** formats/lints staged files; **pre-push** runs `pnpm lint` and `pnpm format:check` so CI style failures are caught locally.
 
 See [`docs/`](docs/README.md) for architecture and contributor notes. Local Supabase layout: [`supabase/README.md`](supabase/README.md).
 

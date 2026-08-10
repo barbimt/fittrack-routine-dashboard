@@ -30,6 +30,7 @@ pnpm lint          # ESLint
 pnpm lint:fix      # ESLint with auto-fix
 pnpm format        # Prettier write
 pnpm format:check  # Prettier check (CI)
+pnpm check         # lint + format:check + typecheck (local CI gate)
 pnpm typecheck     # tsc --noEmit
 pnpm test          # Vitest watch
 pnpm test:run      # Vitest single run (CI)
@@ -39,6 +40,17 @@ pnpm supabase:stop
 pnpm supabase:status
 pnpm supabase:reset  # re-apply migrations
 ```
+
+### Git hooks (Husky)
+
+After `pnpm install`, hooks run automatically:
+
+| Hook | Runs |
+|------|------|
+| `pre-commit` | `lint-staged` — ESLint + Prettier on staged files |
+| `pre-push` | `pnpm lint && pnpm format:check` |
+
+Agents must **not** use `git commit --no-verify` / skip hooks unless the user explicitly asks. Before committing, if hooks are unavailable, run `pnpm format` and `pnpm lint:fix`, then re-stage.
 
 ## Key paths
 
@@ -100,6 +112,7 @@ Use `components/fitness/` (`Button`, `Input`, `Badge`) for app chrome; `componen
 | `fittrack-ui` | New screens, fitness components, tokens |
 | `fittrack-workout-state` | Checkboxes, reps, day selection, reset |
 | `fittrack-excel-import` | Upload page, parser, preview, template |
+| `fittrack-pre-commit-ci` | Before commit/PR: format, lint, CI gates |
 
 ## Suggested implementation order
 
@@ -114,4 +127,5 @@ See `docs/ROADMAP.md` for checklists.
 ## Commits & Git
 
 - Commit only when the user asks.
+- Never skip Husky with `--no-verify` unless the user explicitly asks.
 - Remote: `origin` → `github.com:barbimt/fittrack-routine-dashboard.git`, branch `main`.
