@@ -9,24 +9,43 @@ import { Plus, Save } from "lucide-react";
 import type { EditorRoutine } from "@/features/routines/editorTypes";
 import { useRoutineEditor } from "@/hooks/use-routine-editor";
 import { Button } from "./button";
+import { Input } from "./input";
 import { useEditorSensors } from "./sortable-row";
-import { StatusBanner } from "./routine-editor-fields";
+import { EditorField, StatusBanner } from "./routine-editor-fields";
 import { RoutineEditorDayCard } from "./routine-editor-day-card";
 
 interface RoutineEditorClientProps {
   routine: EditorRoutine;
+  isNew?: boolean;
 }
 
-export function RoutineEditorClient({ routine }: RoutineEditorClientProps) {
-  const editor = useRoutineEditor(routine);
+export function RoutineEditorClient({
+  routine,
+  isNew = false,
+}: RoutineEditorClientProps) {
+  const editor = useRoutineEditor(routine, { isNew });
   const sensors = useEditorSensors();
 
   return (
     <div className="space-y-4">
+      {isNew ? (
+        <EditorField id="routine-name" label="Routine name">
+          <Input
+            id="routine-name"
+            value={editor.name}
+            onChange={(event) => editor.updateName(event.target.value)}
+            placeholder="My routine"
+            autoComplete="off"
+          />
+        </EditorField>
+      ) : null}
+
       <div className="mb-2">
         <h2 className="text-foreground text-lg font-semibold">Training days</h2>
         <p className="text-muted-foreground text-sm">
-          Drag to reorder, edit any field, then save your changes.
+          {isNew
+            ? "Add days and exercises, then save to create your routine."
+            : "Drag to reorder, edit any field, then save your changes."}
         </p>
       </div>
 
@@ -98,7 +117,7 @@ export function RoutineEditorClient({ routine }: RoutineEditorClientProps) {
 
       {editor.saved && !editor.isDirty ? (
         <StatusBanner variant="success">
-          <p>Routine saved.</p>
+          <p>{isNew ? "Routine created." : "Routine saved."}</p>
         </StatusBanner>
       ) : null}
 
@@ -111,11 +130,17 @@ export function RoutineEditorClient({ routine }: RoutineEditorClientProps) {
           onClick={() => void editor.save()}
         >
           <Save className="h-4 w-4" aria-hidden />
-          {editor.saving ? "Saving…" : "Save routine"}
+          {editor.saving
+            ? "Saving…"
+            : isNew
+              ? "Create routine"
+              : "Save routine"}
         </Button>
         {!editor.isDirty && !editor.saving ? (
           <p className="text-muted-foreground text-xs">
-            No changes to save yet.
+            {isNew
+              ? "Add at least one day and exercise to create your routine."
+              : "No changes to save yet."}
           </p>
         ) : null}
       </div>

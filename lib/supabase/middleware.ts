@@ -30,7 +30,19 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { pathname } = request.nextUrl;
+  const { pathname, searchParams } = request.nextUrl;
+
+  // OAuth PKCE code must hit /auth/callback. If Auth falls back to site_url
+  // (or middleware bounced "/" → "/login" keeping ?code=), recover here.
+  const authCode = searchParams.get("code");
+  if (authCode && !pathname.startsWith("/auth/callback")) {
+    const callbackUrl = request.nextUrl.clone();
+    callbackUrl.pathname = "/auth/callback";
+    if (!callbackUrl.searchParams.get("next")) {
+      callbackUrl.searchParams.set("next", "/");
+    }
+    return NextResponse.redirect(callbackUrl);
+  }
 
   const isPublicPath =
     pathname.startsWith("/login") ||
@@ -44,12 +56,14 @@ export async function updateSession(request: NextRequest) {
   if (!user && !isPublicPath) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/login";
+    loginUrl.search = "";
     return NextResponse.redirect(loginUrl);
   }
 
   if (user && (pathname === "/login" || pathname === "/signup")) {
     const homeUrl = request.nextUrl.clone();
     homeUrl.pathname = "/";
+    homeUrl.search = "";
     return NextResponse.redirect(homeUrl);
   }
 

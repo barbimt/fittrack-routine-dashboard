@@ -35,6 +35,12 @@ describe("validateRoutineDays", () => {
     expect(validateRoutineDays([day()])).toEqual([]);
   });
 
+  it("flags a routine with no training days", () => {
+    const errors = validateRoutineDays([]);
+    expect(errors).toHaveLength(1);
+    expect(errors[0].messages).toContain("Add at least one training day");
+  });
+
   it("flags a day with no exercises", () => {
     const errors = validateRoutineDays([day({ exercises: [] })]);
     expect(errors).toHaveLength(1);

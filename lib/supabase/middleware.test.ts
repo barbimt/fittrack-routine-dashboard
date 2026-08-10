@@ -49,4 +49,24 @@ describe("updateSession", () => {
     expect(response.status).toBe(307);
     expect(response.headers.get("location")).toBe("http://localhost:3000/");
   });
+
+  it("forwards OAuth ?code= on /login to /auth/callback", async () => {
+    const response = await updateSession(
+      makeRequest("/login?code=abc-123&other=1")
+    );
+
+    expect(response.status).toBe(307);
+    expect(response.headers.get("location")).toBe(
+      "http://localhost:3000/auth/callback?code=abc-123&other=1&next=%2F"
+    );
+  });
+
+  it("does not rewrite ?code= already on /auth/callback", async () => {
+    const response = await updateSession(
+      makeRequest("/auth/callback?code=abc-123&next=%2F")
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("location")).toBeNull();
+  });
 });

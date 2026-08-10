@@ -1,7 +1,10 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { ParsedRoutine } from "@/features/routine-import/types";
+import { insertActiveRoutineTree } from "@/features/routines/insertActiveRoutineTree";
 
 export type SaveRoutineResult =
   | { ok: true; routineId: string; dayCount: number; exerciseCount: number }
@@ -33,86 +36,31 @@ export async function saveRoutine(
     return { ok: false, error: "Failed to replace existing routine." };
   }
 
-  const { error: deactivateError } = await supabase
-    .from("routines")
-    .update({ is_active: false })
-    .eq("user_id", userId)
-    .eq("is_active", true);
-
-  if (deactivateError) {
-    return { ok: false, error: "Failed to update existing routines." };
-  }
-
-  const { data: routineRow, error: routineError } = await supabase
-    .from("routines")
-    .insert({
-      user_id: userId,
-      name: routine.name,
-      source: routine.source,
-      is_active: true,
-    })
-    .select("id")
-    .single();
-
-  if (routineError || !routineRow) {
-    return { ok: false, error: "Failed to save routine." };
-  }
-
-  const routineId = routineRow.id as string;
-  let totalExerciseCount = 0;
-
-  for (const day of routine.days) {
-    const { data: dayRow, error: dayError } = await supabase
-      .from("routine_days")
-      .insert({
-        user_id: userId,
-        routine_id: routineId,
-        name: day.name,
-        focus: day.focus,
-        original_name: day.originalName,
-        sort_order: day.sortOrder,
-      })
-      .select("id")
-      .single();
-
-    if (dayError || !dayRow) {
-      return { ok: false, error: `Failed to save day "${day.name}".` };
-    }
-
-    const dayId = dayRow.id as string;
-
-    if (day.exercises.length > 0) {
-      const exerciseRows = day.exercises.map((exercise) => ({
-        user_id: userId,
-        routine_day_id: dayId,
+  const result = await insertActiveRoutineTree(supabase, {
+    userId,
+    name: routine.name,
+    source: routine.source,
+    days: routine.days.map((day) => ({
+      name: day.name,
+      focus: day.focus,
+      originalName: day.originalName,
+      sortOrder: day.sortOrder,
+      exercises: day.exercises.map((exercise) => ({
         name: exercise.name,
         prescription: exercise.prescription,
-        planned_sets: exercise.plannedSets,
-        target_reps: exercise.targetReps,
+        plannedSets: exercise.plannedSets,
+        targetReps: exercise.targetReps,
         weight: exercise.weight,
         notes: exercise.notes,
-        sort_order: exercise.sortOrder,
-      }));
+        sortOrder: exercise.sortOrder,
+      })),
+    })),
+  });
 
-      const { error: exerciseError } = await supabase
-        .from("routine_exercises")
-        .insert(exerciseRows);
-
-      if (exerciseError) {
-        return {
-          ok: false,
-          error: `Failed to save exercises for "${day.name}".`,
-        };
-      }
-
-      totalExerciseCount += day.exercises.length;
-    }
+  if (!result.ok) {
+    return result;
   }
 
-  return {
-    ok: true,
-    routineId,
-    dayCount: routine.days.length,
-    exerciseCount: totalExerciseCount,
-  };
+  revalidatePath("/", "layout");
+  redirect("/");
 }

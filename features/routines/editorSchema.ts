@@ -34,10 +34,14 @@ export function validateRoutineDays(days: EditorDay[]): DayValidationError[] {
   if (result.success) return [];
 
   const byDayIndex = new Map<number, Set<string>>();
+  const rootMessages = new Set<string>();
 
   for (const issue of result.error.issues) {
     const dayIndex = typeof issue.path[0] === "number" ? issue.path[0] : null;
-    if (dayIndex === null) continue;
+    if (dayIndex === null) {
+      rootMessages.add(issue.message);
+      continue;
+    }
 
     const messages = byDayIndex.get(dayIndex) ?? new Set<string>();
 
@@ -48,6 +52,16 @@ export function validateRoutineDays(days: EditorDay[]): DayValidationError[] {
     }
 
     byDayIndex.set(dayIndex, messages);
+  }
+
+  if (byDayIndex.size === 0 && rootMessages.size > 0) {
+    return [
+      {
+        dayId: "routine",
+        dayName: "Routine",
+        messages: [...rootMessages],
+      },
+    ];
   }
 
   return [...byDayIndex.entries()].map(([index, messages]) => ({

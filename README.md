@@ -13,9 +13,10 @@ FitTrack lets authenticated users import or edit a weekly workout routine, log s
 | Area | Description |
 |------|-------------|
 | Today's workout (`/`) | Active routine from Supabase; day selection; set checkboxes and rep logging; save / edit / reset session |
-| Excel import (`/upload`) | Client-side `.xlsx` parse; one sheet per training day; save as the active routine |
-| Routine editor (`/editor`) | Edit days, exercises, and prescriptions; persists to Supabase |
-| Auth | Email/password signup and login; protected routes via middleware |
+| Onboarding (`/`) | When there is no active routine, the dashboard shows import / create-from-scratch CTAs |
+| Excel import (`/upload`) | Client-side `.xlsx` parse; one sheet per training day; save redirects to the dashboard |
+| Routine editor (`/editor`) | Create a routine from scratch or edit the active one; persists to Supabase |
+| Auth | Email/password signup (lands on `/`), Google OAuth, login; protected routes via middleware |
 | Weekly overview (`/week`), analytics (`/progress`) | UI prototypes with mock data (not wired to sessions yet) |
 
 ## Tech stack
@@ -32,9 +33,9 @@ FitTrack lets authenticated users import or edit a weekly workout routine, log s
 | `app/` | Routes and pages |
 | `components/fitness/` | Workout UI (dashboard, sets, editor) |
 | `components/layout/` | Navigation and shell |
-| `features/auth/` | Login, signup, logout |
+| `features/auth/` | Login, signup, Google OAuth, logout |
 | `features/routine-import/` | Excel parser, preview, save routine |
-| `features/routines/` | Session actions, editor types, DB mapper |
+| `features/routines/` | Session actions, editor types, create/update routine, DB mapper |
 | `lib/mock-data.ts` | UI types (`TrainingDay`, etc.) and week/progress helpers |
 | `supabase/` | Schema, migrations, reset SQL |
 
@@ -53,6 +54,13 @@ pnpm install
 pnpm supabase:start && pnpm supabase:reset
 pnpm dev
 ```
+
+### Local checklist (onboarding)
+
+1. Sign up with email → should land on `/` with the empty dashboard if you have no routine.
+2. Optional Google: set `SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID` / `SECRET` (see `supabase/README.md`), restart Supabase, use **Continue with Google**.
+3. From `/`, **Create from scratch** → `/editor` → add day + exercise → save → open `/`.
+4. Or **Import routine** → save Excel → redirects to `/`.
 
 ```bash
 pnpm build     # production build

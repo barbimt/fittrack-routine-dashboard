@@ -3,13 +3,17 @@ import { act, renderHook } from "@testing-library/react";
 import type { DragEndEvent } from "@dnd-kit/core";
 import type { EditorRoutine } from "@/features/routines/editorTypes";
 
-const { updateRoutineMock, refreshMock } = vi.hoisted(() => ({
-  updateRoutineMock: vi.fn(),
-  refreshMock: vi.fn(),
-}));
+const { updateRoutineMock, createRoutineMock, refreshMock } = vi.hoisted(
+  () => ({
+    updateRoutineMock: vi.fn(),
+    createRoutineMock: vi.fn(),
+    refreshMock: vi.fn(),
+  })
+);
 
 vi.mock("@/features/routines/actions/routineActions", () => ({
   updateRoutine: updateRoutineMock,
+  createRoutine: createRoutineMock,
 }));
 
 vi.mock("next/navigation", () => ({
@@ -51,6 +55,10 @@ function makeRoutine(): EditorRoutine {
   };
 }
 
+function makeEmptyRoutine(): EditorRoutine {
+  return { id: "new", name: "My routine", days: [] };
+}
+
 function dragEvent(activeId: string, overId: string): DragEndEvent {
   return {
     active: { id: activeId },
@@ -61,6 +69,7 @@ function dragEvent(activeId: string, overId: string): DragEndEvent {
 beforeEach(() => {
   vi.clearAllMocks();
   updateRoutineMock.mockResolvedValue({ ok: true });
+  createRoutineMock.mockResolvedValue({ ok: true, routineId: "created-1" });
 });
 
 describe("useRoutineEditor", () => {
@@ -202,5 +211,42 @@ describe("useRoutineEditor", () => {
     expect(result.current.saveError).toBe("boom");
     expect(result.current.saved).toBe(false);
     expect(refreshMock).not.toHaveBeenCalled();
+  });
+
+  it("calls createRoutine when isNew and skips updateRoutine", async () => {
+    const { result } = renderHook(() =>
+      useRoutineEditor(makeEmptyRoutine(), { isNew: true })
+    );
+
+    act(() => result.current.addDay());
+    const dayId = result.current.days[0].id;
+    act(() => result.current.addExercise(dayId));
+
+    await act(async () => {
+      await result.current.save();
+    });
+
+    expect(createRoutineMock).toHaveBeenCalledTimes(1);
+    expect(createRoutineMock.mock.calls[0][0]).toMatchObject({
+      name: "My routine",
+      days: expect.any(Array),
+    });
+    expect(updateRoutineMock).not.toHaveBeenCalled();
+    expect(refreshMock).toHaveBeenCalledTimes(1);
+    expect(result.current.saved).toBe(true);
+  });
+
+  it("blocks create when the new routine has no days", async () => {
+    const { result } = renderHook(() =>
+      useRoutineEditor(makeEmptyRoutine(), { isNew: true })
+    );
+
+    act(() => result.current.updateName("Legs"));
+    await act(async () => {
+      await result.current.save();
+    });
+
+    expect(result.current.dayErrors.length).toBeGreaterThan(0);
+    expect(createRoutineMock).not.toHaveBeenCalled();
   });
 });
