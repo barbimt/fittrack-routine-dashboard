@@ -38,7 +38,7 @@ export default async function EditorPage() {
 
   return (
     <AppShell>
-      <PageContent className="max-w-4xl">
+      <PageContent className="max-w-4xl pb-28">
         <header className="mb-6">
           <h1 className="text-foreground text-2xl font-bold tracking-tight">
             {isNew ? "Create routine" : "Routine Editor"}

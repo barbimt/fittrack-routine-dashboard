@@ -5,7 +5,7 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { Plus, Save } from "lucide-react";
+import { Plus } from "lucide-react";
 import type { EditorRoutine } from "@/features/routines/editorTypes";
 import { useRoutineEditor } from "@/hooks/use-routine-editor";
 import { Button } from "./button";
@@ -13,6 +13,7 @@ import { Input } from "./input";
 import { useEditorSensors } from "./sortable-row";
 import { EditorField, StatusBanner } from "./routine-editor-fields";
 import { RoutineEditorDayCard } from "./routine-editor-day-card";
+import { RoutineEditorSaveBar } from "./routine-editor-save-bar";
 
 interface RoutineEditorClientProps {
   routine: EditorRoutine;
@@ -109,41 +110,14 @@ export function RoutineEditorClient({
         Add training day
       </Button>
 
-      {editor.saveError ? (
-        <StatusBanner variant="error">
-          <p>{editor.saveError}</p>
-        </StatusBanner>
-      ) : null}
-
-      {editor.saved && !editor.isDirty ? (
-        <StatusBanner variant="success">
-          <p>{isNew ? "Routine created." : "Routine saved."}</p>
-        </StatusBanner>
-      ) : null}
-
-      <div className="border-border mt-6 flex flex-col items-stretch gap-2 border-t pt-6 sm:items-end">
-        <Button
-          size="lg"
-          type="button"
-          className="gap-2"
-          disabled={!editor.isDirty || editor.saving}
-          onClick={() => void editor.save()}
-        >
-          <Save className="h-4 w-4" aria-hidden />
-          {editor.saving
-            ? "Saving…"
-            : isNew
-              ? "Create routine"
-              : "Save routine"}
-        </Button>
-        {!editor.isDirty && !editor.saving ? (
-          <p className="text-muted-foreground text-xs">
-            {isNew
-              ? "Add at least one day and exercise to create your routine."
-              : "No changes to save yet."}
-          </p>
-        ) : null}
-      </div>
+      <RoutineEditorSaveBar
+        isNew={isNew}
+        isDirty={editor.isDirty}
+        saving={editor.saving}
+        saveError={editor.saveError}
+        saved={editor.saved}
+        onSave={() => void editor.save()}
+      />
     </div>
   );
 }
