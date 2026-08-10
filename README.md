@@ -1,12 +1,12 @@
 # FitTrack Routine Dashboard
 
-Premium, mobile-first web app for following a weekly strength routine. Progress is tracked by **completed sets** (not reps).
+Mobile-first web app for following a weekly strength routine. Progress is tracked by **completed sets** (not reps).
 
 **Live demo:** [fittrack-routine-dashboard.vercel.app](https://fittrack-routine-dashboard.vercel.app)
 
 ## Overview
 
-FitTrack lets authenticated users import or edit a weekly workout routine, log sets during training sessions, and track daily progress. Each user has isolated data via Supabase Row Level Security.
+FitTrack lets signed-in users import or edit a weekly workout routine, log sets during training sessions, and track daily progress. Each user has isolated data via Supabase Row Level Security.
 
 ## Features
 
@@ -17,6 +17,8 @@ FitTrack lets authenticated users import or edit a weekly workout routine, log s
 | Excel import (`/upload`) | Client-side `.xlsx` parse; one sheet per training day; template-first upload UX; save redirects to the dashboard |
 | Routine editor (`/editor`) | Create a routine from scratch or edit the active one; persists to Supabase; fixed save bar |
 | Auth | Email/password signup (lands on `/`), Google OAuth, login; protected routes via middleware |
+| Demo (`/demo`) | Public sample dashboard from mock data (no database) |
+| Settings (`/settings`) | Editable display name and email (Supabase profile + Auth confirmation); help links |
 | Rest timer | Manual rest countdown on Today (start / pause / resume) with shared notifications |
 
 ### Not shipped yet (feature-gated)
@@ -52,6 +54,7 @@ Audiences supported in the catalog: `public` · `authenticated` · `paid` (paid 
 | `lib/notify.ts` | App-wide toast helpers (`notify.*` / `notify.workout.*`) |
 | `lib/mock-data.ts` | UI types (`TrainingDay`, etc.) and week/progress helpers |
 | `supabase/` | Schema, migrations, reset SQL |
+| `docs/` | Architecture, domain, import, and roadmap |
 
 ## Database
 
@@ -81,6 +84,8 @@ pnpm build     # production build
 pnpm test:run  # unit tests
 pnpm lint      # ESLint
 ```
+
+See [`docs/`](docs/README.md) for architecture and contributor notes. Local Supabase layout: [`supabase/README.md`](supabase/README.md).
 
 ## Design
 

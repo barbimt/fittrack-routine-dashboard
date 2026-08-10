@@ -23,7 +23,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: "FitTrack Routine Dashboard",
   description:
-    "Premium mobile-first fitness workout UI prototype — track routines, sets, and weekly progress.",
+    "Mobile-first strength routine app — track workouts by completed sets, import routines, and log sessions.",
   icons: {
     icon: [
       {
