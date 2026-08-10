@@ -9,6 +9,8 @@ import { Input } from "./input";
 
 interface SetRowProps {
   set: ExerciseSet;
+  /** Used when the set has no per-set load (e.g. demo mock data). */
+  fallbackWeight?: string | null;
   onToggle?: (setId: string) => void;
   onRepsChange?: (setId: string, reps: number | null) => void;
   onRepsSave?: (setId: string, reps: number | null) => void;
@@ -17,6 +19,7 @@ interface SetRowProps {
 
 export function SetRow({
   set,
+  fallbackWeight,
   onToggle,
   onRepsChange,
   onRepsSave,
@@ -120,7 +123,7 @@ export function SetRow({
 
       <SetTargetLabel
         targetReps={set.targetReps}
-        targetWeight={set.targetWeight}
+        targetWeight={set.targetWeight ?? fallbackWeight}
         className="text-muted-foreground min-w-0 flex-1"
       />
 

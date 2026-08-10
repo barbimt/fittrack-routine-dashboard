@@ -36,6 +36,9 @@ export function SetTargetLabel({
   targetWeight,
   className,
 }: SetTargetLabelProps) {
+  const weight =
+    targetWeight && targetWeight !== "—" ? targetWeight : null;
+
   return (
     <span
       className={cn(
@@ -45,11 +48,11 @@ export function SetTargetLabel({
     >
       <span className="sr-only">Target: </span>
       <span className="shrink-0 tabular-nums">{targetReps}</span>
-      {targetWeight ? (
+      {weight ? (
         <>
           <span className="text-muted-foreground shrink-0">·</span>
           <WeightLabel
-            weight={targetWeight}
+            weight={weight}
             className="min-w-0"
             iconClassName="text-muted-foreground"
           />

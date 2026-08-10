@@ -174,6 +174,7 @@ export function ExerciseCard({
             <SetRow
               key={`${set.id}-${setRowRevision}`}
               set={set}
+              fallbackWeight={exercise.weight}
               onToggle={readOnly ? undefined : onSetToggle}
               onRepsChange={readOnly ? undefined : onRepsChange}
               onRepsSave={readOnly ? undefined : onRepsSave}

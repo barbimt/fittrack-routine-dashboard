@@ -73,6 +73,25 @@ describe("SetRow", () => {
     expect(onToggle).toHaveBeenCalledWith("set-1");
   });
 
+  it("falls back to exercise weight when the set has no targetWeight", () => {
+    render(<SetRow set={baseSet} fallbackWeight="60kg" readOnly />);
+
+    expect(screen.getByText("60kg")).toBeInTheDocument();
+  });
+
+  it("prefers per-set targetWeight over the exercise fallback", () => {
+    render(
+      <SetRow
+        set={{ ...baseSet, targetWeight: "40kg" }}
+        fallbackWeight="60kg"
+        readOnly
+      />
+    );
+
+    expect(screen.getByText("40kg")).toBeInTheDocument();
+    expect(screen.queryByText("60kg")).not.toBeInTheDocument();
+  });
+
   it("does not toggle when clicking the actual reps input", async () => {
     const onToggle = vi.fn();
     render(
