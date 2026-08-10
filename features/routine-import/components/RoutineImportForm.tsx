@@ -1,24 +1,17 @@
 "use client";
 
 import { useCallback, useId, useState } from "react";
-import Link from "next/link";
 import { UploadDropzone } from "@/components/fitness/upload-dropzone";
 import { EmptyState } from "@/components/fitness/empty-state";
 import { Button } from "@/components/fitness/button";
-import { FileSpreadsheet, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { FileSpreadsheet, AlertTriangle } from "lucide-react";
 import { parseRoutineWorkbook } from "../utils/parseRoutineWorkbook";
 import type { ParsedRoutine } from "../types";
 import { ImportPreview } from "./ImportPreview";
 import { ImportWarnings } from "./ImportWarnings";
 import { saveRoutine } from "../actions/saveRoutineAction";
 
-type ImportPhase =
-  | "idle"
-  | "parsing"
-  | "preview"
-  | "saving"
-  | "saved"
-  | "error";
+type ImportPhase = "idle" | "parsing" | "preview" | "saving" | "error";
 
 export function RoutineImportForm() {
   const inputId = useId();
@@ -30,10 +23,6 @@ export function RoutineImportForm() {
     []
   );
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [savedMeta, setSavedMeta] = useState<{
-    dayCount: number;
-    exerciseCount: number;
-  } | null>(null);
 
   const resetImport = useCallback(() => {
     setPhase("idle");
@@ -42,7 +31,6 @@ export function RoutineImportForm() {
     setFatalError(null);
     setParseWarnings([]);
     setSaveError(null);
-    setSavedMeta(null);
   }, []);
 
   const handleSave = useCallback(async () => {
@@ -50,13 +38,8 @@ export function RoutineImportForm() {
     setPhase("saving");
     setSaveError(null);
     const result = await saveRoutine(routine);
-    if (result.ok) {
-      setSavedMeta({
-        dayCount: result.dayCount,
-        exerciseCount: result.exerciseCount,
-      });
-      setPhase("saved");
-    } else {
+    // Successful saves redirect from the server action; only errors return.
+    if (!result.ok) {
       setSaveError(result.error);
       setPhase("preview");
     }
@@ -91,8 +74,6 @@ export function RoutineImportForm() {
     setPhase("preview");
   }, []);
 
-  const showDropzone =
-    phase === "idle" || phase === "parsing" || phase === "error";
   const uploadedMeta =
     selectedFile &&
     (phase === "preview" || phase === "parsing" || phase === "saving")
@@ -111,10 +92,10 @@ export function RoutineImportForm() {
                   aria-hidden
                 />
               }
-              title="No file selected"
-              description="Drop your .xlsx routine file here or browse from your device."
+              title="Upload your FitTrack template"
+              description="Choose the .xlsx you filled from the FitTrack template — not a random gym spreadsheet."
               primaryAction={{
-                label: "Choose file",
+                label: "Choose .xlsx file",
                 onClick: () => {
                   document.getElementById(inputId)?.click();
                 },
@@ -188,37 +169,6 @@ export function RoutineImportForm() {
             </Button>
           </div>
         </>
-      ) : null}
-
-      {phase === "saved" && savedMeta ? (
-        <div className="border-success/30 bg-success/5 space-y-4 rounded-2xl border p-6 text-center">
-          <div className="flex justify-center">
-            <CheckCircle2 className="text-success h-10 w-10" aria-hidden />
-          </div>
-          <div>
-            <p className="text-foreground text-base font-semibold">
-              Routine saved
-            </p>
-            <p className="text-muted-foreground mt-1 text-sm">
-              {savedMeta.dayCount} {savedMeta.dayCount === 1 ? "day" : "days"} ·{" "}
-              {savedMeta.exerciseCount}{" "}
-              {savedMeta.exerciseCount === 1 ? "exercise" : "exercises"}
-            </p>
-          </div>
-          <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
-            <Button size="sm" type="button" asChild>
-              <Link href="/">Go to dashboard</Link>
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              type="button"
-              onClick={resetImport}
-            >
-              Import another
-            </Button>
-          </div>
-        </div>
       ) : null}
     </div>
   );

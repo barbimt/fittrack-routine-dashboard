@@ -81,6 +81,8 @@ export function RoutineEditorDayCard({
               id={`${day.id}-focus`}
               label="Focus"
               value={day.focus}
+              placeholder="e.g. Glutes, Push, Upper body"
+              hint="Optional — the main muscle group or theme for this day."
               onValueChange={(focus) => onDayChange({ focus })}
             />
           </div>

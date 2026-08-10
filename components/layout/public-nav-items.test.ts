@@ -7,11 +7,11 @@ describe("publicNavItems", () => {
     expect(new Set(hrefs).size).toBe(hrefs.length);
   });
 
-  it("includes demo and showcase routes", () => {
+  it("includes the demo route and hides unfinished surfaces", () => {
     const hrefs = publicNavItems.map((item) => item.href);
-    expect(hrefs).toEqual(
-      expect.arrayContaining(["/demo", "/week", "/progress"])
-    );
+    expect(hrefs).toContain("/demo");
+    expect(hrefs).not.toContain("/week");
+    expect(hrefs).not.toContain("/progress");
   });
 
   it("defines a label for each item", () => {

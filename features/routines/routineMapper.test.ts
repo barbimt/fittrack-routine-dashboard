@@ -5,6 +5,7 @@ import {
   buildTrainingDayFromSession,
   mapRoutineToTrainingDays,
   mergeSetLogsIntoDay,
+  replaceExerciseInDay,
 } from "./routineMapper";
 import type { TrainingDay } from "@/lib/mock-data";
 
@@ -72,7 +73,26 @@ describe("mergeSetLogsIntoDay", () => {
     expect(secondSet.completed).toBe(false);
   });
 
-  it("overlays target_weight from set logs", () => {
+  it("keeps planned targets from the routine when logs have stale weights", () => {
+    const dayWithTargets: TrainingDay = {
+      ...baseDay,
+      exercises: [
+        {
+          ...baseDay.exercises[0],
+          sets: [
+            {
+              ...baseDay.exercises[0].sets[0],
+              targetWeight: "40kg",
+            },
+            {
+              ...baseDay.exercises[0].sets[1],
+              targetWeight: "35kg",
+            },
+          ],
+        },
+      ],
+    };
+
     const logs: WorkoutSetLog[] = [
       {
         id: "log-uuid-1",
@@ -81,7 +101,21 @@ describe("mergeSetLogsIntoDay", () => {
         routine_exercise_id: "ex-1",
         set_number: 1,
         target_reps: "10",
-        target_weight: "7kg cada lado",
+        target_weight: "60kg",
+        exercise_name: "Hip Thrust",
+        actual_reps: null,
+        completed: false,
+        created_at: "2026-01-01T00:00:00Z",
+        updated_at: "2026-01-01T00:00:00Z",
+      },
+      {
+        id: "log-uuid-2",
+        user_id: "user-1",
+        workout_session_id: "session-1",
+        routine_exercise_id: "ex-1",
+        set_number: 2,
+        target_reps: "10",
+        target_weight: "60kg",
         exercise_name: "Hip Thrust",
         actual_reps: null,
         completed: false,
@@ -90,8 +124,9 @@ describe("mergeSetLogsIntoDay", () => {
       },
     ];
 
-    const merged = mergeSetLogsIntoDay(baseDay, logs);
-    expect(merged.exercises[0].sets[0].targetWeight).toBe("7kg cada lado");
+    const merged = mergeSetLogsIntoDay(dayWithTargets, logs);
+    expect(merged.exercises[0].sets[0].targetWeight).toBe("40kg");
+    expect(merged.exercises[0].sets[1].targetWeight).toBe("35kg");
   });
 });
 
@@ -193,6 +228,65 @@ describe("appendExerciseToDay", () => {
       targetWeight: "15kg",
       completed: false,
     });
+  });
+});
+
+describe("replaceExerciseInDay", () => {
+  it("replaces the matching exercise and refreshes set targets", () => {
+    const updated: RoutineExercise = {
+      ...routineExerciseFixture,
+      id: "ex-1",
+      name: "Hip Thrust",
+      prescription: "1x12 40kg-1x12 35kg",
+      planned_sets: 2,
+      target_reps: "12",
+      weight: null,
+      muscle_group: "Glutes",
+    };
+
+    const logs: WorkoutSetLog[] = [
+      {
+        id: "log-1",
+        user_id: "user-1",
+        workout_session_id: "session-1",
+        routine_exercise_id: "ex-1",
+        set_number: 1,
+        target_reps: "12",
+        target_weight: "40kg",
+        exercise_name: "Hip Thrust",
+        actual_reps: 12,
+        completed: true,
+        created_at: "2026-01-01T00:00:00Z",
+        updated_at: "2026-01-01T00:00:00Z",
+      },
+      {
+        id: "log-2",
+        user_id: "user-1",
+        workout_session_id: "session-1",
+        routine_exercise_id: "ex-1",
+        set_number: 2,
+        target_reps: "12",
+        target_weight: "35kg",
+        exercise_name: "Hip Thrust",
+        actual_reps: null,
+        completed: false,
+        created_at: "2026-01-01T00:00:00Z",
+        updated_at: "2026-01-01T00:00:00Z",
+      },
+    ];
+
+    const next = replaceExerciseInDay(baseDay, updated, logs);
+
+    expect(next.exercises).toHaveLength(1);
+    expect(next.exercises[0].name).toBe("Hip Thrust");
+    expect(next.exercises[0].sets).toHaveLength(2);
+    expect(next.exercises[0].sets[0]).toMatchObject({
+      id: "log-1",
+      targetWeight: "40kg",
+      completed: true,
+      actualReps: 12,
+    });
+    expect(next.exercises[0].sets[1].targetWeight).toBe("35kg");
   });
 });
 

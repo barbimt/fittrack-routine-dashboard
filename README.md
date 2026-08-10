@@ -12,12 +12,26 @@ FitTrack lets signed-in users import or edit a weekly workout routine, log sets 
 
 | Area | Description |
 |------|-------------|
-| Today's workout (`/`) | Active routine from Supabase; day selection; set checkboxes and rep logging; session save / reset |
-| Excel import (`/upload`) | Client-side `.xlsx` parse; one sheet per training day; save as the active routine |
-| Routine editor (`/editor`) | Edit days, exercises, and prescriptions; persists to Supabase |
-| Auth (`/login`, `/signup`) | Email/password signup and login; protected routes via middleware |
+| Today's workout (`/`) | Active routine from Supabase; day selection; set checkboxes and rep logging; save / edit / reset session |
+| Onboarding (`/`) | When there is no active routine, the dashboard shows import / create-from-scratch CTAs |
+| Excel import (`/upload`) | Client-side `.xlsx` parse; one sheet per training day; template-first upload UX; save redirects to the dashboard |
+| Routine editor (`/editor`) | Create a routine from scratch or edit the active one; persists to Supabase; fixed save bar |
+| Auth | Email/password signup (lands on `/`), Google OAuth, login; protected routes via middleware |
 | Demo (`/demo`) | Public sample dashboard from mock data (no database) |
-| Weekly overview (`/week`), analytics (`/progress`), settings (`/settings`) | UI with mock or non-persisted data (not wired to sessions yet) |
+| Settings (`/settings`) | Editable display name and email (Supabase profile + Auth confirmation); help links |
+| Rest timer | Manual rest countdown on Today (start / pause / resume) with shared notifications |
+
+### Not shipped yet (feature-gated)
+
+Week Overview (`/week`) and Progress (`/progress`) are **UI prototypes** and stay **off by default** — hidden from nav and blocked in middleware until ready.
+
+| How | Where |
+|-----|--------|
+| Catalog + access rules | [`lib/features/`](./lib/features/) |
+| Full guide | [`lib/features/README.md`](./lib/features/README.md) |
+| Env overrides | [`.env.example`](./.env.example) (`NEXT_PUBLIC_FEATURE_*`) |
+
+Audiences supported in the catalog: `public` · `authenticated` · `paid` (paid wiring comes later with billing).
 
 ## Tech stack
 
@@ -33,9 +47,11 @@ FitTrack lets signed-in users import or edit a weekly workout routine, log sets 
 | `app/` | Routes and pages |
 | `components/fitness/` | Workout UI (dashboard, sets, editor) |
 | `components/layout/` | Navigation and shell |
-| `features/auth/` | Login, signup, logout |
+| `features/auth/` | Login, signup, Google OAuth, logout |
 | `features/routine-import/` | Excel parser, preview, save routine |
-| `features/routines/` | Session actions, editor types, DB mapper |
+| `features/routines/` | Session actions, editor types, create/update routine, DB mapper |
+| `lib/features/` | Product feature catalog, release flags, audience access |
+| `lib/notify.ts` | App-wide toast helpers (`notify.*` / `notify.workout.*`) |
 | `lib/mock-data.ts` | UI types (`TrainingDay`, etc.) and week/progress helpers |
 | `supabase/` | Schema, migrations, reset SQL |
 | `docs/` | Architecture, domain, import, and roadmap |
@@ -48,13 +64,20 @@ FitTrack lets signed-in users import or edit a weekly workout routine, log sets 
 
 ## Development
 
-Requires Node.js 20+, pnpm, and Docker (for local Supabase). Copy `supabase/env.local.example` to `.env.local` and set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` from `pnpm supabase:status -o env`.
+Requires Node.js 20+, pnpm, and Docker (for local Supabase). Copy `.env.example` to `.env.local` and set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` from `pnpm supabase:status -o env` (see also `supabase/README.md`).
 
 ```bash
 pnpm install
 pnpm supabase:start && pnpm supabase:reset
 pnpm dev
 ```
+
+### Local checklist (onboarding)
+
+1. Sign up with email → should land on `/` with the empty dashboard if you have no routine.
+2. Optional Google: set `SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID` / `SECRET` (see `supabase/README.md`), restart Supabase, use **Continue with Google**.
+3. From `/`, **Create from scratch** → `/editor` → add day + exercise → save → open `/`.
+4. Or **Import routine** → download FitTrack template → fill → upload → save → redirects to `/`.
 
 ```bash
 pnpm build     # production build

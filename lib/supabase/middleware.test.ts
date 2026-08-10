@@ -22,7 +22,7 @@ describe("updateSession", () => {
     mockGetUser.mockResolvedValue({ data: { user: null } });
   });
 
-  it.each(["/demo", "/preview", "/week", "/progress"])(
+  it.each(["/demo", "/preview"])(
     "allows unauthenticated access to %s",
     async (pathname) => {
       const response = await updateSession(makeRequest(pathname));
@@ -31,6 +31,29 @@ describe("updateSession", () => {
       expect(response.headers.get("location")).toBeNull();
     }
   );
+
+  it.each(["/week", "/progress"])(
+    "redirects unfinished public surfaces like %s to /demo when logged out",
+    async (pathname) => {
+      const response = await updateSession(makeRequest(pathname));
+
+      expect(response.status).toBe(307);
+      expect(response.headers.get("location")).toBe(
+        "http://localhost:3000/demo"
+      );
+    }
+  );
+
+  it("redirects unfinished surfaces to / when authenticated", async () => {
+    mockGetUser.mockResolvedValue({
+      data: { user: { id: "user-1", email: "demo@example.com" } },
+    });
+
+    const response = await updateSession(makeRequest("/progress"));
+
+    expect(response.status).toBe(307);
+    expect(response.headers.get("location")).toBe("http://localhost:3000/");
+  });
 
   it("redirects unauthenticated users from protected routes to /login", async () => {
     const response = await updateSession(makeRequest("/upload"));
@@ -48,5 +71,25 @@ describe("updateSession", () => {
 
     expect(response.status).toBe(307);
     expect(response.headers.get("location")).toBe("http://localhost:3000/");
+  });
+
+  it("forwards OAuth ?code= on /login to /auth/callback", async () => {
+    const response = await updateSession(
+      makeRequest("/login?code=abc-123&other=1")
+    );
+
+    expect(response.status).toBe(307);
+    expect(response.headers.get("location")).toBe(
+      "http://localhost:3000/auth/callback?code=abc-123&other=1&next=%2F"
+    );
+  });
+
+  it("does not rewrite ?code= already on /auth/callback", async () => {
+    const response = await updateSession(
+      makeRequest("/auth/callback?code=abc-123&next=%2F")
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("location")).toBeNull();
   });
 });

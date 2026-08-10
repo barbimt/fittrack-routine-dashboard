@@ -73,3 +73,59 @@ export function buildSetLogRowsForExercises(
     buildSetLogRowsForExercise(userId, sessionId, exercise)
   );
 }
+
+export type ExistingSetLogRef = {
+  id: string;
+  set_number: number;
+};
+
+export type SetLogTargetUpdate = {
+  id: string;
+  target_reps: string | null;
+  target_weight: string | null;
+  exercise_name: string;
+};
+
+/**
+ * Align session set logs with the current exercise prescription.
+ * Preserves log ids (and thus completed / actual_reps) for matching set numbers.
+ */
+export function planSetLogReconciliation(
+  userId: string,
+  sessionId: string,
+  exercise: ExerciseForSetLogs,
+  existingLogs: ExistingSetLogRef[]
+): {
+  updates: SetLogTargetUpdate[];
+  inserts: SetLogInsertRow[];
+  deleteIds: string[];
+} {
+  const desired = buildSetLogRowsForExercise(userId, sessionId, exercise);
+  const byNumber = new Map(
+    existingLogs.map((log) => [log.set_number, log] as const)
+  );
+  const desiredNumbers = new Set(desired.map((row) => row.set_number));
+
+  const updates: SetLogTargetUpdate[] = [];
+  const inserts: SetLogInsertRow[] = [];
+
+  for (const row of desired) {
+    const existing = byNumber.get(row.set_number);
+    if (existing) {
+      updates.push({
+        id: existing.id,
+        target_reps: row.target_reps,
+        target_weight: row.target_weight,
+        exercise_name: row.exercise_name,
+      });
+    } else {
+      inserts.push(row);
+    }
+  }
+
+  const deleteIds = existingLogs
+    .filter((log) => !desiredNumbers.has(log.set_number))
+    .map((log) => log.id);
+
+  return { updates, inserts, deleteIds };
+}

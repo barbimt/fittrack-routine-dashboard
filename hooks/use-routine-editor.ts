@@ -18,7 +18,10 @@ import {
   validateRoutineDays,
   type DayValidationError,
 } from "@/features/routines/editorSchema";
-import { updateRoutine } from "@/features/routines/actions/routineActions";
+import {
+  createRoutine,
+  updateRoutine,
+} from "@/features/routines/actions/routineActions";
 import { useDirtyState } from "./use-dirty-state";
 
 function reorder<T extends { id: string }>(
@@ -33,12 +36,20 @@ function reorder<T extends { id: string }>(
   return arrayMove(items, oldIndex, newIndex);
 }
 
+export type UseRoutineEditorOptions = {
+  isNew?: boolean;
+};
+
 /**
  * Owns all editor state: the working copy of days, dirty tracking against the
  * last-saved baseline, validation, and the patch-based save. UI components stay
  * presentational and only call the returned actions.
  */
-export function useRoutineEditor(routine: EditorRoutine) {
+export function useRoutineEditor(
+  routine: EditorRoutine,
+  options: UseRoutineEditorOptions = {}
+) {
+  const { isNew = false } = options;
   const router = useRouter();
 
   // Editable draft of the routine's days plus dirty tracking against the last
@@ -47,9 +58,10 @@ export function useRoutineEditor(routine: EditorRoutine) {
     value: days,
     setValue: setDays,
     baseline,
-    isDirty,
+    isDirty: daysDirty,
   } = useDirtyState(routine.days);
 
+  const [name, setName] = useState(routine.name);
   const [expandedDayId, setExpandedDayId] = useState<string | null>(
     routine.days[0]?.id ?? null
   );
@@ -57,6 +69,9 @@ export function useRoutineEditor(routine: EditorRoutine) {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const [dayErrors, setDayErrors] = useState<DayValidationError[]>([]);
+
+  const nameDirty = isNew && name.trim() !== routine.name.trim();
+  const isDirty = daysDirty || nameDirty;
 
   const mutate = useCallback(
     (updater: (prev: EditorDay[]) => EditorDay[]) => {
@@ -74,6 +89,12 @@ export function useRoutineEditor(routine: EditorRoutine) {
     },
     [mutate]
   );
+
+  const updateName = useCallback((nextName: string) => {
+    setSaveError(null);
+    setSaved(false);
+    setName(nextName);
+  }, []);
 
   const toggleDay = useCallback((dayId: string) => {
     setExpandedDayId((current) => (current === dayId ? null : dayId));
@@ -173,6 +194,11 @@ export function useRoutineEditor(routine: EditorRoutine) {
     setSaveError(null);
     setSaved(false);
 
+    if (isNew && !name.trim()) {
+      setSaveError("Routine name is required.");
+      return;
+    }
+
     const validationErrors = validateRoutineDays(days);
     if (validationErrors.length > 0) {
       setDayErrors(validationErrors);
@@ -182,6 +208,19 @@ export function useRoutineEditor(routine: EditorRoutine) {
     setDayErrors([]);
 
     setSaving(true);
+
+    if (isNew) {
+      const result = await createRoutine({ name: name.trim(), days });
+      if (result.ok) {
+        setSaved(true);
+        router.refresh();
+      } else {
+        setSaveError(result.error);
+      }
+      setSaving(false);
+      return;
+    }
+
     const patch = computeRoutinePatch(routine.id, baseline, days);
 
     if (isEmptyPatch(patch)) {
@@ -198,7 +237,7 @@ export function useRoutineEditor(routine: EditorRoutine) {
       setSaveError(result.error);
     }
     setSaving(false);
-  }, [baseline, days, routine.id, router]);
+  }, [baseline, days, isNew, name, routine.id, router]);
 
   const dayErrorsById = useMemo(
     () => new Map(dayErrors.map((error) => [error.dayId, error.messages])),
@@ -206,6 +245,9 @@ export function useRoutineEditor(routine: EditorRoutine) {
   );
 
   return {
+    name,
+    updateName,
+    isNew,
     days,
     expandedDayId,
     isDirty,

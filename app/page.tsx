@@ -4,6 +4,7 @@ import { mapRoutineToTrainingDays } from "@/features/routines/routineMapper";
 import { getOrCreateDaySession } from "@/features/routines/actions/sessionActions";
 import type { RoutineWithDays } from "@/features/routines/types";
 import { DashboardClient } from "@/components/fitness/dashboard-client";
+import { DashboardEmptyState } from "@/components/fitness/dashboard-empty-state";
 
 export default async function HomePage() {
   const supabase = await createClient();
@@ -24,7 +25,7 @@ export default async function HomePage() {
     .maybeSingle();
 
   if (!routineData) {
-    redirect("/empty");
+    return <DashboardEmptyState />;
   }
 
   const days = mapRoutineToTrainingDays(routineData as RoutineWithDays);

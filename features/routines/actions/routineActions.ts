@@ -4,9 +4,21 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { isUuid } from "@/lib/uuid";
 import { resolvePrescriptionForSave } from "../editorPrescription";
+import type { EditorDay } from "../editorTypes";
+import { validateRoutineDays } from "../editorSchema";
+import { insertActiveRoutineTree } from "../insertActiveRoutineTree";
 import type { RoutineEditPatch, RoutineExerciseUpsert } from "../routinePatch";
 
 export type UpdateRoutineResult = { ok: true } | { ok: false; error: string };
+
+export type CreateRoutineResult =
+  | { ok: true; routineId: string }
+  | { ok: false; error: string };
+
+export type CreateRoutineInput = {
+  name: string;
+  days: EditorDay[];
+};
 
 function exerciseFields(exercise: RoutineExerciseUpsert) {
   const resolved = resolvePrescriptionForSave(exercise);
@@ -25,6 +37,87 @@ function exerciseFields(exercise: RoutineExerciseUpsert) {
     muscle_group: exercise.muscleGroup,
     sort_order: exercise.sortOrder,
   };
+}
+
+/**
+ * Create a brand-new active routine from the editor (create-from-scratch).
+ * Does not write to the DB until the user saves a valid routine.
+ */
+export async function createRoutine(
+  input: CreateRoutineInput
+): Promise<CreateRoutineResult> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { ok: false, error: "Not authenticated." };
+  }
+
+  const name = input.name.trim();
+  if (!name) {
+    return { ok: false, error: "Routine name is required." };
+  }
+
+  const validationErrors = validateRoutineDays(input.days);
+  if (validationErrors.length > 0) {
+    return {
+      ok: false,
+      error: "Fix validation errors before saving your routine.",
+    };
+  }
+
+  const result = await insertActiveRoutineTree(supabase, {
+    userId: user.id,
+    name,
+    source: "manual",
+    days: input.days.map((day, dayIndex) => ({
+      name: day.name.trim(),
+      focus: day.focus,
+      originalName: day.originalName ?? day.name.trim(),
+      sortOrder: day.sortOrder ?? dayIndex,
+      exercises: day.exercises.map((exercise, exerciseIndex) => {
+        const resolved = resolvePrescriptionForSave({
+          id: exercise.id,
+          dayId: day.id,
+          name: exercise.name,
+          muscleGroup: exercise.muscleGroup,
+          prescription: exercise.prescription,
+          plannedSets: exercise.plannedSets,
+          targetReps: exercise.targetReps,
+          weight: exercise.weight,
+          restTime: exercise.restTime,
+          notes: exercise.notes,
+          sortOrder: exercise.sortOrder,
+        });
+        return {
+          name: exercise.name.trim(),
+          prescription: resolved.prescription,
+          plannedSets:
+            resolved.plannedSets && resolved.plannedSets > 0
+              ? resolved.plannedSets
+              : null,
+          targetReps: resolved.targetReps,
+          weight: exercise.weight,
+          restTime: exercise.restTime,
+          notes: exercise.notes,
+          muscleGroup: exercise.muscleGroup,
+          sortOrder: exercise.sortOrder ?? exerciseIndex,
+        };
+      }),
+    })),
+  });
+
+  if (!result.ok) {
+    return result;
+  }
+
+  revalidatePath("/", "layout");
+  revalidatePath("/editor");
+
+  return { ok: true, routineId: result.routineId };
 }
 
 /**

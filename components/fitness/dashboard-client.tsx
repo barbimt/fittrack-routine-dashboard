@@ -14,8 +14,14 @@ import {
   AddExerciseDialog,
 } from "@/components/fitness/add-exercise-dialog";
 import { Button } from "@/components/fitness/button";
+import { WorkoutRestTimerBar } from "@/components/fitness/rest-timer-bar";
 import type { TrainingDay } from "@/lib/mock-data";
+import {
+  exerciseCardRestProps,
+  restTimerPageClassName,
+} from "@/features/routines/restTimerUi";
 import { useWorkoutSession } from "@/hooks/use-workout-session";
+import { useRestTimer } from "@/hooks/use-rest-timer";
 import { Calendar, RotateCcw } from "lucide-react";
 
 interface DashboardClientProps {
@@ -37,6 +43,7 @@ export function DashboardClient({
 }: DashboardClientProps) {
   const [resetDayDialogOpen, setResetDayDialogOpen] = useState(false);
   const [addExerciseDialogOpen, setAddExerciseDialogOpen] = useState(false);
+  const restTimer = useRestTimer();
 
   const workout = useWorkoutSession({
     initialDays,
@@ -64,6 +71,7 @@ export function DashboardClient({
     isReopening,
     isResetting,
     isAddingExercise,
+    editingExerciseId,
     setRowRevision,
     handleSelectDay,
     handleSetToggle,
@@ -74,6 +82,7 @@ export function DashboardClient({
     handleSaveWorkout,
     handleEditWorkout,
     handleAddExercise,
+    handleEditExercise,
   } = workout;
 
   const today = new Date().toLocaleDateString("en-US", {
@@ -101,7 +110,7 @@ export function DashboardClient({
         />
       }
     >
-      <PageContent className="flex-1 lg:px-0 lg:py-0">
+      <PageContent className={restTimerPageClassName(restTimer.active)}>
         <header className="mb-6">
           <div className="text-muted-foreground mb-1 flex items-center gap-2 text-sm">
             <Calendar className="h-4 w-4" aria-hidden />
@@ -162,7 +171,11 @@ export function DashboardClient({
               onRepsChange={handleRepsChange}
               onRepsSave={handleRepsSave}
               onResetExercise={isReadOnly ? undefined : handleResetExercise}
+              onEditExercise={isReadOnly ? undefined : handleEditExercise}
+              {...exerciseCardRestProps(restTimer, isReadOnly)}
               resetDisabled={isPending}
+              editDisabled={isPending || isAddingExercise}
+              isEditing={editingExerciseId === exercise.id}
               setRowRevision={setRowRevision[exercise.id] ?? 0}
               readOnly={isReadOnly}
             />
@@ -210,6 +223,8 @@ export function DashboardClient({
           }}
         />
       </PageContent>
+
+      <WorkoutRestTimerBar timer={restTimer} />
     </AppShell>
   );
 }

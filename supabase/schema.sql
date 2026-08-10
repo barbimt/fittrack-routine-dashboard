@@ -45,10 +45,11 @@ $$;
 -- ---------------------------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS profiles (
-  id          uuid        PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  email       text,
-  created_at  timestamptz NOT NULL DEFAULT now(),
-  updated_at  timestamptz NOT NULL DEFAULT now()
+  id            uuid        PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  email         text,
+  display_name  text,
+  created_at    timestamptz NOT NULL DEFAULT now(),
+  updated_at    timestamptz NOT NULL DEFAULT now()
 );
 
 CREATE OR REPLACE TRIGGER trg_profiles_updated_at
@@ -62,10 +63,28 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public
 AS $$
+DECLARE
+  meta_name text;
 BEGIN
-  INSERT INTO public.profiles (id, email)
-  VALUES (NEW.id, NEW.email)
+  meta_name := NULLIF(
+    TRIM(
+      COALESCE(
+        NEW.raw_user_meta_data ->> 'full_name',
+        NEW.raw_user_meta_data ->> 'name',
+        NEW.raw_user_meta_data ->> 'display_name'
+      )
+    ),
+    ''
+  );
+
+  INSERT INTO public.profiles (id, email, display_name)
+  VALUES (
+    NEW.id,
+    NEW.email,
+    COALESCE(meta_name, split_part(NEW.email, '@', 1))
+  )
   ON CONFLICT (id) DO NOTHING;
+
   RETURN NEW;
 END;
 $$;

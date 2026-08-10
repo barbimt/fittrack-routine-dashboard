@@ -11,8 +11,14 @@ import { SummaryPanel } from "@/components/fitness/summary-panel";
 import { WorkoutSavePanel } from "@/components/fitness/workout-save-panel";
 import { ResetDayDialog } from "@/components/fitness/reset-day-dialog";
 import { Button } from "@/components/fitness/button";
+import { WorkoutRestTimerBar } from "@/components/fitness/rest-timer-bar";
 import type { TrainingDay } from "@/lib/mock-data";
+import {
+  exerciseCardRestProps,
+  restTimerPageClassName,
+} from "@/features/routines/restTimerUi";
 import { useDemoWorkoutSession } from "@/hooks/use-demo-workout-session";
+import { useRestTimer } from "@/hooks/use-rest-timer";
 import { Calendar, RotateCcw, Sparkles } from "lucide-react";
 
 interface DemoDashboardClientProps {
@@ -27,6 +33,7 @@ export function DemoDashboardClient({
   initialDayId,
 }: DemoDashboardClientProps) {
   const [resetDayDialogOpen, setResetDayDialogOpen] = useState(false);
+  const restTimer = useRestTimer();
 
   const workout = useDemoWorkoutSession({
     initialDays: days,
@@ -86,7 +93,7 @@ export function DemoDashboardClient({
         />
       }
     >
-      <PageContent className="flex-1 lg:px-0 lg:py-0">
+      <PageContent className={restTimerPageClassName(restTimer.active)}>
         <div
           className="border-primary/20 bg-accent-soft mb-6 flex flex-col gap-3 rounded-2xl border p-4 sm:flex-row sm:items-center sm:justify-between"
           role="status"
@@ -171,6 +178,7 @@ export function DemoDashboardClient({
               onRepsChange={handleRepsChange}
               onRepsSave={handleRepsSave}
               onResetExercise={isReadOnly ? undefined : handleResetExercise}
+              {...exerciseCardRestProps(restTimer, isReadOnly)}
               resetDisabled={isPending}
               setRowRevision={setRowRevision[exercise.id] ?? 0}
               readOnly={isReadOnly}
@@ -202,6 +210,8 @@ export function DemoDashboardClient({
           onConfirm={confirmResetDay}
         />
       </PageContent>
+
+      <WorkoutRestTimerBar timer={restTimer} />
     </PublicAppShell>
   );
 }

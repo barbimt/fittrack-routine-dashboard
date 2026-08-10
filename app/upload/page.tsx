@@ -13,36 +13,126 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { FileSpreadsheet, Download, CheckCircle2 } from "lucide-react";
+import {
+  FileSpreadsheet,
+  Download,
+  CheckCircle2,
+  PencilLine,
+  Upload,
+} from "lucide-react";
+
+const STEPS = [
+  {
+    icon: Download,
+    title: "Download the FitTrack template",
+    body: "Start from our .xlsx — not a random gym spreadsheet. Each person uses their own copy.",
+  },
+  {
+    icon: PencilLine,
+    title: "Fill in your days and exercises",
+    body: "One sheet per training day. Keep the header row. Replace the sample rows with your routine.",
+  },
+  {
+    icon: Upload,
+    title: "Upload your filled file",
+    body: "Preview days and exercises here, then import. Wrong format? You’ll see what to fix.",
+  },
+] as const;
 
 export default function UploadPage() {
   return (
     <AppShell>
       <PageContent className="max-w-3xl">
-        <header className="mb-8">
+        <header className="mb-6">
           <h1 className="text-foreground text-2xl font-bold tracking-tight">
             Upload Routine
           </h1>
           <p className="text-muted-foreground mt-2">
-            Import your workout routine from Excel. Select a .xlsx file to
-            preview days and exercises before saving.
+            Import a FitTrack Excel template — one sheet per day, with{" "}
+            {COLUMN_LABELS.EXERCISE} and {COLUMN_LABELS.SETS_X_REPS} columns.
+            Any workout table can work if you copy it into this format first.
           </p>
         </header>
 
-        <RoutineImportForm />
+        <Card className="border-primary/20 bg-accent-soft/40 mb-6 rounded-2xl shadow-sm">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">How to import</CardTitle>
+            <CardDescription>
+              FitTrack does not read arbitrary Excel layouts. Use the template
+              so every routine shares the same structure.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <ol className="space-y-3">
+              {STEPS.map((step, index) => (
+                <li key={step.title} className="flex gap-3">
+                  <span
+                    className="bg-primary text-primary-foreground flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold"
+                    aria-hidden
+                  >
+                    {index + 1}
+                  </span>
+                  <div className="min-w-0 pt-0.5">
+                    <p className="text-foreground flex items-center gap-2 text-sm font-medium">
+                      <step.icon
+                        className="text-primary h-4 w-4 shrink-0"
+                        aria-hidden
+                      />
+                      {step.title}
+                    </p>
+                    <p className="text-muted-foreground mt-0.5 text-sm">
+                      {step.body}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ol>
 
-        <Card className="mt-8 mb-8 rounded-2xl shadow-sm">
+            <Button
+              type="button"
+              className="w-full gap-2 sm:w-auto"
+              onClick={() => downloadRoutineTemplate()}
+            >
+              <Download className="h-4 w-4" aria-hidden />
+              Download FitTrack template
+            </Button>
+            <p className="text-muted-foreground text-xs">
+              File name:{" "}
+              <span className="font-medium">
+                fittrack-routine-template.xlsx
+              </span>
+              . Rename it after filling (e.g.{" "}
+              <span className="font-medium">my-routine-fittrack.xlsx</span>) if
+              you like — format matters more than the name.
+            </p>
+          </CardContent>
+        </Card>
+
+        <section className="mb-8" aria-labelledby="upload-file-heading">
+          <h2
+            id="upload-file-heading"
+            className="text-foreground mb-1 text-lg font-semibold"
+          >
+            Upload your filled template
+          </h2>
+          <p className="text-muted-foreground mb-4 text-sm">
+            Only .xlsx files in the FitTrack column layout. Preview before you
+            save.
+          </p>
+          <RoutineImportForm />
+        </section>
+
+        <Card className="mb-8 rounded-2xl shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <FileSpreadsheet className="text-primary h-5 w-5" aria-hidden />
-              Example file format
+              What the template looks like
             </CardTitle>
             <CardDescription>
-              One sheet per training day. Row 1 must include{" "}
-              {COLUMN_LABELS.EXERCISE} and {COLUMN_LABELS.SETS_X_REPS} (English
-              headers). Put the full prescription in{" "}
-              <span className="font-medium">{COLUMN_LABELS.SETS_X_REPS}</span> —
-              including per-set weight when it changes.
+              Row 1 headers must stay. Put variable loads in{" "}
+              <span className="font-medium">{COLUMN_LABELS.SETS_X_REPS}</span>{" "}
+              (e.g. <span className="font-mono">1x12 15kg-3x12 20kg</span>) and
+              leave {COLUMN_LABELS.WEIGHT} empty when weight changes per set.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -69,9 +159,7 @@ export default function UploadPage() {
                     <td className="px-3 py-2">Hip Thrust</td>
                     <td className="px-3 py-2">4x10</td>
                     <td className="px-3 py-2">60kg</td>
-                    <td className="px-3 py-2">
-                      Same reps and weight for every set
-                    </td>
+                    <td className="px-3 py-2">Same load every set</td>
                   </tr>
                   <tr className="border-border/50 border-b">
                     <td className="px-3 py-2">Dumbbell Row</td>
@@ -79,70 +167,38 @@ export default function UploadPage() {
                       1x12 15kg-3x12 20kg
                     </td>
                     <td className="text-muted-foreground px-3 py-2">(empty)</td>
-                    <td className="px-3 py-2">Variable weight per set</td>
+                    <td className="px-3 py-2">Weight changes per set</td>
                   </tr>
-                  <tr className="border-border/50 border-b">
+                  <tr>
                     <td className="px-3 py-2">Leg Press</td>
                     <td className="px-3 py-2">3x10-2x8</td>
                     <td className="px-3 py-2">80kg</td>
-                    <td className="px-3 py-2">Variable reps, same weight</td>
-                  </tr>
-                  <tr>
-                    <td className="px-3 py-2">Bulgarian Split Squat</td>
-                    <td className="px-3 py-2">3x10 per leg</td>
-                    <td className="px-3 py-2">12kg</td>
-                    <td className="px-3 py-2">—</td>
+                    <td className="px-3 py-2">Reps change, same weight</td>
                   </tr>
                 </tbody>
               </table>
             </div>
             <p className="text-muted-foreground mt-3 text-xs">
               Sheet name example:{" "}
-              <span className="font-medium">Day 1 - FULL BODY</span>
+              <span className="font-medium">Day 1 - FULL BODY</span> → day name
+              + focus.
             </p>
-            <p className="text-muted-foreground mt-2 text-xs">
-              <span className="font-medium">{COLUMN_LABELS.SETS_X_REPS}</span>{" "}
-              formats: <span className="font-mono">4x10</span> (simple),{" "}
-              <span className="font-mono">3x10-2x8</span> (reps change per
-              block), <span className="font-mono">1x12 15kg-3x12 20kg</span>{" "}
-              (reps and weight per block, separated by{" "}
-              <span className="font-mono">-</span>),{" "}
-              <span className="font-mono">@</span> or{" "}
-              <span className="font-mono">con</span> also work instead of a
-              space before kg. Use{" "}
-              <span className="font-medium">{COLUMN_LABELS.WEIGHT}</span> only
-              when every set shares the same load.
-            </p>
-            <div className="border-border mt-4 border-t pt-4">
-              <Button
-                variant="outline"
-                size="sm"
-                type="button"
-                className="gap-2"
-                onClick={() => downloadRoutineTemplate()}
-              >
-                <Download className="h-4 w-4" aria-hidden />
-                Download template
-              </Button>
-            </div>
           </CardContent>
         </Card>
 
         <Card className="rounded-2xl shadow-sm">
           <CardHeader>
-            <CardTitle className="text-base">Validation checklist</CardTitle>
-            <CardDescription>
-              Rules applied when you select a file
-            </CardDescription>
+            <CardTitle className="text-base">Quick checklist</CardTitle>
+            <CardDescription>Checked when you select a file</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent>
             <ul className="space-y-3">
               {[
-                "File must be .xlsx",
-                "Each sheet becomes one training day",
+                "File is .xlsx (not .xls or Google Sheets link)",
+                "Built from the FitTrack template (or same columns)",
+                "One sheet = one training day",
                 `Required columns: ${COLUMN_LABELS.EXERCISE}, ${COLUMN_LABELS.SETS_X_REPS}`,
-                `Optional columns: ${COLUMN_LABELS.WEIGHT}, ${COLUMN_LABELS.NOTES}`,
-                `Empty rows and rows without ${COLUMN_LABELS.EXERCISE} are skipped`,
+                `Optional: ${COLUMN_LABELS.WEIGHT}, ${COLUMN_LABELS.NOTES}`,
               ].map((requirement) => (
                 <li
                   key={requirement}
