@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { TrainingDay } from "@/lib/mock-data";
 import {
   canSaveWorkoutForDay,
+  findExerciseForSetInDays,
   findSetInDays,
   resetDayInDays,
   resetExerciseInDays,
@@ -110,6 +111,15 @@ describe("findSetInDays", () => {
   it("returns the matching set across days", () => {
     expect(findSetInDays(sampleDays, "set-a1")?.completed).toBe(true);
     expect(findSetInDays(sampleDays, "missing")).toBeNull();
+  });
+});
+
+describe("findExerciseForSetInDays", () => {
+  it("returns the exercise that owns the set", () => {
+    const located = findExerciseForSetInDays(sampleDays, "set-a1");
+    expect(located?.exercise.name).toBeTruthy();
+    expect(located?.set.id).toBe("set-a1");
+    expect(findExerciseForSetInDays(sampleDays, "missing")).toBeNull();
   });
 });
 

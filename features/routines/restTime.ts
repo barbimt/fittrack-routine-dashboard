@@ -84,3 +84,17 @@ export function formatRestLabel(value: string | null | undefined): string {
   if (minutes > 0) return `${minutes}m`;
   return `${seconds}s`;
 }
+
+/** Total seconds from a stored rest_time value (0 if empty/invalid). */
+export function restTimeToSeconds(value: string | null | undefined): number {
+  const { minutes, seconds } = parseRestTime(value);
+  return Math.max(0, minutes * 60 + seconds);
+}
+
+/** Format remaining seconds as `m:ss` (e.g. `1:05`, `0:45`). */
+export function formatCountdown(totalSeconds: number): string {
+  const whole = Math.max(0, Math.ceil(totalSeconds));
+  const minutes = Math.floor(whole / 60);
+  const seconds = whole % 60;
+  return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+}

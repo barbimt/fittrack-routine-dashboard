@@ -3,12 +3,7 @@
 import { Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { EditorExercise } from "@/features/routines/editorTypes";
-import {
-  defaultSetRow,
-  exerciseToSetRows,
-  setRowsToExercisePatch,
-  type EditorSetRow,
-} from "@/features/routines/editorSetRows";
+import { useEditorSetRows } from "@/hooks/use-editor-set-rows";
 import { Button } from "./button";
 import { EditorSetRowsField } from "./editor-set-rows-field";
 import { DragHandle, useSortableRow } from "./sortable-row";
@@ -34,29 +29,10 @@ export function RoutineEditorExerciseRow({
   const { setNodeRef, setActivatorNodeRef, style, isDragging, handleProps } =
     useSortableRow(exercise.id);
 
-  const setRows = exerciseToSetRows(exercise);
-
-  const commitSetRows = (rows: EditorSetRow[]) => {
-    onChange(setRowsToExercisePatch(rows));
-  };
-
-  const updateSetRow = (index: number, patch: Partial<EditorSetRow>) => {
-    commitSetRows(
-      setRows.map((row, i) => (i === index ? { ...row, ...patch } : row))
-    );
-  };
-
-  const addSet = () => {
-    commitSetRows([...setRows, defaultSetRow(setRows[setRows.length - 1])]);
-  };
-
-  const removeSet = (index: number) => {
-    if (setRows.length <= 1) {
-      commitSetRows([{ reps: "", weightKg: "" }]);
-      return;
-    }
-    commitSetRows(setRows.filter((_, i) => i !== index));
-  };
+  const { setRows, updateSetRow, addSet, removeSet } = useEditorSetRows(
+    exercise,
+    onChange
+  );
 
   return (
     <div

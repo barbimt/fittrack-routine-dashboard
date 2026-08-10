@@ -1,10 +1,13 @@
 import { describe, expect, it } from "vitest";
 import type { EditorExercise } from "./editorTypes";
 import {
+  addEditorSetRow,
   exerciseToSetRows,
   formatWeightKg,
+  removeEditorSetRow,
   setRowsToExercisePatch,
   stripWeightUnit,
+  updateEditorSetRow,
 } from "./editorSetRows";
 
 function exercise(overrides: Partial<EditorExercise> = {}): EditorExercise {
@@ -105,6 +108,39 @@ describe("setRowsToExercisePatch", () => {
     expect(rows).toEqual([
       { reps: "10", weightKg: "40" },
       { reps: "8", weightKg: "50" },
+    ]);
+  });
+});
+
+describe("update / add / remove editor set rows", () => {
+  it("updates a single row", () => {
+    expect(
+      updateEditorSetRow(
+        [
+          { reps: "12", weightKg: "40" },
+          { reps: "12", weightKg: "40" },
+        ],
+        1,
+        { weightKg: "45" }
+      )
+    ).toEqual([
+      { reps: "12", weightKg: "40" },
+      { reps: "12", weightKg: "45" },
+    ]);
+  });
+
+  it("appends a copy of the last row", () => {
+    expect(
+      addEditorSetRow([{ reps: "10", weightKg: "50" }])
+    ).toEqual([
+      { reps: "10", weightKg: "50" },
+      { reps: "10", weightKg: "50" },
+    ]);
+  });
+
+  it("keeps one empty row when removing the last set", () => {
+    expect(removeEditorSetRow([{ reps: "12", weightKg: "40" }], 0)).toEqual([
+      { reps: "", weightKg: "" },
     ]);
   });
 });

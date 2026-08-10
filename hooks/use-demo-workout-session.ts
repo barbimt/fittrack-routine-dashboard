@@ -10,8 +10,13 @@ import {
   resetExerciseInDays,
   updateSetInDays,
 } from "@/features/routines/dashboardDayState";
+import { notify } from "@/lib/notify";
+import {
+  buildRepsChangePatch,
+  buildSetTogglePatch,
+  bumpRevisionMap,
+} from "@/features/routines/setProgress";
 import type { SessionSavedNotice } from "@/features/routines/types";
-import { toast } from "@/hooks/use-toast";
 
 export interface UseDemoWorkoutSessionOptions {
   initialDays: TrainingDay[];
@@ -54,13 +59,7 @@ export function useDemoWorkoutSession({
   const weeklyTotal = daysData.reduce((sum, day) => sum + getTotalSets(day), 0);
 
   const bumpSetRowRevision = (exerciseIds: string[]) => {
-    setSetRowRevision((prev) => {
-      const next = { ...prev };
-      for (const id of exerciseIds) {
-        next[id] = (next[id] ?? 0) + 1;
-      }
-      return next;
-    });
+    setSetRowRevision((prev) => bumpRevisionMap(prev, exerciseIds));
   };
 
   const handleSetToggle = (setId: string) => {
@@ -69,19 +68,8 @@ export function useDemoWorkoutSession({
     const currentSet = findSetInDays(daysData, setId);
     if (!currentSet) return;
 
-    const nextCompleted = !currentSet.completed;
-    const shouldAutoFillReps = nextCompleted && currentSet.actualReps == null;
-    const shouldClearReps = !nextCompleted;
-
     setDaysData((prev) =>
-      updateSetInDays(prev, setId, {
-        completed: nextCompleted,
-        ...(shouldAutoFillReps
-          ? { actualReps: currentSet.targetReps }
-          : shouldClearReps
-            ? { actualReps: null }
-            : {}),
-      })
+      updateSetInDays(prev, setId, buildSetTogglePatch(currentSet))
     );
 
     if (isSessionSaved) {
@@ -92,14 +80,7 @@ export function useDemoWorkoutSession({
   const handleRepsChange = (setId: string, reps: number | null) => {
     if (isReadOnly) return;
     setDaysData((prev) =>
-      updateSetInDays(prev, setId, {
-        actualReps: reps,
-        ...(reps === null || reps === 0
-          ? { completed: false }
-          : reps >= 1
-            ? { completed: true }
-            : {}),
-      })
+      updateSetInDays(prev, setId, buildRepsChangePatch(reps))
     );
     if (isSessionSaved) {
       setIsSessionSaved(false);
@@ -121,10 +102,7 @@ export function useDemoWorkoutSession({
     setDaysData((prev) => resetExerciseInDays(prev, selectedDayId, exerciseId));
     bumpSetRowRevision([exerciseId]);
     setIsSessionSaved(false);
-    toast({
-      title: "Exercise reset",
-      description: "Sets cleared for this exercise.",
-    });
+    notify.workout.exerciseReset();
   };
 
   const handleResetDay = () => {
@@ -135,10 +113,7 @@ export function useDemoWorkoutSession({
     setIsSessionSaved(false);
     hasSavedOnceRef.current = false;
     setSessionSavedNotice("first");
-    toast({
-      title: "Day reset",
-      description: "All sets cleared for this training day.",
-    });
+    notify.workout.dayReset("demo");
   };
 
   const handleSaveWorkout = () => {
@@ -148,19 +123,12 @@ export function useDemoWorkoutSession({
     hasSavedOnceRef.current = true;
     setSessionSavedNotice(isUpdate ? "updated" : "first");
     setIsSessionSaved(true);
-    toast({
-      title: isUpdate ? "Workout updated (demo)" : "Workout saved (demo)",
-      description:
-        "Create a free account to save your real routines and track progress over time.",
-    });
+    notify.workout.workoutSaved(isUpdate, "demo");
   };
 
   const handleEditWorkout = () => {
     setIsSessionSaved(false);
-    toast({
-      title: "Editing workout",
-      description: "You can update sets and reps, then save again.",
-    });
+    notify.workout.editingWorkout();
   };
 
   return {

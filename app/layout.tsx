@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
+import { AppToaster } from "@/components/fitness/app-toaster";
 import { fitTrackThemeColor } from "@/lib/design-tokens";
 import "./globals.css";
 
@@ -54,6 +55,7 @@ export default function RootLayout({
     >
       <body className="font-sans antialiased max-lg:h-full max-lg:overflow-hidden lg:min-h-screen">
         {children}
+        <AppToaster />
         {process.env.NODE_ENV === "production" && <Analytics />}
       </body>
     </html>

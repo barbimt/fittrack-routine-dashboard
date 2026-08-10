@@ -123,3 +123,27 @@ export function defaultSetRow(from?: EditorSetRow): EditorSetRow {
     weightKg: from?.weightKg ?? "",
   };
 }
+
+export function updateEditorSetRow(
+  rows: EditorSetRow[],
+  index: number,
+  patch: Partial<EditorSetRow>
+): EditorSetRow[] {
+  return rows.map((row, i) => (i === index ? { ...row, ...patch } : row));
+}
+
+/** Append a set, copying the last row when present. */
+export function addEditorSetRow(rows: EditorSetRow[]): EditorSetRow[] {
+  return [...rows, defaultSetRow(rows[rows.length - 1])];
+}
+
+/** Remove a set; keep one empty row when the list would become empty. */
+export function removeEditorSetRow(
+  rows: EditorSetRow[],
+  index: number
+): EditorSetRow[] {
+  if (rows.length <= 1) {
+    return [{ reps: "", weightKg: "" }];
+  }
+  return rows.filter((_, i) => i !== index);
+}

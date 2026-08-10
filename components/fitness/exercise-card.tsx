@@ -5,11 +5,15 @@ import { cn } from "@/lib/utils";
 import type { Exercise } from "@/lib/mock-data";
 import { getExerciseProgress } from "@/lib/mock-data";
 import type { UpdateExerciseInDayInput } from "@/features/routines/actions/sessionActions";
+import type { ExerciseRestTimerStatus } from "@/features/routines/restTimerUi";
 import { SetRow } from "./set-row";
 import { Badge } from "./badge";
 import { Button } from "./button";
 import { EditExerciseDialog } from "./edit-exercise-dialog";
+import { StartRestButton } from "./start-rest-button";
 import { ChevronDown, Clock, Info, Pencil, RotateCcw } from "lucide-react";
+
+export type { ExerciseRestTimerStatus };
 
 interface ExerciseCardProps {
   exercise: Exercise;
@@ -21,6 +25,8 @@ interface ExerciseCardProps {
     exerciseId: string,
     input: UpdateExerciseInDayInput
   ) => void | Promise<void>;
+  onStartRest?: (exercise: Exercise) => void;
+  restTimerStatus?: ExerciseRestTimerStatus;
   resetDisabled?: boolean;
   editDisabled?: boolean;
   isEditing?: boolean;
@@ -35,6 +41,8 @@ export function ExerciseCard({
   onRepsSave,
   onResetExercise,
   onEditExercise,
+  onStartRest,
+  restTimerStatus,
   resetDisabled = false,
   editDisabled = false,
   isEditing = false,
@@ -49,6 +57,7 @@ export function ExerciseCard({
     exercise.restTime && exercise.restTime !== "—"
   );
   const canEdit = !readOnly && Boolean(onEditExercise);
+  const canStartRest = !readOnly && hasRestTime && Boolean(onStartRest);
 
   return (
     <div className="bg-card border-border overflow-hidden rounded-2xl border shadow-sm">
@@ -70,7 +79,7 @@ export function ExerciseCard({
               </Badge>
             </div>
 
-            {hasRestTime ? (
+            {hasRestTime && !canStartRest ? (
               <div
                 className="text-muted-foreground mt-1 flex items-center gap-1 text-sm"
                 title="Rest between sets"
@@ -136,6 +145,16 @@ export function ExerciseCard({
           </Button>
         ) : null}
       </div>
+
+      {canStartRest && onStartRest ? (
+        <div className="px-4 pb-2">
+          <StartRestButton
+            exercise={exercise}
+            status={restTimerStatus}
+            onStart={onStartRest}
+          />
+        </div>
+      ) : null}
 
       {exercise.notes && expanded && (
         <div className="px-4 pb-2">

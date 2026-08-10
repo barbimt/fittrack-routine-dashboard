@@ -52,10 +52,63 @@ describe("ExerciseCard", () => {
     expect(screen.getByLabelText("Exercise")).toHaveValue("Calf raise");
   });
 
+  it("starts rest only when the user taps Start rest", async () => {
+    const onStartRest = vi.fn();
+    render(
+      <ExerciseCard
+        exercise={exercise}
+        onStartRest={onStartRest}
+        onSetToggle={vi.fn()}
+      />
+    );
+
+    await userEvent.click(
+      screen.getByRole("button", { name: /Start rest · 60s/i })
+    );
+    expect(onStartRest).toHaveBeenCalledWith(exercise);
+  });
+
+  it("disables Start rest while a timer is running and shows paused state", () => {
+    const { rerender } = render(
+      <ExerciseCard
+        exercise={exercise}
+        onStartRest={vi.fn()}
+        restTimerStatus={{
+          activeExerciseId: exercise.id,
+          isPaused: false,
+          countdownLabel: "0:45",
+        }}
+      />
+    );
+
+    expect(
+      screen.getByRole("button", { name: /Rest · 0:45/i })
+    ).toBeDisabled();
+
+    rerender(
+      <ExerciseCard
+        exercise={exercise}
+        onStartRest={vi.fn()}
+        restTimerStatus={{
+          activeExerciseId: exercise.id,
+          isPaused: true,
+          countdownLabel: "0:40",
+        }}
+      />
+    );
+
+    expect(
+      screen.getByRole("button", { name: /Rest paused · 0:40/i })
+    ).toBeDisabled();
+  });
+
   it("hides the pencil when readOnly", () => {
     render(<ExerciseCard exercise={exercise} readOnly />);
     expect(
       screen.queryByRole("button", { name: /Edit Calf raise/i })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /Start rest/i })
     ).not.toBeInTheDocument();
   });
 });

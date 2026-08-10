@@ -1,4 +1,4 @@
-import type { ExerciseSet, TrainingDay } from "@/lib/mock-data";
+import type { Exercise, ExerciseSet, TrainingDay } from "@/lib/mock-data";
 
 export type SetFieldPatch = Partial<
   Pick<ExerciseSet, "completed" | "actualReps">
@@ -8,10 +8,18 @@ export function findSetInDays(
   days: TrainingDay[],
   setId: string
 ): ExerciseSet | null {
+  return findExerciseForSetInDays(days, setId)?.set ?? null;
+}
+
+/** Locate the exercise (and set) that owns a set id across training days. */
+export function findExerciseForSetInDays(
+  days: TrainingDay[],
+  setId: string
+): { exercise: Exercise; set: ExerciseSet } | null {
   for (const day of days) {
     for (const exercise of day.exercises) {
       const set = exercise.sets.find((s) => s.id === setId);
-      if (set) return set;
+      if (set) return { exercise, set };
     }
   }
   return null;

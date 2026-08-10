@@ -11,13 +11,9 @@ import {
 } from "@/components/ui/dialog";
 import type { Exercise } from "@/lib/mock-data";
 import type { EditorExercise } from "@/features/routines/editorTypes";
-import {
-  defaultSetRow,
-  exerciseToSetRows,
-  setRowsToExercisePatch,
-  type EditorSetRow,
-} from "@/features/routines/editorSetRows";
+import { exerciseToEditorDraft } from "@/features/routines/exerciseDraft";
 import type { UpdateExerciseInDayInput } from "@/features/routines/actions/sessionActions";
+import { useEditorSetRows } from "@/hooks/use-editor-set-rows";
 import { Button } from "./button";
 import { EditorSetRowsField } from "./editor-set-rows-field";
 import {
@@ -27,30 +23,6 @@ import {
   MuscleSelect,
   RestDurationField,
 } from "./routine-editor-fields";
-
-function exerciseToEditorDraft(exercise: Exercise): EditorExercise {
-  const weight =
-    exercise.weight && exercise.weight !== "—" ? exercise.weight : null;
-  const restTime =
-    exercise.restTime && exercise.restTime !== "—" ? exercise.restTime : null;
-  const targetReps =
-    typeof exercise.targetReps === "number"
-      ? String(exercise.targetReps)
-      : exercise.targetReps;
-
-  return {
-    id: exercise.id,
-    name: exercise.name,
-    muscleGroup: exercise.muscleGroup || null,
-    prescription: exercise.prescription ?? null,
-    plannedSets: exercise.targetSets > 0 ? exercise.targetSets : null,
-    targetReps: targetReps || null,
-    weight,
-    restTime,
-    notes: exercise.notes ?? null,
-    sortOrder: 0,
-  };
-}
 
 export interface EditExerciseDialogProps {
   open: boolean;
@@ -71,33 +43,14 @@ export function EditExerciseDialog({
     exerciseToEditorDraft(exercise)
   );
 
-  const setRows = exerciseToSetRows(draft);
-
   const patchDraft = (patch: Partial<EditorExercise>) => {
     setDraft((prev) => ({ ...prev, ...patch }));
   };
 
-  const commitSetRows = (rows: EditorSetRow[]) => {
-    patchDraft(setRowsToExercisePatch(rows));
-  };
-
-  const updateSetRow = (index: number, patch: Partial<EditorSetRow>) => {
-    commitSetRows(
-      setRows.map((row, i) => (i === index ? { ...row, ...patch } : row))
-    );
-  };
-
-  const addSet = () => {
-    commitSetRows([...setRows, defaultSetRow(setRows[setRows.length - 1])]);
-  };
-
-  const removeSet = (index: number) => {
-    if (setRows.length <= 1) {
-      commitSetRows([{ reps: "", weightKg: "" }]);
-      return;
-    }
-    commitSetRows(setRows.filter((_, i) => i !== index));
-  };
+  const { setRows, updateSetRow, addSet, removeSet } = useEditorSetRows(
+    draft,
+    patchDraft
+  );
 
   const handleSubmit = () => {
     if (!draft.name.trim()) return;

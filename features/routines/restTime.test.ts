@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
+  formatCountdown,
   formatRestLabel,
   formatRestTime,
   parseRestTime,
+  restTimeToSeconds,
   secondsToParts,
 } from "./restTime";
 
@@ -35,6 +37,20 @@ describe("formatRestLabel", () => {
     expect(formatRestLabel("120s")).toBe("2m");
     expect(formatRestLabel("45s")).toBe("45s");
     expect(formatRestLabel(null)).toBe("");
+  });
+});
+
+describe("restTimeToSeconds / formatCountdown", () => {
+  it("converts rest_time to total seconds", () => {
+    expect(restTimeToSeconds("90s")).toBe(90);
+    expect(restTimeToSeconds("2m")).toBe(120);
+    expect(restTimeToSeconds(null)).toBe(0);
+  });
+
+  it("formats countdown as m:ss", () => {
+    expect(formatCountdown(90)).toBe("1:30");
+    expect(formatCountdown(5)).toBe("0:05");
+    expect(formatCountdown(0)).toBe("0:00");
   });
 });
 

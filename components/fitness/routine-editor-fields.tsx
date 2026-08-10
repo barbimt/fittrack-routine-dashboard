@@ -352,7 +352,7 @@ interface StatusBannerProps {
   children: ReactNode;
 }
 
-/** Inline error/success banner (no Toaster mounted in this app). */
+/** Inline error/success banner (prefer `notify` for transient feedback). */
 export function StatusBanner({ variant, children }: StatusBannerProps) {
   const isError = variant === "error";
   const Icon = isError ? AlertTriangle : CheckCircle2;
