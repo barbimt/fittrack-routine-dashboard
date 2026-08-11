@@ -37,7 +37,11 @@ import {
   bumpRevisionMap,
 } from "@/features/routines/setProgress";
 import type { SessionSavedNotice } from "@/features/routines/types";
-import { writeSelectedDayCookie } from "@/features/routines/selectedDayCookie";
+import {
+  assignTrainingDaySlugs,
+  rememberDaySlug,
+  trainingDaySlug,
+} from "@/features/routines/trainingDaySlug";
 
 export interface UseWorkoutSessionOptions {
   initialDays: TrainingDay[];
@@ -48,6 +52,22 @@ export interface UseWorkoutSessionOptions {
 }
 
 type DaySessionOk = Extract<DaySessionResult, { ok: true }>;
+
+function writeDaySlugQuery(days: TrainingDay[], dayId: string) {
+  if (typeof window === "undefined") return;
+  const slugs = assignTrainingDaySlugs(days);
+  const slug =
+    slugs.get(dayId) ??
+    trainingDaySlug(days.find((day) => day.id === dayId) ?? days[0]);
+  rememberDaySlug(slug);
+  const url = new URL(window.location.href);
+  url.searchParams.set("day", slug);
+  window.history.replaceState(
+    null,
+    "",
+    `${url.pathname}?${url.searchParams.toString()}`
+  );
+}
 
 export function useWorkoutSession({
   initialDays,
@@ -146,7 +166,7 @@ export function useWorkoutSession({
     let cancelled = false;
     const dayId = initialDayId;
     hasLocalEditsRef.current = false;
-    writeSelectedDayCookie(dayId);
+    writeDaySlugQuery(initialDays, dayId);
 
     startTransition(async () => {
       const result = await getOrCreateDaySession(routineId, dayId);
@@ -157,7 +177,7 @@ export function useWorkoutSession({
     return () => {
       cancelled = true;
     };
-  }, [routineId, initialDayId]);
+  }, [routineId, initialDayId, initialDays]);
 
   const getSelectedSessionId = (): string | null => {
     const sessionId = sessionIdsByDayId[selectedDayId];
@@ -234,7 +254,7 @@ export function useWorkoutSession({
 
   const handleSelectDay = (dayId: string) => {
     setSelectedDayId(dayId);
-    writeSelectedDayCookie(dayId);
+    writeDaySlugQuery(daysData, dayId);
 
     startTransition(async () => {
       const result = await getOrCreateDaySession(routineId, dayId);

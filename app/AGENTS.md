@@ -10,7 +10,7 @@ Public paths (see `lib/supabase/middleware.ts`): `/login`, `/signup`, `/auth/*`,
 
 | Route | Data | Notes |
 |-------|------|-------|
-| `/` | Supabase active routine + day session | Remembers last training day via cookie; remount re-hydrates session progress |
+| `/` | Supabase active routine + day session | `?day=glutes` (focus slug); remount re-hydrates session progress |
 | `/login`, `/signup` | Auth forms | Redirect to `/` if already signed in |
 | `/upload` | Client parse + `saveRoutine` | Excel import |
 | `/editor` | Supabase active routine | `RoutineEditorClient`; saves via `updateRoutine` |
