@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { AppToaster } from "@/components/fitness/app-toaster";
+import { SelectedTrainingDayProvider } from "@/features/routines/selected-training-day-context";
 import { fitTrackThemeColor } from "@/lib/design-tokens";
 import "./globals.css";
 
@@ -49,12 +50,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className="bg-background max-lg:h-dvh max-lg:overflow-hidden"
-    >
-      <body className="font-sans antialiased max-lg:h-full max-lg:overflow-hidden lg:min-h-screen">
-        {children}
+    <html lang="en" className="bg-background h-dvh overflow-hidden">
+      <body className="h-full overflow-hidden font-sans antialiased">
+        <SelectedTrainingDayProvider>{children}</SelectedTrainingDayProvider>
         <AppToaster />
         {process.env.NODE_ENV === "production" && <Analytics />}
       </body>

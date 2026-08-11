@@ -1,6 +1,5 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -15,10 +14,6 @@ import {
 } from "lucide-react";
 import { LogoutButton } from "@/features/auth/components/LogoutButton";
 import { filterEnabledNavItems } from "@/lib/features";
-import {
-  DAY_SLUG_STORAGE_KEY,
-  todayHrefFromRememberedDay,
-} from "@/features/routines/trainingDaySlug";
 
 export interface NavItem {
   label: string;
@@ -67,31 +62,6 @@ interface SidebarProps {
   footer?: React.ReactNode;
 }
 
-function subscribeDaySlug(onStoreChange: () => void) {
-  if (typeof window === "undefined") return () => {};
-  const onStorage = (event: StorageEvent) => {
-    if (event.key === DAY_SLUG_STORAGE_KEY || event.key === null) {
-      onStoreChange();
-    }
-  };
-  window.addEventListener("storage", onStorage);
-  window.addEventListener("fittrack:day-slug", onStoreChange);
-  return () => {
-    window.removeEventListener("storage", onStorage);
-    window.removeEventListener("fittrack:day-slug", onStoreChange);
-  };
-}
-
-function resolveNavHref(item: NavItem): string {
-  if (item.href !== "/") return item.href;
-  return todayHrefFromRememberedDay();
-}
-
-function isNavItemActive(pathname: string, item: NavItem): boolean {
-  if (item.href === "/") return pathname === "/";
-  return pathname === item.href || pathname.startsWith(`${item.href}/`);
-}
-
 export function Sidebar({
   onNavigate,
   className,
@@ -99,8 +69,6 @@ export function Sidebar({
   footer,
 }: SidebarProps) {
   const pathname = usePathname();
-  // Re-render when the remembered day slug changes so Today keeps `/?day=…`.
-  useSyncExternalStore(subscribeDaySlug, todayHrefFromRememberedDay, () => "/");
 
   return (
     <aside
@@ -127,27 +95,23 @@ export function Sidebar({
       </div>
 
       <nav className="flex-1 space-y-1 px-3 py-4" aria-label="Main navigation">
-        {items.map((item) => {
-          const href = resolveNavHref(item);
-          const active = isNavItemActive(pathname, item);
-          return (
-            <Link
-              key={item.href}
-              href={href}
-              onClick={onNavigate}
-              className={cn(
-                "flex min-h-11 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-                active
-                  ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                  : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
-              )}
-              aria-current={active ? "page" : undefined}
-            >
-              {item.icon}
-              {item.label}
-            </Link>
-          );
-        })}
+        {items.map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            onClick={onNavigate}
+            className={cn(
+              "flex min-h-11 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+              pathname === item.href
+                ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+            )}
+            aria-current={pathname === item.href ? "page" : undefined}
+          >
+            {item.icon}
+            {item.label}
+          </Link>
+        ))}
       </nav>
 
       <div className="border-sidebar-border border-t px-3 py-3">

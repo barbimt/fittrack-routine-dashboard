@@ -1,7 +1,9 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { act, renderHook } from "@testing-library/react";
+import type { ReactNode } from "react";
 import type { TrainingDay } from "@/lib/mock-data";
 import { useWorkoutSession } from "./use-workout-session";
+import { SelectedTrainingDayProvider } from "@/features/routines/selected-training-day-context";
 
 vi.mock("@/features/routines/actions/sessionActions", () => ({
   updateSetLogProgress: vi.fn().mockResolvedValue({ ok: true }),
@@ -43,6 +45,10 @@ const SET_ID = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee";
 const DAY_ID = "day-1";
 const SESSION_ID = "session-1111-2222-3333-444444444444";
 const ROUTINE_ID = "routine-5555-6666-7777-888888888888";
+
+function wrapper({ children }: { children: ReactNode }) {
+  return <SelectedTrainingDayProvider>{children}</SelectedTrainingDayProvider>;
+}
 
 const initialDays: TrainingDay[] = [
   {
@@ -89,13 +95,16 @@ describe("useWorkoutSession handleSetToggle", () => {
   });
 
   it("auto-fills target reps when completing a set with no actual reps", () => {
-    const { result } = renderHook(() =>
-      useWorkoutSession({
-        initialDays,
-        routineId: ROUTINE_ID,
-        initialDayId: DAY_ID,
-        initialSessionId: SESSION_ID,
-      })
+    const { result } = renderHook(
+      () =>
+        useWorkoutSession({
+          initialDays,
+          routineId: ROUTINE_ID,
+          initialDayId: DAY_ID,
+          initialSessionId: SESSION_ID,
+        }),
+
+      { wrapper }
     );
 
     act(() => {
@@ -131,13 +140,16 @@ describe("useWorkoutSession handleSetToggle", () => {
       },
     ];
 
-    const { result } = renderHook(() =>
-      useWorkoutSession({
-        initialDays: daysWithReps,
-        routineId: ROUTINE_ID,
-        initialDayId: DAY_ID,
-        initialSessionId: SESSION_ID,
-      })
+    const { result } = renderHook(
+      () =>
+        useWorkoutSession({
+          initialDays: daysWithReps,
+          routineId: ROUTINE_ID,
+          initialDayId: DAY_ID,
+          initialSessionId: SESSION_ID,
+        }),
+
+      { wrapper }
     );
 
     act(() => {
@@ -172,13 +184,16 @@ describe("useWorkoutSession handleSetToggle", () => {
       },
     ];
 
-    const { result } = renderHook(() =>
-      useWorkoutSession({
-        initialDays: daysWithCompletedSet,
-        routineId: ROUTINE_ID,
-        initialDayId: DAY_ID,
-        initialSessionId: SESSION_ID,
-      })
+    const { result } = renderHook(
+      () =>
+        useWorkoutSession({
+          initialDays: daysWithCompletedSet,
+          routineId: ROUTINE_ID,
+          initialDayId: DAY_ID,
+          initialSessionId: SESSION_ID,
+        }),
+
+      { wrapper }
     );
 
     act(() => {
@@ -262,13 +277,16 @@ describe("useWorkoutSession day session sync", () => {
       { id: DAY_2_ID, dayName: "Tuesday", focus: "Push", exercises: [] },
     ];
 
-    const { result } = renderHook(() =>
-      useWorkoutSession({
-        initialDays: daysWithSecondDay,
-        routineId: ROUTINE_ID,
-        initialDayId: DAY_ID,
-        initialSessionId: SESSION_ID,
-      })
+    const { result } = renderHook(
+      () =>
+        useWorkoutSession({
+          initialDays: daysWithSecondDay,
+          routineId: ROUTINE_ID,
+          initialDayId: DAY_ID,
+          initialSessionId: SESSION_ID,
+        }),
+
+      { wrapper }
     );
 
     await act(async () => {
@@ -315,13 +333,16 @@ describe("useWorkoutSession handleAddExercise", () => {
       ],
     });
 
-    const { result } = renderHook(() =>
-      useWorkoutSession({
-        initialDays,
-        routineId: ROUTINE_ID,
-        initialDayId: DAY_ID,
-        initialSessionId: SESSION_ID,
-      })
+    const { result } = renderHook(
+      () =>
+        useWorkoutSession({
+          initialDays,
+          routineId: ROUTINE_ID,
+          initialDayId: DAY_ID,
+          initialSessionId: SESSION_ID,
+        }),
+
+      { wrapper }
     );
 
     await act(async () => {
@@ -354,13 +375,16 @@ describe("useWorkoutSession handleAddExercise", () => {
       error: "Session not found.",
     });
 
-    const { result } = renderHook(() =>
-      useWorkoutSession({
-        initialDays,
-        routineId: ROUTINE_ID,
-        initialDayId: DAY_ID,
-        initialSessionId: SESSION_ID,
-      })
+    const { result } = renderHook(
+      () =>
+        useWorkoutSession({
+          initialDays,
+          routineId: ROUTINE_ID,
+          initialDayId: DAY_ID,
+          initialSessionId: SESSION_ID,
+        }),
+
+      { wrapper }
     );
 
     await act(async () => {
@@ -382,13 +406,16 @@ describe("useWorkoutSession handleRepsSave", () => {
   });
 
   it("persists reps and completion in one updateSetLogProgress call", () => {
-    const { result } = renderHook(() =>
-      useWorkoutSession({
-        initialDays,
-        routineId: ROUTINE_ID,
-        initialDayId: DAY_ID,
-        initialSessionId: SESSION_ID,
-      })
+    const { result } = renderHook(
+      () =>
+        useWorkoutSession({
+          initialDays,
+          routineId: ROUTINE_ID,
+          initialDayId: DAY_ID,
+          initialSessionId: SESSION_ID,
+        }),
+
+      { wrapper }
     );
 
     act(() => {
@@ -426,13 +453,16 @@ describe("useWorkoutSession handleRepsSave", () => {
       },
     ];
 
-    const { result } = renderHook(() =>
-      useWorkoutSession({
-        initialDays: daysWithCompletedSet,
-        routineId: ROUTINE_ID,
-        initialDayId: DAY_ID,
-        initialSessionId: SESSION_ID,
-      })
+    const { result } = renderHook(
+      () =>
+        useWorkoutSession({
+          initialDays: daysWithCompletedSet,
+          routineId: ROUTINE_ID,
+          initialDayId: DAY_ID,
+          initialSessionId: SESSION_ID,
+        }),
+
+      { wrapper }
     );
 
     act(() => {
@@ -521,13 +551,16 @@ describe("useWorkoutSession handleEditExercise", () => {
       notes: "slow ecc",
     };
 
-    const { result } = renderHook(() =>
-      useWorkoutSession({
-        initialDays,
-        routineId: ROUTINE_ID,
-        initialDayId: DAY_ID,
-        initialSessionId: SESSION_ID,
-      })
+    const { result } = renderHook(
+      () =>
+        useWorkoutSession({
+          initialDays,
+          routineId: ROUTINE_ID,
+          initialDayId: DAY_ID,
+          initialSessionId: SESSION_ID,
+        }),
+
+      { wrapper }
     );
 
     await act(async () => {
@@ -557,13 +590,16 @@ describe("useWorkoutSession handleEditExercise", () => {
       error: "Failed to update exercise.",
     });
 
-    const { result } = renderHook(() =>
-      useWorkoutSession({
-        initialDays,
-        routineId: ROUTINE_ID,
-        initialDayId: DAY_ID,
-        initialSessionId: SESSION_ID,
-      })
+    const { result } = renderHook(
+      () =>
+        useWorkoutSession({
+          initialDays,
+          routineId: ROUTINE_ID,
+          initialDayId: DAY_ID,
+          initialSessionId: SESSION_ID,
+        }),
+
+      { wrapper }
     );
 
     await act(async () => {
@@ -614,13 +650,16 @@ describe("useWorkoutSession mount hydrate", () => {
       mergedDay: hydratedDay,
     });
 
-    const { result } = renderHook(() =>
-      useWorkoutSession({
-        initialDays,
-        routineId: ROUTINE_ID,
-        initialDayId: DAY_ID,
-        initialSessionId: SESSION_ID,
-      })
+    const { result } = renderHook(
+      () =>
+        useWorkoutSession({
+          initialDays,
+          routineId: ROUTINE_ID,
+          initialDayId: DAY_ID,
+          initialSessionId: SESSION_ID,
+        }),
+
+      { wrapper }
     );
 
     await act(async () => {

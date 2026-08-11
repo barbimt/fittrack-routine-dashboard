@@ -10,7 +10,7 @@ Public paths (see `lib/supabase/middleware.ts`): `/login`, `/signup`, `/auth/*`,
 
 | Route | Data | Notes |
 |-------|------|-------|
-| `/` | Supabase active routine + day session | `?day=glutes` (focus slug); remount re-hydrates session progress |
+| `/` | Supabase active routine + day session | Last day kept in React Context across `/` ↔ `/editor`; remount re-hydrates session progress |
 | `/login`, `/signup` | Auth forms | Redirect to `/` if already signed in |
 | `/upload` | Client parse + `saveRoutine` | Excel import |
 | `/editor` | Supabase active routine | `RoutineEditorClient`; saves via `updateRoutine` |
@@ -23,6 +23,8 @@ Public paths (see `lib/supabase/middleware.ts`): `/login`, `/signup`, `/auth/*`,
 ## Shell
 
 Wrap main screens in `<AppShell>` from `@/components/app-shell`. Add new nav entries in `components/layout/sidebar.tsx`.
+
+Scroll lives only in `AppShell`’s main pane. Root `html`/`body` are `h-dvh overflow-hidden` so the document never adds a second scrollbar.
 
 ## Local Supabase
 

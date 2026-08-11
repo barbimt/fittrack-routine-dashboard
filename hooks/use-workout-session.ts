@@ -37,11 +37,7 @@ import {
   bumpRevisionMap,
 } from "@/features/routines/setProgress";
 import type { SessionSavedNotice } from "@/features/routines/types";
-import {
-  assignTrainingDaySlugs,
-  rememberDaySlug,
-  trainingDaySlug,
-} from "@/features/routines/trainingDaySlug";
+import { useSelectedTrainingDay } from "@/features/routines/selected-training-day-context";
 
 export interface UseWorkoutSessionOptions {
   initialDays: TrainingDay[];
@@ -53,22 +49,6 @@ export interface UseWorkoutSessionOptions {
 
 type DaySessionOk = Extract<DaySessionResult, { ok: true }>;
 
-function writeDaySlugQuery(days: TrainingDay[], dayId: string) {
-  if (typeof window === "undefined") return;
-  const slugs = assignTrainingDaySlugs(days);
-  const slug =
-    slugs.get(dayId) ??
-    trainingDaySlug(days.find((day) => day.id === dayId) ?? days[0]);
-  rememberDaySlug(slug);
-  const url = new URL(window.location.href);
-  url.searchParams.set("day", slug);
-  window.history.replaceState(
-    null,
-    "",
-    `${url.pathname}?${url.searchParams.toString()}`
-  );
-}
-
 export function useWorkoutSession({
   initialDays,
   routineId,
@@ -76,8 +56,16 @@ export function useWorkoutSession({
   initialSessionId,
   initialSessionCompleted = false,
 }: UseWorkoutSessionOptions) {
+  const { getSelectedDayId, setSelectedDayId: rememberSelectedDayId } =
+    useSelectedTrainingDay();
+  const rememberedDayId = getSelectedDayId(routineId);
+  const resolvedInitialDayId =
+    rememberedDayId && initialDays.some((day) => day.id === rememberedDayId)
+      ? rememberedDayId
+      : initialDayId;
+
   const [daysData, setDaysData] = useState<TrainingDay[]>(initialDays);
-  const [selectedDayId, setSelectedDayId] = useState(initialDayId);
+  const [selectedDayId, setSelectedDayId] = useState(resolvedInitialDayId);
   const [isPending, startTransition] = useTransition();
   const [isSaving, setIsSaving] = useState(false);
   const [isReopening, setIsReopening] = useState(false);
@@ -101,9 +89,15 @@ export function useWorkoutSession({
   >({});
   const [sessionIdsByDayId, setSessionIdsByDayId] = useState<
     Record<string, string>
-  >(initialSessionId ? { [initialDayId]: initialSessionId } : {});
+  >(
+    initialSessionId && resolvedInitialDayId === initialDayId
+      ? { [initialDayId]: initialSessionId }
+      : {}
+  );
   const hasSavedOnceRef = useRef<Record<string, boolean>>(
-    initialSessionId && initialSessionCompleted
+    initialSessionId &&
+      initialSessionCompleted &&
+      resolvedInitialDayId === initialDayId
       ? { [initialSessionId]: true }
       : {}
   );
@@ -160,13 +154,12 @@ export function useWorkoutSession({
     );
   };
 
-  // Re-fetch session when Today remounts (e.g. after visiting /editor). Client
-  // router cache can otherwise show the pre-progress RSC payload.
+  // Re-fetch session on remount so / ↔ /editor does not show stale progress.
+  // Selected day comes from Context via resolvedInitialDayId (useState init).
   useEffect(() => {
     let cancelled = false;
-    const dayId = initialDayId;
+    const dayId = resolvedInitialDayId;
     hasLocalEditsRef.current = false;
-    writeDaySlugQuery(initialDays, dayId);
 
     startTransition(async () => {
       const result = await getOrCreateDaySession(routineId, dayId);
@@ -177,7 +170,7 @@ export function useWorkoutSession({
     return () => {
       cancelled = true;
     };
-  }, [routineId, initialDayId, initialDays]);
+  }, [routineId, resolvedInitialDayId]);
 
   const getSelectedSessionId = (): string | null => {
     const sessionId = sessionIdsByDayId[selectedDayId];
@@ -254,7 +247,7 @@ export function useWorkoutSession({
 
   const handleSelectDay = (dayId: string) => {
     setSelectedDayId(dayId);
-    writeDaySlugQuery(daysData, dayId);
+    rememberSelectedDayId(routineId, dayId);
 
     startTransition(async () => {
       const result = await getOrCreateDaySession(routineId, dayId);
