@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { getCompletedSets, getTotalSets } from "@/lib/mock-data";
 import type { TrainingDay } from "@/lib/mock-data";
 import { isUuid } from "@/lib/uuid";
@@ -27,6 +27,7 @@ import {
 } from "@/features/routines/actions/sessionActions";
 import type {
   AddExerciseToDayInput,
+  DaySessionResult,
   UpdateExerciseInDayInput,
 } from "@/features/routines/actions/sessionActions";
 import { notify } from "@/lib/notify";
@@ -43,6 +44,16 @@ export interface UseWorkoutSessionOptions {
   initialDayId: string;
   initialSessionId: string | null;
   initialSessionCompleted?: boolean;
+}
+
+type DaySessionOk = Extract<DaySessionResult, { ok: true }>;
+
+function writeDayQuery(dayId: string) {
+  if (typeof window === "undefined") return;
+  const url = new URL(window.location.href);
+  url.searchParams.set("day", dayId);
+  const query = url.searchParams.toString();
+  window.history.replaceState(null, "", `${url.pathname}?${query}`);
 }
 
 export function useWorkoutSession({
@@ -83,6 +94,7 @@ export function useWorkoutSession({
       ? { [initialSessionId]: true }
       : {}
   );
+  const hasLocalEditsRef = useRef(false);
 
   const selectedDay =
     daysData.find((d) => d.id === selectedDayId) ?? daysData[0];
@@ -113,6 +125,50 @@ export function useWorkoutSession({
     setSetRowRevision((prev) => bumpRevisionMap(prev, exerciseIds));
   };
 
+  const applySessionPayload = (dayId: string, result: DaySessionOk) => {
+    setSessionIdsByDayId((prev) => ({ ...prev, [dayId]: result.sessionId }));
+
+    if (result.sessionStatus === "completed") {
+      setCompletedSessionIds((prev) => ({
+        ...prev,
+        [result.sessionId]: true,
+      }));
+    } else {
+      setCompletedSessionIds((prev) => {
+        if (!(result.sessionId in prev)) return prev;
+        const next = { ...prev };
+        delete next[result.sessionId];
+        return next;
+      });
+    }
+
+    setDaysData((prev) =>
+      prev.map((d) => (d.id === dayId ? result.mergedDay : d))
+    );
+  };
+
+  // Re-fetch session when Today remounts (e.g. after visiting /editor). Client
+  // router cache can otherwise show the pre-progress RSC payload.
+  useEffect(() => {
+    let cancelled = false;
+    const dayId = initialDayId;
+    hasLocalEditsRef.current = false;
+
+    startTransition(async () => {
+      const result = await getOrCreateDaySession(routineId, dayId);
+      if (cancelled || !result?.ok || hasLocalEditsRef.current) return;
+      applySessionPayload(dayId, result);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [routineId, initialDayId]);
+
+  useEffect(() => {
+    writeDayQuery(selectedDayId);
+  }, [selectedDayId]);
+
   const getSelectedSessionId = (): string | null => {
     const sessionId = sessionIdsByDayId[selectedDayId];
     if (!sessionId) {
@@ -123,6 +179,7 @@ export function useWorkoutSession({
   };
 
   const markSessionEditable = (sessionId: string) => {
+    hasLocalEditsRef.current = true;
     setCompletedSessionIds((prev) => {
       const next = { ...prev };
       delete next[sessionId];
@@ -145,6 +202,7 @@ export function useWorkoutSession({
     const currentSet = findSetInDays(daysData, setId);
     if (!currentSet) return;
 
+    hasLocalEditsRef.current = true;
     const progressPatch = buildSetTogglePatch(currentSet);
 
     setDaysData((prev) => updateSetInDays(prev, setId, progressPatch));
@@ -169,6 +227,7 @@ export function useWorkoutSession({
   const handleRepsChange = (setId: string, reps: number | null) => {
     if (isReadOnly || !isUuid(setId)) return;
 
+    hasLocalEditsRef.current = true;
     setDaysData((prev) =>
       updateSetInDays(prev, setId, buildRepsChangePatch(reps))
     );
@@ -185,25 +244,12 @@ export function useWorkoutSession({
 
   const handleSelectDay = (dayId: string) => {
     setSelectedDayId(dayId);
-
-    if (sessionIdsByDayId[dayId]) return;
+    writeDayQuery(dayId);
 
     startTransition(async () => {
       const result = await getOrCreateDaySession(routineId, dayId);
-      if (!result.ok) return;
-
-      setSessionIdsByDayId((prev) => ({ ...prev, [dayId]: result.sessionId }));
-
-      if (result.sessionStatus === "completed") {
-        setCompletedSessionIds((prev) => ({
-          ...prev,
-          [result.sessionId]: true,
-        }));
-      }
-
-      setDaysData((prev) =>
-        prev.map((d) => (d.id === dayId ? result.mergedDay : d))
-      );
+      if (!result?.ok) return;
+      applySessionPayload(dayId, result);
     });
   };
 
@@ -211,6 +257,7 @@ export function useWorkoutSession({
     const sessionId = getSelectedSessionId();
     if (!sessionId) return;
 
+    hasLocalEditsRef.current = true;
     const previousDays = daysData;
     setDaysData((prev) => resetExerciseInDays(prev, selectedDayId, exerciseId));
     bumpSetRowRevision([exerciseId]);
@@ -233,6 +280,7 @@ export function useWorkoutSession({
     const sessionId = getSelectedSessionId();
     if (!sessionId) return;
 
+    hasLocalEditsRef.current = true;
     const previousDays = daysData;
     setDaysData((prev) => resetDayInDays(prev, selectedDayId));
     bumpSetRowRevision(selectedDay.exercises.map((exercise) => exercise.id));
@@ -282,6 +330,7 @@ export function useWorkoutSession({
     const sessionId = getSelectedSessionId();
     if (!sessionId || isReadOnly) return;
 
+    hasLocalEditsRef.current = true;
     setIsAddingExercise(true);
     const result = await addExerciseToDay(selectedDayId, sessionId, input);
     setIsAddingExercise(false);
@@ -313,6 +362,7 @@ export function useWorkoutSession({
     const sessionId = getSelectedSessionId();
     if (!sessionId || isReadOnly) return;
 
+    hasLocalEditsRef.current = true;
     setEditingExerciseId(exerciseId);
     const result = await updateExerciseInDay(
       selectedDayId,

@@ -644,6 +644,8 @@ export async function updateSetLogProgress(
     return { ok: false, error: error.message };
   }
 
+  // Keep Today fresh when navigating away and back (client router cache).
+  revalidatePath("/");
   return { ok: true };
 }
 
@@ -692,6 +694,7 @@ export async function resetExerciseSets(
     return { ok: false, error: error.message };
   }
 
+  revalidatePath("/");
   return { ok: true };
 }
 
@@ -726,6 +729,7 @@ export async function resetDaySession(sessionId: string): Promise<ResetResult> {
     return { ok: false, error: sessionError.message };
   }
 
+  revalidatePath("/");
   return { ok: true };
 }
 
@@ -754,6 +758,7 @@ export async function completeDaySession(
     return { ok: false, error: error.message };
   }
 
+  revalidatePath("/");
   return { ok: true };
 }
 
@@ -780,5 +785,6 @@ export async function reopenDaySession(
     return { ok: false, error: error.message };
   }
 
+  revalidatePath("/");
   return { ok: true };
 }
