@@ -30,6 +30,8 @@ export default async function HomePage() {
 
   const days = mapRoutineToTrainingDays(routineData as RoutineWithDays);
   const routineId = routineData.id as string;
+  // Server defaults to day 1; the client provider restores the last selected day
+  // across / ↔ /editor without URL or cookie coupling.
   const firstDay = days[0];
 
   const sessionResult = await getOrCreateDaySession(routineId, firstDay.id);

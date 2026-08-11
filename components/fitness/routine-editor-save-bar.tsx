@@ -65,7 +65,7 @@ export function RoutineEditorSaveBar({
         <Button
           size="lg"
           type="button"
-          className="h-11 w-full gap-2 sm:w-auto sm:min-w-[10rem]"
+          className="h-11 w-full gap-2 sm:w-auto sm:min-w-40"
           disabled={!isDirty || saving}
           onClick={onSave}
         >

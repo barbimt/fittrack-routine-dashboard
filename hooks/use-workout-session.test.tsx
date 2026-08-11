@@ -1,14 +1,27 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { act, renderHook } from "@testing-library/react";
+import type { ReactNode } from "react";
 import type { TrainingDay } from "@/lib/mock-data";
 import { useWorkoutSession } from "./use-workout-session";
+import { SelectedTrainingDayProvider } from "@/features/routines/selected-training-day-context";
 
 vi.mock("@/features/routines/actions/sessionActions", () => ({
   updateSetLogProgress: vi.fn().mockResolvedValue({ ok: true }),
   toggleSetLog: vi.fn().mockResolvedValue({ ok: true }),
   updateSetReps: vi.fn().mockResolvedValue({ ok: true }),
   updateExerciseInDay: vi.fn(),
-  getOrCreateDaySession: vi.fn(),
+  getOrCreateDaySession: vi.fn().mockResolvedValue({
+    ok: true,
+    sessionId: "session-1111-2222-3333-444444444444",
+    sessionStatus: "in_progress",
+    setLogs: [],
+    mergedDay: {
+      id: "day-1",
+      dayName: "Monday",
+      focus: "Legs",
+      exercises: [],
+    },
+  }),
   addExerciseToDay: vi.fn(),
   resetExerciseSets: vi.fn(),
   resetDaySession: vi.fn(),
@@ -32,6 +45,10 @@ const SET_ID = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee";
 const DAY_ID = "day-1";
 const SESSION_ID = "session-1111-2222-3333-444444444444";
 const ROUTINE_ID = "routine-5555-6666-7777-888888888888";
+
+function wrapper({ children }: { children: ReactNode }) {
+  return <SelectedTrainingDayProvider>{children}</SelectedTrainingDayProvider>;
+}
 
 const initialDays: TrainingDay[] = [
   {
@@ -61,19 +78,33 @@ const initialDays: TrainingDay[] = [
   },
 ];
 
+function mockActiveDaySession(mergedDay: TrainingDay = initialDays[0]) {
+  vi.mocked(getOrCreateDaySession).mockResolvedValue({
+    ok: true,
+    sessionId: SESSION_ID,
+    sessionStatus: "in_progress",
+    setLogs: [],
+    mergedDay,
+  });
+}
+
 describe("useWorkoutSession handleSetToggle", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockActiveDaySession();
   });
 
   it("auto-fills target reps when completing a set with no actual reps", () => {
-    const { result } = renderHook(() =>
-      useWorkoutSession({
-        initialDays,
-        routineId: ROUTINE_ID,
-        initialDayId: DAY_ID,
-        initialSessionId: SESSION_ID,
-      })
+    const { result } = renderHook(
+      () =>
+        useWorkoutSession({
+          initialDays,
+          routineId: ROUTINE_ID,
+          initialDayId: DAY_ID,
+          initialSessionId: SESSION_ID,
+        }),
+
+      { wrapper }
     );
 
     act(() => {
@@ -109,13 +140,16 @@ describe("useWorkoutSession handleSetToggle", () => {
       },
     ];
 
-    const { result } = renderHook(() =>
-      useWorkoutSession({
-        initialDays: daysWithReps,
-        routineId: ROUTINE_ID,
-        initialDayId: DAY_ID,
-        initialSessionId: SESSION_ID,
-      })
+    const { result } = renderHook(
+      () =>
+        useWorkoutSession({
+          initialDays: daysWithReps,
+          routineId: ROUTINE_ID,
+          initialDayId: DAY_ID,
+          initialSessionId: SESSION_ID,
+        }),
+
+      { wrapper }
     );
 
     act(() => {
@@ -150,13 +184,16 @@ describe("useWorkoutSession handleSetToggle", () => {
       },
     ];
 
-    const { result } = renderHook(() =>
-      useWorkoutSession({
-        initialDays: daysWithCompletedSet,
-        routineId: ROUTINE_ID,
-        initialDayId: DAY_ID,
-        initialSessionId: SESSION_ID,
-      })
+    const { result } = renderHook(
+      () =>
+        useWorkoutSession({
+          initialDays: daysWithCompletedSet,
+          routineId: ROUTINE_ID,
+          initialDayId: DAY_ID,
+          initialSessionId: SESSION_ID,
+        }),
+
+      { wrapper }
     );
 
     act(() => {
@@ -223,6 +260,7 @@ const addedExercise: RoutineExercise = {
 describe("useWorkoutSession day session sync", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockActiveDaySession();
   });
 
   it("replaces the selected day with mergedDay from getOrCreateDaySession", async () => {
@@ -239,13 +277,16 @@ describe("useWorkoutSession day session sync", () => {
       { id: DAY_2_ID, dayName: "Tuesday", focus: "Push", exercises: [] },
     ];
 
-    const { result } = renderHook(() =>
-      useWorkoutSession({
-        initialDays: daysWithSecondDay,
-        routineId: ROUTINE_ID,
-        initialDayId: DAY_ID,
-        initialSessionId: SESSION_ID,
-      })
+    const { result } = renderHook(
+      () =>
+        useWorkoutSession({
+          initialDays: daysWithSecondDay,
+          routineId: ROUTINE_ID,
+          initialDayId: DAY_ID,
+          initialSessionId: SESSION_ID,
+        }),
+
+      { wrapper }
     );
 
     await act(async () => {
@@ -267,6 +308,7 @@ describe("useWorkoutSession day session sync", () => {
 describe("useWorkoutSession handleAddExercise", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockActiveDaySession();
   });
 
   it("appends the new exercise when addExerciseToDay succeeds", async () => {
@@ -291,13 +333,16 @@ describe("useWorkoutSession handleAddExercise", () => {
       ],
     });
 
-    const { result } = renderHook(() =>
-      useWorkoutSession({
-        initialDays,
-        routineId: ROUTINE_ID,
-        initialDayId: DAY_ID,
-        initialSessionId: SESSION_ID,
-      })
+    const { result } = renderHook(
+      () =>
+        useWorkoutSession({
+          initialDays,
+          routineId: ROUTINE_ID,
+          initialDayId: DAY_ID,
+          initialSessionId: SESSION_ID,
+        }),
+
+      { wrapper }
     );
 
     await act(async () => {
@@ -330,13 +375,16 @@ describe("useWorkoutSession handleAddExercise", () => {
       error: "Session not found.",
     });
 
-    const { result } = renderHook(() =>
-      useWorkoutSession({
-        initialDays,
-        routineId: ROUTINE_ID,
-        initialDayId: DAY_ID,
-        initialSessionId: SESSION_ID,
-      })
+    const { result } = renderHook(
+      () =>
+        useWorkoutSession({
+          initialDays,
+          routineId: ROUTINE_ID,
+          initialDayId: DAY_ID,
+          initialSessionId: SESSION_ID,
+        }),
+
+      { wrapper }
     );
 
     await act(async () => {
@@ -354,16 +402,20 @@ describe("useWorkoutSession handleAddExercise", () => {
 describe("useWorkoutSession handleRepsSave", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockActiveDaySession();
   });
 
   it("persists reps and completion in one updateSetLogProgress call", () => {
-    const { result } = renderHook(() =>
-      useWorkoutSession({
-        initialDays,
-        routineId: ROUTINE_ID,
-        initialDayId: DAY_ID,
-        initialSessionId: SESSION_ID,
-      })
+    const { result } = renderHook(
+      () =>
+        useWorkoutSession({
+          initialDays,
+          routineId: ROUTINE_ID,
+          initialDayId: DAY_ID,
+          initialSessionId: SESSION_ID,
+        }),
+
+      { wrapper }
     );
 
     act(() => {
@@ -401,13 +453,16 @@ describe("useWorkoutSession handleRepsSave", () => {
       },
     ];
 
-    const { result } = renderHook(() =>
-      useWorkoutSession({
-        initialDays: daysWithCompletedSet,
-        routineId: ROUTINE_ID,
-        initialDayId: DAY_ID,
-        initialSessionId: SESSION_ID,
-      })
+    const { result } = renderHook(
+      () =>
+        useWorkoutSession({
+          initialDays: daysWithCompletedSet,
+          routineId: ROUTINE_ID,
+          initialDayId: DAY_ID,
+          initialSessionId: SESSION_ID,
+        }),
+
+      { wrapper }
     );
 
     act(() => {
@@ -429,6 +484,7 @@ describe("useWorkoutSession handleRepsSave", () => {
 describe("useWorkoutSession handleEditExercise", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockActiveDaySession();
   });
 
   it("replaces the exercise with updated targets when update succeeds", async () => {
@@ -495,13 +551,16 @@ describe("useWorkoutSession handleEditExercise", () => {
       notes: "slow ecc",
     };
 
-    const { result } = renderHook(() =>
-      useWorkoutSession({
-        initialDays,
-        routineId: ROUTINE_ID,
-        initialDayId: DAY_ID,
-        initialSessionId: SESSION_ID,
-      })
+    const { result } = renderHook(
+      () =>
+        useWorkoutSession({
+          initialDays,
+          routineId: ROUTINE_ID,
+          initialDayId: DAY_ID,
+          initialSessionId: SESSION_ID,
+        }),
+
+      { wrapper }
     );
 
     await act(async () => {
@@ -531,13 +590,16 @@ describe("useWorkoutSession handleEditExercise", () => {
       error: "Failed to update exercise.",
     });
 
-    const { result } = renderHook(() =>
-      useWorkoutSession({
-        initialDays,
-        routineId: ROUTINE_ID,
-        initialDayId: DAY_ID,
-        initialSessionId: SESSION_ID,
-      })
+    const { result } = renderHook(
+      () =>
+        useWorkoutSession({
+          initialDays,
+          routineId: ROUTINE_ID,
+          initialDayId: DAY_ID,
+          initialSessionId: SESSION_ID,
+        }),
+
+      { wrapper }
     );
 
     await act(async () => {
@@ -555,5 +617,59 @@ describe("useWorkoutSession handleEditExercise", () => {
 
     expect(result.current.daysData[0].exercises[0].name).toBe("Squat");
     expect(result.current.daysData[0].exercises[0].sets).toHaveLength(1);
+  });
+});
+
+describe("useWorkoutSession mount hydrate", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("reloads session progress from the server on mount", async () => {
+    const hydratedDay: TrainingDay = {
+      ...initialDays[0],
+      exercises: [
+        {
+          ...initialDays[0].exercises[0],
+          sets: [
+            {
+              ...initialDays[0].exercises[0].sets[0],
+              completed: true,
+              actualReps: 12,
+            },
+          ],
+        },
+      ],
+    };
+
+    vi.mocked(getOrCreateDaySession).mockResolvedValue({
+      ok: true,
+      sessionId: SESSION_ID,
+      sessionStatus: "in_progress",
+      setLogs: [],
+      mergedDay: hydratedDay,
+    });
+
+    const { result } = renderHook(
+      () =>
+        useWorkoutSession({
+          initialDays,
+          routineId: ROUTINE_ID,
+          initialDayId: DAY_ID,
+          initialSessionId: SESSION_ID,
+        }),
+
+      { wrapper }
+    );
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(getOrCreateDaySession).toHaveBeenCalledWith(ROUTINE_ID, DAY_ID);
+    expect(result.current.daysData[0].exercises[0].sets[0]).toMatchObject({
+      completed: true,
+      actualReps: 12,
+    });
   });
 });
