@@ -11,6 +11,7 @@ Learning notes under `docs/next/`, `docs/react/`, `docs/supabase/`, `docs/typesc
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | Stack, layering, data flow |
 | [DOMAIN.md](./DOMAIN.md) | Dashboard entities + import types |
 | [ROUTINE-IMPORT.md](./ROUTINE-IMPORT.md) | Excel parser, `/upload`, `features/routine-import/` |
+| [FEATURES.md](./FEATURES.md) | Product feature catalog / env release flags |
 | [ROADMAP.md](./ROADMAP.md) | Phases and checklists |
 
 ## When to update which doc
