@@ -37,6 +37,7 @@ import {
   bumpRevisionMap,
 } from "@/features/routines/setProgress";
 import type { SessionSavedNotice } from "@/features/routines/types";
+import { writeSelectedDayCookie } from "@/features/routines/selectedDayCookie";
 
 export interface UseWorkoutSessionOptions {
   initialDays: TrainingDay[];
@@ -145,6 +146,7 @@ export function useWorkoutSession({
     let cancelled = false;
     const dayId = initialDayId;
     hasLocalEditsRef.current = false;
+    writeSelectedDayCookie(dayId);
 
     startTransition(async () => {
       const result = await getOrCreateDaySession(routineId, dayId);
@@ -232,6 +234,7 @@ export function useWorkoutSession({
 
   const handleSelectDay = (dayId: string) => {
     setSelectedDayId(dayId);
+    writeSelectedDayCookie(dayId);
 
     startTransition(async () => {
       const result = await getOrCreateDaySession(routineId, dayId);
