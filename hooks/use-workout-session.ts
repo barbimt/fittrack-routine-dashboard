@@ -48,14 +48,6 @@ export interface UseWorkoutSessionOptions {
 
 type DaySessionOk = Extract<DaySessionResult, { ok: true }>;
 
-function writeDayQuery(dayId: string) {
-  if (typeof window === "undefined") return;
-  const url = new URL(window.location.href);
-  url.searchParams.set("day", dayId);
-  const query = url.searchParams.toString();
-  window.history.replaceState(null, "", `${url.pathname}?${query}`);
-}
-
 export function useWorkoutSession({
   initialDays,
   routineId,
@@ -165,10 +157,6 @@ export function useWorkoutSession({
     };
   }, [routineId, initialDayId]);
 
-  useEffect(() => {
-    writeDayQuery(selectedDayId);
-  }, [selectedDayId]);
-
   const getSelectedSessionId = (): string | null => {
     const sessionId = sessionIdsByDayId[selectedDayId];
     if (!sessionId) {
@@ -244,7 +232,6 @@ export function useWorkoutSession({
 
   const handleSelectDay = (dayId: string) => {
     setSelectedDayId(dayId);
-    writeDayQuery(dayId);
 
     startTransition(async () => {
       const result = await getOrCreateDaySession(routineId, dayId);
