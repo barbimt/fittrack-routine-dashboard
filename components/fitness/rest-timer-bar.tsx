@@ -14,7 +14,7 @@ interface RestTimerBarProps {
 }
 
 /** Fixed bottom rest countdown — stays visible while you keep training. */
-export function RestTimerBar({
+function RestTimerBar({
   countdownLabel,
   isPaused,
   onPause,

@@ -60,7 +60,7 @@ Nested **`AGENTS.md`** files auto-apply when Cursor works in that folder ([docs]
 | `components/ui/` | shadcn primitives |
 | `features/routine-import/` | Excel import types, parser, preview UI |
 | `lib/mock-data.ts` | Dashboard types + mock `trainingDays` |
-| `lib/design-tokens.ts` | Palette (OKLCH) |
+| `lib/design-tokens.ts` | Theme color (`fitTrackThemeColor`) |
 | `app/globals.css` | CSS variables + Tailwind theme |
 | `supabase/` | Schema, migrations, README, reset SQL |
 

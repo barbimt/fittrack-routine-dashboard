@@ -127,23 +127,23 @@ export function computeRoutinePatch(
   });
 
   const currentDayIds = new Set(
-    current.filter((d) => isUuid(d.id)).map((d) => d.id)
+    current.flatMap((d) => (isUuid(d.id) ? [d.id] : []))
   );
   const currentExerciseIds = new Set(
-    current
-      .flatMap((d) => d.exercises)
-      .filter((e) => isUuid(e.id))
-      .map((e) => e.id)
+    current.flatMap((d) =>
+      d.exercises.flatMap((e) => (isUuid(e.id) ? [e.id] : []))
+    )
   );
 
-  const deleteDayIds = baseline
-    .filter((d) => isUuid(d.id) && !currentDayIds.has(d.id))
-    .map((d) => d.id);
+  const deleteDayIds = baseline.flatMap((d) =>
+    isUuid(d.id) && !currentDayIds.has(d.id) ? [d.id] : []
+  );
 
-  const deleteExerciseIds = baseline
-    .flatMap((d) => d.exercises)
-    .filter((e) => isUuid(e.id) && !currentExerciseIds.has(e.id))
-    .map((e) => e.id);
+  const deleteExerciseIds = baseline.flatMap((d) =>
+    d.exercises.flatMap((e) =>
+      isUuid(e.id) && !currentExerciseIds.has(e.id) ? [e.id] : []
+    )
+  );
 
   return {
     routineId,

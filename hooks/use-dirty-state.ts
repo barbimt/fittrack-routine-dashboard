@@ -37,11 +37,16 @@ export function useDirtyState<T>(
   const [baseline, setBaseline] = useState<T>(() => structuredClone(source));
   const sourceRef = useRef(source);
 
+  // Draft + baseline must live in state (editable working copy). Re-seed when
+  // upstream `source` identity/content changes after save/refresh — not derived UI.
+  // react-doctor-disable-next-line react-doctor/no-derived-state-effect,react-doctor/no-derived-state
   useEffect(() => {
     if (isEqual(sourceRef.current, source)) return;
     sourceRef.current = source;
     const fresh = structuredClone(source);
+    // react-doctor-disable-next-line react-doctor/no-derived-state
     setBaseline(fresh);
+    // react-doctor-disable-next-line react-doctor/no-derived-state
     setValue(fresh);
   }, [source, isEqual]);
 

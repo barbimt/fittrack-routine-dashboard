@@ -8,6 +8,10 @@ interface ImportWarningsProps {
   title?: string;
 }
 
+function warningKey(warning: ImportWarning): string {
+  return `${warning.type}-${warning.sheetName ?? ""}-${warning.rowNumber ?? ""}-${warning.message}`;
+}
+
 export function ImportWarnings({
   warnings,
   title = "Warnings",
@@ -33,9 +37,9 @@ export function ImportWarnings({
         </span>
       </h3>
       <ul className="space-y-2">
-        {visible.map((warning, index) => (
+        {visible.map((warning) => (
           <li
-            key={`${warning.type}-${warning.sheetName ?? ""}-${warning.rowNumber ?? ""}-${index}`}
+            key={warningKey(warning)}
             className="text-foreground flex items-start gap-2 text-sm"
           >
             <Info

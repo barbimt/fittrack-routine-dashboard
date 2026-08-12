@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { insertActiveRoutineTree } from "./insertActiveRoutineTree";
+import { insertActiveRoutineTree } from "./insertActiveRoutineTree.server";
 
 type QueryResult = { data: unknown; error: { message: string } | null };
 
@@ -22,10 +22,22 @@ function createThenable(result: QueryResult) {
 
 describe("insertActiveRoutineTree", () => {
   const fromMock = vi.fn();
+  const getUserMock = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
+    getUserMock.mockResolvedValue({
+      data: { user: { id: "user-1" } },
+      error: null,
+    });
   });
+
+  function client(): SupabaseClient {
+    return {
+      from: fromMock,
+      auth: { getUser: getUserMock },
+    } as unknown as SupabaseClient;
+  }
 
   it("deactivates existing actives and inserts routine, day, and exercises", async () => {
     let routinesFromCount = 0;
@@ -47,10 +59,7 @@ describe("insertActiveRoutineTree", () => {
       throw new Error(`unexpected table ${table}`);
     });
 
-    const supabase = { from: fromMock } as unknown as SupabaseClient;
-
-    const result = await insertActiveRoutineTree(supabase, {
-      userId: "user-1",
+    const result = await insertActiveRoutineTree(client(), {
       name: "Push Pull",
       source: "manual",
       days: [
@@ -83,10 +92,14 @@ describe("insertActiveRoutineTree", () => {
     expect(deactivate.update).toHaveBeenCalled();
     expect(routineInsert.insert).toHaveBeenCalledWith(
       expect.objectContaining({
-        user_id: "user-1",
         name: "Push Pull",
         source: "manual",
         is_active: true,
+      })
+    );
+    expect(routineInsert.insert).toHaveBeenCalledWith(
+      expect.not.objectContaining({
+        user_id: expect.anything(),
       })
     );
     expect(exerciseInsert.insert).toHaveBeenCalledWith(
@@ -100,16 +113,27 @@ describe("insertActiveRoutineTree", () => {
     );
   });
 
+  it("returns an error when not authenticated", async () => {
+    getUserMock.mockResolvedValue({ data: { user: null }, error: null });
+
+    const result = await insertActiveRoutineTree(client(), {
+      name: "X",
+      source: "excel",
+      days: [],
+    });
+
+    expect(result).toEqual({ ok: false, error: "Not authenticated." });
+    expect(fromMock).not.toHaveBeenCalled();
+  });
+
   it("returns an error when deactivate fails", async () => {
     const deactivate = createThenable({
       data: null,
       error: { message: "nope" },
     });
     fromMock.mockReturnValue(deactivate);
-    const supabase = { from: fromMock } as unknown as SupabaseClient;
 
-    const result = await insertActiveRoutineTree(supabase, {
-      userId: "user-1",
+    const result = await insertActiveRoutineTree(client(), {
       name: "X",
       source: "excel",
       days: [],

@@ -13,8 +13,8 @@ describe("EditorSetRowsField", () => {
       <EditorSetRowsField
         idPrefix="ex-1"
         rows={[
-          { reps: "12", weightKg: "40" },
-          { reps: "10", weightKg: "35" },
+          { id: "r1", reps: "12", weightKg: "40" },
+          { id: "r2", reps: "10", weightKg: "35" },
         ]}
         onUpdateRow={vi.fn()}
         onAddRow={vi.fn()}
@@ -36,7 +36,7 @@ describe("EditorSetRowsField", () => {
     render(
       <EditorSetRowsField
         idPrefix="ex-1"
-        rows={[{ reps: "12", weightKg: "40" }]}
+        rows={[{ id: "r1", reps: "12", weightKg: "40" }]}
         onUpdateRow={onUpdateRow}
         onAddRow={onAddRow}
         onRemoveRow={onRemoveRow}

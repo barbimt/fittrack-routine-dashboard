@@ -8,7 +8,7 @@ Domain modules with Server Actions and feature UI. Keep business logic here; pag
 |--------|------|
 | `auth/` | `login`, `signup`, `logout` Server Actions; `LoginForm`, `SignupForm`, `LogoutButton` |
 | `routine-import/` | Excel parse/preview; `saveRoutine` → Supabase; see `docs/ROUTINE-IMPORT.md` |
-| `routines/` | DB types, `routineMapper`, editor model/patch/schema, session + routine Server Actions; `SelectedTrainingDayProvider` keeps the active Today day across `/` ↔ `/editor` (in-memory Context, not URL/cookie) |
+| `routines/` | DB types, `routineMapper`, editor model/patch/schema, session + routine Server Actions; `insertActiveRoutineTree.server` sets ownership via `auth.uid()` defaults (never caller `user_id`) |
 
 ## Sessions (`routines/actions/sessionActions.ts`)
 

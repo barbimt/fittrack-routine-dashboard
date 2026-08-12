@@ -4,10 +4,16 @@ import { buildPrescription } from "./prescription";
 
 /** One editable set row in the routine editor (no schema change — maps to prescription). */
 export type EditorSetRow = {
+  /** Stable client id for list keys. */
+  id: string;
   reps: string;
   /** Numeric weight without unit (UI shows KG; persisted as e.g. `60kg`). */
   weightKg: string;
 };
+
+function newSetRowId(): string {
+  return crypto.randomUUID();
+}
 
 export function stripWeightUnit(weight: string | null | undefined): string {
   if (!weight) return "";
@@ -31,6 +37,7 @@ export function exerciseToSetRows(exercise: EditorExercise): EditorSetRow[] {
     const expanded = expandPrescriptionToSets(prescription, exercise.weight);
     if (expanded.length > 0) {
       return expanded.map((set) => ({
+        id: newSetRowId(),
         reps: set.targetReps > 0 ? String(set.targetReps) : "",
         weightKg: stripWeightUnit(set.targetWeight),
       }));
@@ -42,7 +49,11 @@ export function exerciseToSetRows(exercise: EditorExercise): EditorSetRow[] {
   const reps = exercise.targetReps?.trim() ?? "";
   const weightKg = stripWeightUnit(exercise.weight);
 
-  return Array.from({ length: count }, () => ({ reps, weightKg }));
+  return Array.from({ length: count }, () => ({
+    id: newSetRowId(),
+    reps,
+    weightKg,
+  }));
 }
 
 type SetBlock = { sets: number; reps: string; weightKg: string };
@@ -74,7 +85,8 @@ export function setRowsToExercisePatch(
   EditorExercise,
   "prescription" | "plannedSets" | "targetReps" | "weight"
 > {
-  const cleaned = rows.length > 0 ? rows : [{ reps: "12", weightKg: "" }];
+  const cleaned =
+    rows.length > 0 ? rows : [{ id: newSetRowId(), reps: "12", weightKg: "" }];
   const blocks = groupSetRows(cleaned);
   const plannedSets = cleaned.length;
 
@@ -117,6 +129,7 @@ export function setRowsToExercisePatch(
 
 export function defaultSetRow(from?: EditorSetRow): EditorSetRow {
   return {
+    id: newSetRowId(),
     reps: from?.reps?.trim() ? from.reps : "12",
     weightKg: from?.weightKg ?? "",
   };
@@ -141,7 +154,7 @@ export function removeEditorSetRow(
   index: number
 ): EditorSetRow[] {
   if (rows.length <= 1) {
-    return [{ reps: "", weightKg: "" }];
+    return [{ id: newSetRowId(), reps: "", weightKg: "" }];
   }
   return rows.filter((_, i) => i !== index);
 }

@@ -70,13 +70,6 @@ export function canAccessPath(pathname: string, ctx: AccessContext): boolean {
   return canAccessFeature(feature.id, ctx);
 }
 
-/** True when the path is catalogued and currently released (ignores audience). */
-export function isFeaturePathReleased(pathname: string): boolean {
-  const feature = findFeatureByPath(pathname);
-  if (!feature) return true;
-  return getFeatureRelease(feature) === "on";
-}
-
 /**
  * Nav visibility: released + audience ok for this shell/user.
  * Items without a catalog path stay visible.

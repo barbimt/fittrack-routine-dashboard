@@ -111,7 +111,7 @@ CREATE TRIGGER trg_on_auth_user_created
 
 CREATE TABLE IF NOT EXISTS routines (
   id          uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id     uuid        NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  user_id     uuid        NOT NULL DEFAULT auth.uid() REFERENCES auth.users(id) ON DELETE CASCADE,
   name        text        NOT NULL,
   source      text        NOT NULL DEFAULT 'manual'
                           CHECK (source IN ('manual', 'excel')),
@@ -142,7 +142,7 @@ CREATE OR REPLACE TRIGGER trg_routines_updated_at
 
 CREATE TABLE IF NOT EXISTS routine_days (
   id            uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id       uuid        NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  user_id       uuid        NOT NULL DEFAULT auth.uid() REFERENCES auth.users(id) ON DELETE CASCADE,
   routine_id    uuid        NOT NULL,
   name          text        NOT NULL,
   focus         text,
@@ -176,7 +176,7 @@ CREATE OR REPLACE TRIGGER trg_routine_days_updated_at
 
 CREATE TABLE IF NOT EXISTS routine_exercises (
   id               uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id          uuid        NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  user_id          uuid        NOT NULL DEFAULT auth.uid() REFERENCES auth.users(id) ON DELETE CASCADE,
   routine_day_id   uuid        NOT NULL,
   name             text        NOT NULL,
   prescription     text        NOT NULL,

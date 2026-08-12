@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { ParsedRoutine } from "@/features/routine-import/types";
-import { insertActiveRoutineTree } from "@/features/routines/insertActiveRoutineTree";
+import { insertActiveRoutineTree } from "@/features/routines/insertActiveRoutineTree.server";
 
 export type SaveRoutineResult =
   | { ok: true; routineId: string; dayCount: number; exerciseCount: number }
@@ -37,7 +37,6 @@ export async function saveRoutine(
   }
 
   const result = await insertActiveRoutineTree(supabase, {
-    userId,
     name: routine.name,
     source: routine.source,
     days: routine.days.map((day) => ({

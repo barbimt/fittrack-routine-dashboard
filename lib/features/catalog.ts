@@ -64,5 +64,3 @@ export const FEATURE_CATALOG: Record<FeatureId, FeatureDefinition> = {
     envKey: "NEXT_PUBLIC_FEATURE_PROGRESS",
   },
 };
-
-export const FEATURE_IDS = Object.keys(FEATURE_CATALOG) as FeatureId[];

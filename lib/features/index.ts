@@ -10,7 +10,6 @@
 
 export {
   FEATURE_CATALOG,
-  FEATURE_IDS,
   type FeatureAudience,
   type FeatureDefinition,
   type FeatureId,
@@ -25,7 +24,6 @@ export {
   filterEnabledNavItems,
   findFeatureByPath,
   getFeatureRelease,
-  isFeaturePathReleased,
   isFeatureReleased,
   type AccessContext,
 } from "./access";

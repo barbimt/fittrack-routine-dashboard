@@ -36,6 +36,8 @@ export function SetRow({
 
   useEffect(() => () => clearTimeout(saveTimer.current), []);
 
+  // Local draft while typing; sync from props only when the input is not focused.
+  // react-doctor-disable-next-line react-doctor/no-reset-all-state-on-prop-change
   useEffect(() => {
     if (isFocused.current) return;
     setLocalValue(set.actualReps != null ? String(set.actualReps) : "");
@@ -81,24 +83,12 @@ export function SetRow({
   };
 
   const editable = !readOnly && Boolean(onRepsChange ?? onRepsSave);
-  const canToggle = !readOnly && Boolean(onToggle);
-
-  const handleRowClick = () => {
-    if (!canToggle) return;
-    onToggle?.(set.id);
-  };
-
-  const stopRowToggle = (e: React.MouseEvent | React.PointerEvent) => {
-    e.stopPropagation();
-  };
 
   return (
     <div
-      onClick={handleRowClick}
       className={cn(
         "flex items-center gap-2.5 rounded-lg px-3 py-2.5 transition-colors",
-        set.completed ? "bg-success/10" : "bg-muted/50",
-        canToggle && "cursor-pointer"
+        set.completed ? "bg-success/10" : "bg-muted/50"
       )}
     >
       <Checkbox
@@ -106,7 +96,6 @@ export function SetRow({
         checked={set.completed}
         disabled={readOnly}
         onCheckedChange={() => onToggle?.(set.id)}
-        onClick={stopRowToggle}
         className="h-5 w-5 shrink-0 rounded-md border-2"
         aria-label={`Mark set ${set.setNumber} as ${set.completed ? "incomplete" : "complete"}`}
       />
@@ -127,11 +116,7 @@ export function SetRow({
         className="text-muted-foreground min-w-0 flex-1"
       />
 
-      <div
-        className="flex shrink-0 items-center"
-        onClick={stopRowToggle}
-        onPointerDown={stopRowToggle}
-      >
+      <div className="flex shrink-0 items-center">
         <Input
           type="number"
           min={0}

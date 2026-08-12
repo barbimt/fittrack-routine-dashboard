@@ -59,18 +59,15 @@ describe("SetRow", () => {
     expect(onToggle).toHaveBeenCalledWith("set-1");
   });
 
-  it("calls onToggle when the row is clicked outside the input", async () => {
+  it("does not toggle when clicking set number or target label", async () => {
     const onToggle = vi.fn();
     render(
       <SetRow set={{ ...baseSet, completed: false }} onToggle={onToggle} />
     );
 
     await userEvent.click(screen.getByText("1"));
-    expect(onToggle).toHaveBeenCalledWith("set-1");
-
-    onToggle.mockClear();
     await userEvent.click(screen.getByText("10"));
-    expect(onToggle).toHaveBeenCalledWith("set-1");
+    expect(onToggle).not.toHaveBeenCalled();
   });
 
   it("falls back to exercise weight when the set has no targetWeight", () => {

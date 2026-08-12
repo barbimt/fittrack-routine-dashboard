@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useId, useState } from "react";
+import { useCallback, useId, useReducer } from "react";
 import { UploadDropzone } from "@/components/fitness/upload-dropzone";
 import { EmptyState } from "@/components/fitness/empty-state";
 import { Button } from "@/components/fitness/button";
@@ -13,65 +13,118 @@ import { saveRoutine } from "../actions/saveRoutineAction";
 
 type ImportPhase = "idle" | "parsing" | "preview" | "saving" | "error";
 
+type ImportState = {
+  phase: ImportPhase;
+  selectedFile: File | null;
+  routine: ParsedRoutine | null;
+  fatalError: string | null;
+  parseWarnings: ParsedRoutine["warnings"];
+  saveError: string | null;
+};
+
+type ImportAction =
+  | { type: "reset" }
+  | { type: "invalid_format"; file: File }
+  | { type: "parse_start"; file: File }
+  | {
+      type: "parse_error";
+      error: string;
+      warnings: ParsedRoutine["warnings"];
+    }
+  | { type: "parse_ok"; routine: ParsedRoutine }
+  | { type: "save_start" }
+  | { type: "save_error"; error: string };
+
+const initialState: ImportState = {
+  phase: "idle",
+  selectedFile: null,
+  routine: null,
+  fatalError: null,
+  parseWarnings: [],
+  saveError: null,
+};
+
+function importReducer(state: ImportState, action: ImportAction): ImportState {
+  switch (action.type) {
+    case "reset":
+      return initialState;
+    case "invalid_format":
+      return {
+        ...initialState,
+        phase: "error",
+        selectedFile: action.file,
+        fatalError: "Invalid file format. Please upload a .xlsx file.",
+      };
+    case "parse_start":
+      return {
+        ...initialState,
+        phase: "parsing",
+        selectedFile: action.file,
+      };
+    case "parse_error":
+      return {
+        ...state,
+        phase: "error",
+        fatalError: action.error,
+        parseWarnings: action.warnings,
+        routine: null,
+      };
+    case "parse_ok":
+      return {
+        ...state,
+        phase: "preview",
+        routine: action.routine,
+        fatalError: null,
+        parseWarnings: [],
+      };
+    case "save_start":
+      return { ...state, phase: "saving", saveError: null };
+    case "save_error":
+      return { ...state, phase: "preview", saveError: action.error };
+    default:
+      return state;
+  }
+}
+
 export function RoutineImportForm() {
   const inputId = useId();
-  const [phase, setPhase] = useState<ImportPhase>("idle");
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [routine, setRoutine] = useState<ParsedRoutine | null>(null);
-  const [fatalError, setFatalError] = useState<string | null>(null);
-  const [parseWarnings, setParseWarnings] = useState<ParsedRoutine["warnings"]>(
-    []
-  );
-  const [saveError, setSaveError] = useState<string | null>(null);
+  const [state, dispatch] = useReducer(importReducer, initialState);
+  const { phase, selectedFile, routine, fatalError, parseWarnings, saveError } =
+    state;
 
   const resetImport = useCallback(() => {
-    setPhase("idle");
-    setSelectedFile(null);
-    setRoutine(null);
-    setFatalError(null);
-    setParseWarnings([]);
-    setSaveError(null);
+    dispatch({ type: "reset" });
   }, []);
 
   const handleSave = useCallback(async () => {
     if (!routine) return;
-    setPhase("saving");
-    setSaveError(null);
+    dispatch({ type: "save_start" });
     const result = await saveRoutine(routine);
     // Successful saves redirect from the server action; only errors return.
     if (!result.ok) {
-      setSaveError(result.error);
-      setPhase("preview");
+      dispatch({ type: "save_error", error: result.error });
     }
   }, [routine]);
 
   const handleFileSelect = useCallback(async (file: File) => {
     if (!file.name.toLowerCase().endsWith(".xlsx")) {
-      setSelectedFile(file);
-      setRoutine(null);
-      setParseWarnings([]);
-      setFatalError("Invalid file format. Please upload a .xlsx file.");
-      setPhase("error");
+      dispatch({ type: "invalid_format", file });
       return;
     }
 
-    setSelectedFile(file);
-    setRoutine(null);
-    setFatalError(null);
-    setParseWarnings([]);
-    setPhase("parsing");
-
+    dispatch({ type: "parse_start", file });
     const result = await parseRoutineWorkbook(file);
 
     if (!result.ok) {
-      setFatalError(result.error);
-      setParseWarnings(result.warnings);
-      setPhase("error");
+      dispatch({
+        type: "parse_error",
+        error: result.error,
+        warnings: result.warnings,
+      });
       return;
     }
 
-    setRoutine(result.routine);
-    setPhase("preview");
+    dispatch({ type: "parse_ok", routine: result.routine });
   }, []);
 
   const uploadedMeta =
@@ -106,6 +159,7 @@ export function RoutineImportForm() {
               type="file"
               accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
               className="sr-only"
+              aria-label="Choose FitTrack routine Excel file"
               onChange={(event) => {
                 const file = event.target.files?.[0];
                 if (file) void handleFileSelect(file);

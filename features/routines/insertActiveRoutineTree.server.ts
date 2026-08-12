@@ -22,7 +22,6 @@ export type RoutineTreeDayInput = {
 };
 
 export type InsertActiveRoutineTreeInput = {
-  userId: string;
   name: string;
   source: RoutineSource;
   days: RoutineTreeDayInput[];
@@ -35,12 +34,25 @@ export type InsertActiveRoutineTreeResult =
 /**
  * Deactivate the user's other active routines, then insert a new active routine
  * with its days and exercises. Shared by Excel import and create-from-scratch.
+ *
+ * Ownership (`user_id`) is always taken from the authenticated session — never
+ * from caller-supplied input.
  */
 export async function insertActiveRoutineTree(
   supabase: SupabaseClient,
   input: InsertActiveRoutineTreeInput
 ): Promise<InsertActiveRoutineTreeResult> {
-  const { userId, name, source, days } = input;
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    return { ok: false, error: "Not authenticated." };
+  }
+
+  const userId = user.id;
+  const { name, source, days } = input;
 
   const { error: deactivateError } = await supabase
     .from("routines")
@@ -52,10 +64,10 @@ export async function insertActiveRoutineTree(
     return { ok: false, error: "Failed to update existing routines." };
   }
 
+  // user_id comes from column DEFAULT auth.uid() — never from caller input.
   const { data: routineRow, error: routineError } = await supabase
     .from("routines")
     .insert({
-      user_id: userId,
       name,
       source,
       is_active: true,
@@ -74,7 +86,6 @@ export async function insertActiveRoutineTree(
     const { data: dayRow, error: dayError } = await supabase
       .from("routine_days")
       .insert({
-        user_id: userId,
         routine_id: routineId,
         name: day.name,
         focus: day.focus,
@@ -92,7 +103,6 @@ export async function insertActiveRoutineTree(
 
     if (day.exercises.length > 0) {
       const exerciseRows = day.exercises.map((exercise, exerciseIndex) => ({
-        user_id: userId,
         routine_day_id: dayId,
         name: exercise.name,
         prescription: exercise.prescription,

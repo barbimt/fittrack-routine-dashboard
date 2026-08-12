@@ -208,35 +208,35 @@ export function useRoutineEditor(
     setDayErrors([]);
 
     setSaving(true);
+    try {
+      if (isNew) {
+        const result = await createRoutine({ name: name.trim(), days });
+        if (result.ok) {
+          setSaved(true);
+          router.refresh();
+        } else {
+          setSaveError(result.error);
+        }
+        return;
+      }
 
-    if (isNew) {
-      const result = await createRoutine({ name: name.trim(), days });
+      const patch = computeRoutinePatch(routine.id, baseline, days);
+
+      if (isEmptyPatch(patch)) {
+        setSaved(true);
+        return;
+      }
+
+      const result = await updateRoutine(patch);
       if (result.ok) {
         setSaved(true);
         router.refresh();
       } else {
         setSaveError(result.error);
       }
+    } finally {
       setSaving(false);
-      return;
     }
-
-    const patch = computeRoutinePatch(routine.id, baseline, days);
-
-    if (isEmptyPatch(patch)) {
-      setSaved(true);
-      setSaving(false);
-      return;
-    }
-
-    const result = await updateRoutine(patch);
-    if (result.ok) {
-      setSaved(true);
-      router.refresh();
-    } else {
-      setSaveError(result.error);
-    }
-    setSaving(false);
   }, [baseline, days, isNew, name, routine.id, router]);
 
   const dayErrorsById = useMemo(

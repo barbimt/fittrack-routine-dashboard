@@ -14,6 +14,16 @@ interface UploadDropzoneProps {
   className?: string;
 }
 
+function isXlsx(file: File) {
+  return file.name.toLowerCase().endsWith(".xlsx");
+}
+
+function formatFileSize(bytes: number) {
+  if (bytes < 1024) return bytes + " B";
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+  return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+}
+
 export function UploadDropzone({
   onFileSelect,
   onChangeFile,
@@ -22,8 +32,6 @@ export function UploadDropzone({
   error,
   className,
 }: UploadDropzoneProps) {
-  const isXlsx = (file: File) => file.name.toLowerCase().endsWith(".xlsx");
-
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault();
@@ -45,12 +53,6 @@ export function UploadDropzone({
     },
     [onFileSelect]
   );
-
-  const formatFileSize = (bytes: number) => {
-    if (bytes < 1024) return bytes + " B";
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
-    return (bytes / (1024 * 1024)).toFixed(1) + " MB";
-  };
 
   if (uploadedFile) {
     return (
