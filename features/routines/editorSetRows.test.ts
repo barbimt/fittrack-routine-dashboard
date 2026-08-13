@@ -65,6 +65,18 @@ describe("exerciseToSetRows", () => {
     ]);
   });
 
+  it("keeps stable row ids across re-hydrates so weight inputs keep focus", () => {
+    const ex = exercise();
+    const first = exerciseToSetRows(ex);
+    const second = exerciseToSetRows({ ...ex, weight: "55kg" });
+    expect(first.map((row) => row.id)).toEqual([
+      "ex-1-set-0",
+      "ex-1-set-1",
+      "ex-1-set-2",
+    ]);
+    expect(second.map((row) => row.id)).toEqual(first.map((row) => row.id));
+  });
+
   it("expands variable weight prescriptions per set", () => {
     expectRows(
       exerciseToSetRows(

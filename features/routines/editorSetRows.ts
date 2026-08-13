@@ -15,6 +15,11 @@ function newSetRowId(): string {
   return crypto.randomUUID();
 }
 
+/** Stable across re-hydrates of the same exercise so inputs keep focus while typing. */
+function stableSetRowId(exerciseId: string, index: number): string {
+  return `${exerciseId}-set-${index}`;
+}
+
 export function stripWeightUnit(weight: string | null | undefined): string {
   if (!weight) return "";
   return weight.replace(/\s*kg\s*$/i, "").trim();
@@ -36,8 +41,8 @@ export function exerciseToSetRows(exercise: EditorExercise): EditorSetRow[] {
   if (prescription && prescription !== "—") {
     const expanded = expandPrescriptionToSets(prescription, exercise.weight);
     if (expanded.length > 0) {
-      return expanded.map((set) => ({
-        id: newSetRowId(),
+      return expanded.map((set, index) => ({
+        id: stableSetRowId(exercise.id, index),
         reps: set.targetReps > 0 ? String(set.targetReps) : "",
         weightKg: stripWeightUnit(set.targetWeight),
       }));
@@ -49,8 +54,8 @@ export function exerciseToSetRows(exercise: EditorExercise): EditorSetRow[] {
   const reps = exercise.targetReps?.trim() ?? "";
   const weightKg = stripWeightUnit(exercise.weight);
 
-  return Array.from({ length: count }, () => ({
-    id: newSetRowId(),
+  return Array.from({ length: count }, (_, index) => ({
+    id: stableSetRowId(exercise.id, index),
     reps,
     weightKg,
   }));
