@@ -1,6 +1,6 @@
 # FitTrack
 
-A quiet workout companion for a weekly strength routine. You check off **sets** as you train — that’s the progress that matters, not a pile of charts.
+Weekly strength-training tracker. You log **sets** as you train, edit the plan when it changes, or import a routine from Excel.
 
 **[Open FitTrack](https://fittrack-routine-dashboard.vercel.app)** · [peek at a sample week without signing in](https://fittrack-routine-dashboard.vercel.app/demo)
 
