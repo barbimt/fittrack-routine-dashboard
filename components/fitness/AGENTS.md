@@ -20,3 +20,4 @@ Presentation layer for workouts. Props in, events up — no direct Supabase call
 - App chrome primitives: `button.tsx`, `input.tsx`, `badge.tsx` (prefer over raw `components/ui` in fitness screens).
 - Calm stone / sage styling; no neon gym colors.
 - Wire persistence through hooks (`useWorkoutSession`, `useRoutineEditor`) and feature actions, not inside these components.
+- Mobile inputs: keep `text-base` (≥16px) on small screens (`md:text-sm` ok on desktop). Overriding with bare `text-sm` triggers iOS Safari/Chrome focus zoom and breaks the layout.

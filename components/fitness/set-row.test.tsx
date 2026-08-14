@@ -59,15 +59,18 @@ describe("SetRow", () => {
     expect(onToggle).toHaveBeenCalledWith("set-1");
   });
 
-  it("does not toggle when clicking set number or target label", async () => {
+  it("toggles when clicking the row (set number / target), not only the checkbox", async () => {
     const onToggle = vi.fn();
     render(
       <SetRow set={{ ...baseSet, completed: false }} onToggle={onToggle} />
     );
 
     await userEvent.click(screen.getByText("1"));
+    expect(onToggle).toHaveBeenCalledWith("set-1");
+
+    onToggle.mockClear();
     await userEvent.click(screen.getByText("10"));
-    expect(onToggle).not.toHaveBeenCalled();
+    expect(onToggle).toHaveBeenCalledWith("set-1");
   });
 
   it("falls back to exercise weight when the set has no targetWeight", () => {
