@@ -102,11 +102,11 @@ export function DemoDashboardClient({
             />
             <div>
               <p className="text-foreground text-sm font-semibold">
-                Interactive demo — no account needed
+                Sample week — no account needed
               </p>
               <p className="text-muted-foreground mt-0.5 text-sm">
-                Explore FitTrack with sample data. Sign up to import your own
-                routine and save progress.
+                You can tick sets here, but nothing is stored. Sign up to use
+                your own routine.
               </p>
             </div>
           </div>
