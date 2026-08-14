@@ -23,11 +23,8 @@ function formatClientToday(): ClientToday {
   };
 }
 
-/**
- * Client-only calendar label. Server / hydration snapshot is null so SSR and
- * the client agree (no locale/timezone mismatch).
- */
 export function useClientToday(): ClientToday | null {
+  // Server snapshot is false so SSR/client hydration don't disagree on locale.
   const ready = useSyncExternalStore(
     emptySubscribe,
     () => true,

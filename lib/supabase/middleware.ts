@@ -40,7 +40,6 @@ export async function updateSession(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
   const accessCtx = {
     isAuthenticated: Boolean(user),
-    // Wire from billing / Supabase when paid plans exist.
     isPaid: false,
   };
 
@@ -64,7 +63,6 @@ export async function updateSession(request: NextRequest) {
     return redirectResponse;
   }
 
-  // Catalogued features: respect release + audience (public / auth / paid).
   if (!canAccessPath(pathname, accessCtx)) {
     const fallbackUrl = request.nextUrl.clone();
     fallbackUrl.pathname = featureAccessFallbackPath(accessCtx);

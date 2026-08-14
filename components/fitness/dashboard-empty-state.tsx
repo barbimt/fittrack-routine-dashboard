@@ -8,7 +8,6 @@ import { EmptyState } from "@/components/fitness/empty-state";
 import { Button } from "@/components/fitness/button";
 import { Dumbbell, Sparkles } from "lucide-react";
 
-/** Empty dashboard when the user has no active routine yet. */
 export function DashboardEmptyState() {
   const router = useRouter();
 

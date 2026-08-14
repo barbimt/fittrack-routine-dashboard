@@ -50,7 +50,6 @@ const ALL_NAV_ITEMS: NavItem[] = [
   },
 ];
 
-/** App sidebar — signed-in shell; respects feature release + audience. */
 export const navItems: NavItem[] = filterEnabledNavItems(ALL_NAV_ITEMS, {
   isAuthenticated: true,
 });

@@ -100,7 +100,6 @@ export function editorPatchFromSimpleFields(
   };
 }
 
-/** Prescription text + parsed sets/reps persisted to the DB on save. */
 export function resolvePrescriptionForSave(exercise: RoutineExerciseUpsert): {
   prescription: string;
   plannedSets: number | null;

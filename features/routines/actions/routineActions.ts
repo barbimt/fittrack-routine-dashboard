@@ -39,10 +39,6 @@ function exerciseFields(exercise: RoutineExerciseUpsert) {
   };
 }
 
-/**
- * Create a brand-new active routine from the editor (create-from-scratch).
- * Does not write to the DB until the user saves a valid routine.
- */
 export async function createRoutine(
   input: CreateRoutineInput
 ): Promise<CreateRoutineResult> {

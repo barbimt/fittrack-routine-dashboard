@@ -1,7 +1,3 @@
-/**
- * Allowlisted relative paths for post-auth redirects (`?next=`).
- * Rejects protocol-relative URLs, backslashes, and unknown routes.
- */
 const ALLOWED_EXACT = new Set([
   "/",
   "/empty",

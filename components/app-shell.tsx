@@ -9,15 +9,10 @@ import { cn } from "@/lib/utils";
 
 interface AppShellProps {
   children: React.ReactNode;
-  /** Optional right column (e.g. SummaryPanel) — desktop xl+ */
   aside?: React.ReactNode;
   navItems?: NavItem[];
   footer?: React.ReactNode;
-  /**
-   * Persistent bottom chrome (save bar, etc.) rendered **outside** the
-   * scroll region so it never covers page actions — works on mobile Chrome
-   * with dynamic toolbars + safe-area insets (see MDN `env(safe-area-inset-*)`).
-   */
+  /** Save bar / rest timer — outside the scroll pane so it isn't covered on mobile. */
   bottomChrome?: React.ReactNode;
 }
 
@@ -59,9 +54,8 @@ export function AppShell({
         <Header onMenuOpen={() => setSidebarOpen(true)} />
 
         {/*
-          Always scroll inside a dedicated region. `h-0 flex-1` is required so
-          the flex item gets a real height in mobile Chrome (otherwise the
-          pane can collapse to 0 and the page looks blank).
+          `h-0 flex-1` gives the pane a real height in mobile Chrome.
+          Without it the flex child can collapse and the page looks blank.
         */}
         <main
           className={cn(

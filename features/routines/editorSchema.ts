@@ -24,11 +24,6 @@ export interface DayValidationError {
   messages: string[];
 }
 
-/**
- * Validate the editor state before saving. Returns one entry per day that has
- * problems (empty name, no exercises, or an invalid exercise); an empty array
- * means the routine is valid.
- */
 export function validateRoutineDays(days: EditorDay[]): DayValidationError[] {
   const result = routineDaysSchema.safeParse(days);
   if (result.success) return [];

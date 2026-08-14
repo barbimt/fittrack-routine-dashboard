@@ -123,7 +123,6 @@ export function hasWeightInPrescriptionText(prescription: string): boolean {
   return segments.some((block) => block !== null && block.weight !== null);
 }
 
-/** True when the prescription has multiple blocks (e.g. `1x12-3x10`). */
 export function isVariablePrescriptionStructure(prescription: string): boolean {
   const trimmed = normalizePrescriptionInput(prescription).trim();
   if (!trimmed) return false;
@@ -193,7 +192,6 @@ export function expandPrescriptionToSets(
   return sets;
 }
 
-/** Human-readable block lines for exercise headers, e.g. `1 × 12 · 15kg`. */
 export function formatPrescriptionBlockLines(
   prescription: string,
   fallbackWeight?: string | null

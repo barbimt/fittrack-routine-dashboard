@@ -7,7 +7,6 @@ interface WeightLabelProps {
   iconClassName?: string;
 }
 
-/** Dumbbell icon + load text — shared in exercise header and set rows. */
 function WeightLabel({ weight, className, iconClassName }: WeightLabelProps) {
   return (
     <span className={cn("inline-flex items-center gap-1", className)}>
@@ -26,7 +25,6 @@ interface SetTargetLabelProps {
   className?: string;
 }
 
-/** Compact target: `12 · 40kg` (no “Target:” label — keeps mobile rows short). */
 export function SetTargetLabel({
   targetReps,
   targetWeight,

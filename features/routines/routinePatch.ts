@@ -1,7 +1,6 @@
 import { isUuid } from "@/lib/uuid";
 import type { EditorDay } from "./editorTypes";
 
-/** A day to insert (id is a `new-*` temp id) or update (id is a UUID). */
 export interface RoutineDayUpsert {
   id: string;
   name: string;
@@ -10,7 +9,6 @@ export interface RoutineDayUpsert {
   sortOrder: number;
 }
 
-/** An exercise to insert or update; `dayId` may be a temp id resolved server-side. */
 export interface RoutineExerciseUpsert {
   id: string;
   dayId: string;
@@ -25,7 +23,6 @@ export interface RoutineExerciseUpsert {
   sortOrder: number;
 }
 
-/** Minimal set of changes to persist; only changed/added/removed rows are included. */
 export interface RoutineEditPatch {
   routineId: string;
   upsertDays: RoutineDayUpsert[];

@@ -9,7 +9,6 @@ import { Input } from "./input";
 
 interface SetRowProps {
   set: ExerciseSet;
-  /** Used when the set has no per-set load (e.g. demo mock data). */
   fallbackWeight?: string | null;
   onToggle?: (setId: string) => void;
   onRepsChange?: (setId: string, reps: number | null) => void;
@@ -40,7 +39,7 @@ export function SetRow({
 
   useEffect(() => () => clearTimeout(saveTimer.current), []);
 
-  // Local draft while typing; sync from props only when the input is not focused.
+  // Don't overwrite the input while the user is typing.
   // react-doctor-disable-next-line react-doctor/no-reset-all-state-on-prop-change
   useEffect(() => {
     if (isFocused.current) return;

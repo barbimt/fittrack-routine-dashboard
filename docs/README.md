@@ -1,8 +1,8 @@
 # FitTrack — documentation
 
-Product docs for contributors and agents. Keep them aligned with the codebase whenever related code changes.
+Update these when the related code changes.
 
-Learning notes under `docs/next/`, `docs/react/`, `docs/supabase/`, `docs/typescript/`, and `docs/CURSOR.md` stay **local** (gitignored). Cursor rules/skills live under `.cursor/` (also gitignored).
+Learning notes under `docs/next/`, `docs/react/`, `docs/supabase/`, and `docs/typescript/` stay local (gitignored).
 
 ## Index
 
@@ -18,11 +18,11 @@ Learning notes under `docs/next/`, `docs/react/`, `docs/supabase/`, `docs/typesc
 
 | You change… | Update… |
 |-------------|---------|
-| `features/routine-import/*` | `ROUTINE-IMPORT.md`, `DOMAIN.md` (import section), `ROADMAP.md`, `features/AGENTS.md` |
-| Routine editor (`/editor`, editor hooks, dnd) | `ARCHITECTURE.md` (editor flow), `ROADMAP.md`, `features/AGENTS.md`, `components/fitness/AGENTS.md` |
-| Session / set logging on `/` | `ARCHITECTURE.md` (dashboard flow), `ROADMAP.md`, `features/AGENTS.md` |
-| `lib/mock-data.ts` types or progress rules | `DOMAIN.md`, root `AGENTS.md`, `lib/AGENTS.md` |
-| New route or user-facing feature | Root `README.md`, `ARCHITECTURE.md`, `AGENTS.md`, `app/AGENTS.md` |
+| `features/routine-import/*` | `ROUTINE-IMPORT.md`, `DOMAIN.md` (import section), `ROADMAP.md` |
+| Routine editor (`/editor`, editor hooks, dnd) | `ARCHITECTURE.md` (editor flow), `ROADMAP.md` |
+| Session / set logging on `/` | `ARCHITECTURE.md` (dashboard flow), `ROADMAP.md` |
+| `lib/mock-data.ts` types or progress rules | `DOMAIN.md` |
+| New route or user-facing feature | Root `README.md`, `ARCHITECTURE.md` |
 | Finished roadmap item | `ROADMAP.md` checkboxes |
 
-**Style:** Describe the current system only. Replace obsolete sections; do not keep “historical” comparisons.
+Describe the current system only. Replace obsolete sections instead of keeping historical comparisons.

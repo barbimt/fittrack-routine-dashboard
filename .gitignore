@@ -31,6 +31,7 @@ next-env.d.ts
 
 # Local-only Cursor config, learning notes, and scripts (not published)
 /.cursor/
+AGENTS.md
 /docs/CURSOR.md
 /docs/next/
 /docs/react/

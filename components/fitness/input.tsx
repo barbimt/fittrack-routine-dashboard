@@ -5,7 +5,6 @@ export interface FitnessInputProps extends React.ComponentProps<
   typeof UiInput
 > {}
 
-/** Editable-looking field for workout prototype */
 export function Input({ className, ...props }: FitnessInputProps) {
   return (
     <UiInput

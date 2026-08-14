@@ -13,7 +13,6 @@ interface EditorSetRowsFieldProps {
   onRemoveRow: (index: number) => void;
 }
 
-/** Compact set table for editor + edit modal — readable on narrow screens. */
 export function EditorSetRowsField({
   idPrefix,
   rows,

@@ -141,7 +141,6 @@ export function appendExerciseToDay(
   };
 }
 
-/** Replace one exercise in the day using updated DB row + session logs. */
 export function replaceExerciseInDay(
   day: TrainingDay,
   exercise: RoutineExercise,

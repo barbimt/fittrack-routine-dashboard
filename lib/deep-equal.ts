@@ -1,10 +1,4 @@
-/**
- * Structural deep equality for plain JSON-like data (objects, arrays,
- * primitives, null). Short-circuits on the first difference, so it scales
- * better than `JSON.stringify` comparison and is not sensitive to key order.
- *
- * Not intended for Dates, Maps, Sets, class instances, or circular structures.
- */
+/** Deep equality for JSON-like values. Not for Dates, Maps, Sets, or cycles. */
 export function deepEqual(a: unknown, b: unknown): boolean {
   if (Object.is(a, b)) return true;
 

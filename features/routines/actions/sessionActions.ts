@@ -607,7 +607,6 @@ export type UpdateSetLogProgressResult =
   | { ok: true }
   | { ok: false; error: string };
 
-/** Single write for set completion and/or actual reps (one POST / DB update). */
 export async function updateSetLogProgress(
   setLogId: string,
   patch: UpdateSetLogProgressInput
