@@ -1,6 +1,8 @@
 # FitTrack
 
-Weekly strength-training tracker. You log **sets** as you train, edit the plan when it changes, or import a routine from Excel.
+A practice project to get comfortable with **Next.js**, **React**, **TypeScript**, **Tailwind**, and **Supabase** (auth, Postgres, server actions). The domain is a weekly gym tracker so the UI and data model have something real to do.
+
+You log **sets** as you train, edit the plan when it changes, or import a routine from Excel.
 
 **[Open FitTrack](https://fittrack-routine-dashboard.vercel.app)** · [peek at a sample week without signing in](https://fittrack-routine-dashboard.vercel.app/demo)
 
@@ -33,4 +35,4 @@ From there: create an account, download the Excel template from the import page 
 
 ## Notes
 
-If you’re poking around the code, [`docs/`](docs/README.md) has the longer write-ups. Built with Next.js and Supabase.
+If you’re poking around the code, [`docs/`](docs/README.md) has the longer write-ups.
