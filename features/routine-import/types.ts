@@ -36,14 +36,12 @@ export type ParsedRoutine = {
   warnings: ImportWarning[];
 };
 
-/** Canonical column keys used by the parser (English). */
 export type CanonicalColumn = "EXERCISE" | "SETS_X_REPS" | "WEIGHT" | "NOTES";
 
 export const REQUIRED_COLUMNS: CanonicalColumn[] = ["EXERCISE", "SETS_X_REPS"];
 
 export const OPTIONAL_COLUMNS: CanonicalColumn[] = ["WEIGHT", "NOTES"];
 
-/** Human-readable header labels shown in UI and error messages. */
 export const COLUMN_LABELS: Record<CanonicalColumn, string> = {
   EXERCISE: "EXERCISE",
   SETS_X_REPS: "SETS x REPS",

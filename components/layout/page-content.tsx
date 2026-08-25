@@ -5,7 +5,6 @@ export interface PageContentProps {
   className?: string;
 }
 
-/** Shared page shell: centered content, default `max-w-4xl`, responsive padding. Override width via `className` (e.g. `max-w-5xl`). */
 export function PageContent({ children, className }: PageContentProps) {
   return (
     <div

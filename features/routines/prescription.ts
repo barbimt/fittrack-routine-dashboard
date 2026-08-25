@@ -1,7 +1,3 @@
-/**
- * Build the NOT NULL `prescription` string from the editor's separate
- * sets / reps fields, e.g. 4 sets x "8-10" -> "4x8-10".
- */
 export function buildPrescription(
   plannedSets: number | null,
   targetReps: string | null

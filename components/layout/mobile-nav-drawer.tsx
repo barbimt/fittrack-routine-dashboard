@@ -12,7 +12,6 @@ interface MobileNavDrawerProps {
   footer?: React.ReactNode;
 }
 
-/** Mobile hamburger drawer — reuses `Sidebar` nav links (all routes). */
 export function MobileNavDrawer({
   open,
   onOpenChange,

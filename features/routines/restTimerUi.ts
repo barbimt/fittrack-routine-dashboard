@@ -1,8 +1,3 @@
-/**
- * Presentation helpers for the workout rest timer.
- * Keep UI labels/status mapping here so dashboards and cards stay thin.
- */
-
 import type { Exercise } from "@/lib/mock-data";
 
 export type ExerciseRestTimerStatus = {
@@ -21,10 +16,8 @@ export type RestTimerViewModel = {
   clear: () => void;
 };
 
-/** Tight mobile inset for Today; lg+ horizontal padding comes from AppShell. */
 const REST_TIMER_PAGE_BASE = "flex-1 px-2 pt-3 pb-6 lg:px-0 lg:py-0";
 
-/** Map hook state → props consumed by ExerciseCard. */
 export function toExerciseRestTimerStatus(
   timer: Pick<RestTimerViewModel, "exerciseId" | "isPaused" | "countdownLabel">
 ): ExerciseRestTimerStatus {
@@ -35,10 +28,6 @@ export function toExerciseRestTimerStatus(
   };
 }
 
-/**
- * ExerciseCard rest-timer props for live + demo dashboards.
- * Read-only sessions omit start + status so the button stays hidden.
- */
 export function exerciseCardRestProps(
   timer: Pick<
     RestTimerViewModel,
@@ -58,7 +47,6 @@ export function exerciseCardRestProps(
   };
 }
 
-/** Extra bottom padding so the fixed rest bar does not cover content. */
 export function restTimerPageClassName(active: boolean): string {
   return active ? `${REST_TIMER_PAGE_BASE} pb-28` : REST_TIMER_PAGE_BASE;
 }

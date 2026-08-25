@@ -5,7 +5,6 @@ export type NotifyVariant = "default" | "success" | "destructive";
 export type NotifyOptions = {
   title: string;
   description?: string;
-  /** Auto-dismiss in ms (Radix toast duration). */
   duration?: number;
 };
 
@@ -22,10 +21,6 @@ function show(variant: NotifyVariant, options: NotifyOptions) {
   });
 }
 
-/**
- * Workout-session feedback copy.
- * Call via `notify.workout.*` from live / demo session hooks.
- */
 const workout = {
   notReady() {
     return show("destructive", {
@@ -139,14 +134,6 @@ const workout = {
   },
 };
 
-/**
- * App-wide notifications (toasts).
- * Mount `<AppToaster />` once in the root layout.
- *
- * Generic: `notify.success({ title: "Saved" })`
- * Workout: `notify.workout.workoutSaved(true)`
- * Rest: `notify.restComplete("Hip Thrust")`
- */
 export const notify = {
   info(options: NotifyOptions) {
     return show("default", options);
@@ -157,7 +144,6 @@ export const notify = {
   error(options: NotifyOptions) {
     return show("destructive", options);
   },
-  /** Rest timer finished. */
   restComplete(exerciseName?: string) {
     return show("success", {
       title: "Rest done",

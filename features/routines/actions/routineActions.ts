@@ -6,7 +6,7 @@ import { isUuid } from "@/lib/uuid";
 import { resolvePrescriptionForSave } from "../editorPrescription";
 import type { EditorDay } from "../editorTypes";
 import { validateRoutineDays } from "../editorSchema";
-import { insertActiveRoutineTree } from "../insertActiveRoutineTree";
+import { insertActiveRoutineTree } from "../insertActiveRoutineTree.server";
 import type { RoutineEditPatch, RoutineExerciseUpsert } from "../routinePatch";
 
 export type UpdateRoutineResult = { ok: true } | { ok: false; error: string };
@@ -39,10 +39,6 @@ function exerciseFields(exercise: RoutineExerciseUpsert) {
   };
 }
 
-/**
- * Create a brand-new active routine from the editor (create-from-scratch).
- * Does not write to the DB until the user saves a valid routine.
- */
 export async function createRoutine(
   input: CreateRoutineInput
 ): Promise<CreateRoutineResult> {
@@ -70,7 +66,6 @@ export async function createRoutine(
   }
 
   const result = await insertActiveRoutineTree(supabase, {
-    userId: user.id,
     name,
     source: "manual",
     days: input.days.map((day, dayIndex) => ({

@@ -1,7 +1,6 @@
 import type { Exercise } from "@/lib/mock-data";
 import type { EditorExercise } from "./editorTypes";
 
-/** Map a live workout Exercise into routine-editor draft fields. */
 export function exerciseToEditorDraft(exercise: Exercise): EditorExercise {
   const weight =
     exercise.weight && exercise.weight !== "—" ? exercise.weight : null;

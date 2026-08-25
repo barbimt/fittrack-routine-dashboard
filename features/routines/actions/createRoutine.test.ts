@@ -13,7 +13,7 @@ vi.mock("@/lib/supabase/server", () => ({
   })),
 }));
 
-vi.mock("../insertActiveRoutineTree", () => ({
+vi.mock("../insertActiveRoutineTree.server", () => ({
   insertActiveRoutineTree: insertTreeMock,
 }));
 
@@ -69,7 +69,6 @@ describe("createRoutine", () => {
     expect(insertTreeMock).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({
-        userId: "user-1",
         name: "Legs",
         source: "manual",
       })

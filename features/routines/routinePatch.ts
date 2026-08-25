@@ -1,7 +1,6 @@
 import { isUuid } from "@/lib/uuid";
 import type { EditorDay } from "./editorTypes";
 
-/** A day to insert (id is a `new-*` temp id) or update (id is a UUID). */
 export interface RoutineDayUpsert {
   id: string;
   name: string;
@@ -10,7 +9,6 @@ export interface RoutineDayUpsert {
   sortOrder: number;
 }
 
-/** An exercise to insert or update; `dayId` may be a temp id resolved server-side. */
 export interface RoutineExerciseUpsert {
   id: string;
   dayId: string;
@@ -25,7 +23,6 @@ export interface RoutineExerciseUpsert {
   sortOrder: number;
 }
 
-/** Minimal set of changes to persist; only changed/added/removed rows are included. */
 export interface RoutineEditPatch {
   routineId: string;
   upsertDays: RoutineDayUpsert[];
@@ -127,23 +124,23 @@ export function computeRoutinePatch(
   });
 
   const currentDayIds = new Set(
-    current.filter((d) => isUuid(d.id)).map((d) => d.id)
+    current.flatMap((d) => (isUuid(d.id) ? [d.id] : []))
   );
   const currentExerciseIds = new Set(
-    current
-      .flatMap((d) => d.exercises)
-      .filter((e) => isUuid(e.id))
-      .map((e) => e.id)
+    current.flatMap((d) =>
+      d.exercises.flatMap((e) => (isUuid(e.id) ? [e.id] : []))
+    )
   );
 
-  const deleteDayIds = baseline
-    .filter((d) => isUuid(d.id) && !currentDayIds.has(d.id))
-    .map((d) => d.id);
+  const deleteDayIds = baseline.flatMap((d) =>
+    isUuid(d.id) && !currentDayIds.has(d.id) ? [d.id] : []
+  );
 
-  const deleteExerciseIds = baseline
-    .flatMap((d) => d.exercises)
-    .filter((e) => isUuid(e.id) && !currentExerciseIds.has(e.id))
-    .map((e) => e.id);
+  const deleteExerciseIds = baseline.flatMap((d) =>
+    d.exercises.flatMap((e) =>
+      isUuid(e.id) && !currentExerciseIds.has(e.id) ? [e.id] : []
+    )
+  );
 
   return {
     routineId,

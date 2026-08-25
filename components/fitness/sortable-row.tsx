@@ -12,7 +12,6 @@ import { CSS } from "@dnd-kit/utilities";
 import { GripVertical } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-/** Pointer + keyboard sensors tuned for the editor's sortable lists. */
 export function useEditorSensors() {
   return useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -20,11 +19,6 @@ export function useEditorSensors() {
   );
 }
 
-/**
- * Wraps `useSortable` for a handle-driven sortable row: returns the node ref,
- * the activator (drag handle) ref, computed style, and the props to spread on
- * the handle.
- */
 export function useSortableRow(id: string, dragZIndex = 10) {
   const {
     attributes,
@@ -55,7 +49,6 @@ interface DragHandleProps extends React.ComponentProps<"button"> {
   label: string;
 }
 
-/** Grip button used as the drag activator for a sortable row. */
 export function DragHandle({
   label,
   className,

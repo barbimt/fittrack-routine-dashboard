@@ -3,7 +3,7 @@
 ## Stack
 
 - **Framework:** Next.js 16 (App Router), React 19
-- **Language:** TypeScript (strict — no `any`)
+- **Language:** TypeScript (strict)
 - **Styling:** Tailwind CSS 4 (`app/globals.css` + `@theme inline`)
 - **UI primitives:** shadcn/ui + Radix (`components/ui/`)
 - **Icons:** lucide-react
@@ -35,7 +35,7 @@ components/ui/*               →  shadcn primitives — no business logic
 `AppShell` wraps every main screen:
 
 - **Desktop (`lg+`):** fixed `Sidebar` (64), main content, optional `aside` (e.g. `SummaryPanel` on `xl+`)
-- **Mobile:** `Header` (menu), content, `MobileNavigation` (bottom tabs, first 5 routes)
+- **Mobile:** `Header` (hamburger) + `MobileNavDrawer`
 
 Navigation uses Next.js `Link` routes.
 
@@ -46,7 +46,7 @@ Navigation uses Next.js `Link` routes.
 ```
 app/page.tsx (Server Component)
   → supabase.auth.getUser()           if no session → redirect /login
-  → supabase.from("routines")         if no active routine → redirect /empty
+  → supabase.from("routines")         if no active routine → empty dashboard CTAs
     .select("*, routine_days(*, routine_exercises(*))")
   → mapRoutineToTrainingDays()        RoutineWithDays → TrainingDay[]
   → getOrCreateDaySession()           workout_sessions + workout_set_logs for first day
@@ -77,7 +77,7 @@ User selects .xlsx
 ```
 app/editor/page.tsx (Server Component)
   → supabase.auth.getUser()           if no session → redirect /login
-  → supabase.from("routines")         if no active routine → redirect /empty
+  → supabase.from("routines")         if no active routine → create-from-scratch editor
     .select("*, routine_days(*, routine_exercises(*))")
   → mapRoutineToEditor()              RoutineWithDays → EditorRoutine (editor-shaped)
   → <RoutineEditorClient routine={...} />

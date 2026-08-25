@@ -1,0 +1,53 @@
+{
+  "$schema": "https://www.react.doctor/schema.json",
+  "ignore": {
+    "files": [".next/**", "test/mocks/**", "hooks/use-mobile.ts"],
+    "overrides": [
+      {
+        "files": ["components/ui/**"],
+        "rules": [
+          "deslop/unused-file",
+          "react-doctor/only-export-components",
+          "react-doctor/prefer-tag-over-role",
+          "react-doctor/no-redundant-roles",
+          "react-doctor/prefer-dynamic-import",
+          "react-doctor/rerender-memo-before-early-return",
+          "react-doctor/no-pass-data-to-parent",
+          "react-doctor/no-pass-live-state-to-parent",
+          "react-doctor/no-prop-callback-in-effect",
+          "react-doctor/no-locale-format-in-render",
+          "react-doctor/no-transition-all",
+          "react-doctor/no-array-index-as-key"
+        ]
+      },
+      {
+        "files": [
+          "components/fitness/workout-save-panel.tsx",
+          "components/fitness/routine-editor-fields.tsx",
+          "components/layout/sidebar.tsx",
+          "components/layout/public-nav-items.tsx"
+        ],
+        "rules": ["react-doctor/only-export-components"]
+      },
+      {
+        "files": [
+          "hooks/use-workout-session.ts",
+          "hooks/use-demo-workout-session.ts"
+        ],
+        "rules": ["react-doctor/prefer-module-scope-pure-function"]
+      },
+      {
+        "files": ["hooks/use-dirty-state.ts"],
+        "rules": [
+          "react-doctor/no-derived-state",
+          "react-doctor/no-derived-state-effect"
+        ]
+      },
+      {
+        "files": ["lib/supabase/middleware.ts"],
+        "rules": ["react-doctor/clickjacking-redirect-risk"]
+      }
+    ],
+    "rules": ["react-doctor/artifact-baas-authority-surface"]
+  }
+}

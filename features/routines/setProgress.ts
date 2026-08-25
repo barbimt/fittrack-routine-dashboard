@@ -34,7 +34,6 @@ export function buildRepsChangePatch(reps: number | null): SetFieldPatch {
   };
 }
 
-/** Map of exerciseId → remount key after reset / prescription edits. */
 export function bumpRevisionMap(
   prev: Record<string, number>,
   ids: string[]

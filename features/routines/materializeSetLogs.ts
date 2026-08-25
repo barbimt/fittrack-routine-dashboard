@@ -123,9 +123,9 @@ export function planSetLogReconciliation(
     }
   }
 
-  const deleteIds = existingLogs
-    .filter((log) => !desiredNumbers.has(log.set_number))
-    .map((log) => log.id);
+  const deleteIds = existingLogs.flatMap((log) =>
+    !desiredNumbers.has(log.set_number) ? [log.id] : []
+  );
 
   return { updates, inserts, deleteIds };
 }

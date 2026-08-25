@@ -1,0 +1,787 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Informe FitTrack — limpieza React Doctor</title>
+    <style>
+      :root {
+        --bg: #f7f4ef;
+        --card: #fffdf9;
+        --ink: #2c2824;
+        --muted: #6b635a;
+        --line: #e6dfd4;
+        --sage: #5f7a66;
+        --sage-soft: #e8f0ea;
+        --warn: #8a5a2b;
+        --warn-soft: #f5ebdf;
+        --good: #3f6b4d;
+        --good-soft: #e4f0e7;
+        --bad: #8b3d3d;
+        --bad-soft: #f6e8e8;
+        --radius: 14px;
+        --shadow: 0 10px 30px rgba(44, 40, 36, 0.06);
+        --font: "Segoe UI", system-ui, -apple-system, sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: var(--font);
+        color: var(--ink);
+        background:
+          radial-gradient(900px 400px at 10% -10%, #efe8dc 0%, transparent 60%),
+          radial-gradient(700px 300px at 100% 0%, #e7efe9 0%, transparent 55%),
+          var(--bg);
+        line-height: 1.55;
+      }
+
+      .wrap {
+        max-width: 920px;
+        margin: 0 auto;
+        padding: 2.5rem 1.25rem 4rem;
+      }
+
+      header.hero {
+        margin-bottom: 2rem;
+      }
+
+      .eyebrow {
+        color: var(--sage);
+        font-size: 0.85rem;
+        font-weight: 650;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        margin: 0 0 0.5rem;
+      }
+
+      h1 {
+        font-size: clamp(1.7rem, 3vw, 2.35rem);
+        line-height: 1.2;
+        margin: 0 0 0.75rem;
+        letter-spacing: -0.02em;
+      }
+
+      .lead {
+        color: var(--muted);
+        font-size: 1.05rem;
+        max-width: 62ch;
+        margin: 0;
+      }
+
+      .scoreboard {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.85rem;
+        margin: 1.75rem 0 2rem;
+      }
+
+      @media (max-width: 700px) {
+        .scoreboard {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .score {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: 1rem 1.1rem;
+        box-shadow: var(--shadow);
+      }
+
+      .score .label {
+        color: var(--muted);
+        font-size: 0.8rem;
+        margin-bottom: 0.35rem;
+      }
+
+      .score .value {
+        font-size: 1.7rem;
+        font-weight: 700;
+        letter-spacing: -0.03em;
+      }
+
+      .score.before .value {
+        color: var(--bad);
+      }
+
+      .score.after .value {
+        color: var(--good);
+      }
+
+      .score.meta .value {
+        font-size: 1.15rem;
+      }
+
+      .toc {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: 1rem 1.2rem;
+        margin-bottom: 2rem;
+      }
+
+      .toc h2 {
+        font-size: 0.95rem;
+        margin: 0 0 0.6rem;
+      }
+
+      .toc ol {
+        margin: 0;
+        padding-left: 1.2rem;
+        color: var(--muted);
+      }
+
+      .toc a {
+        color: var(--sage);
+        text-decoration: none;
+      }
+
+      .toc a:hover {
+        text-decoration: underline;
+      }
+
+      section {
+        margin-bottom: 1.75rem;
+      }
+
+      h2 {
+        font-size: 1.35rem;
+        margin: 0 0 0.75rem;
+        letter-spacing: -0.02em;
+      }
+
+      h3 {
+        font-size: 1.05rem;
+        margin: 1.1rem 0 0.45rem;
+      }
+
+      p {
+        margin: 0 0 0.85rem;
+      }
+
+      .card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: 1.15rem 1.25rem;
+        box-shadow: var(--shadow);
+        margin-bottom: 1rem;
+      }
+
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.85rem;
+      }
+
+      @media (max-width: 700px) {
+        .grid-2 {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .before,
+      .after,
+      .why,
+      .vue {
+        border-radius: 12px;
+        padding: 0.9rem 1rem;
+        border: 1px solid transparent;
+      }
+
+      .before {
+        background: var(--bad-soft);
+        border-color: #efd3d3;
+      }
+
+      .after {
+        background: var(--good-soft);
+        border-color: #cfe3d4;
+      }
+
+      .why {
+        background: var(--warn-soft);
+        border-color: #ead9c4;
+      }
+
+      .vue {
+        background: var(--sage-soft);
+        border-color: #d3e3d7;
+      }
+
+      .pill {
+        display: inline-block;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        margin-bottom: 0.4rem;
+      }
+
+      .before .pill {
+        color: var(--bad);
+      }
+
+      .after .pill {
+        color: var(--good);
+      }
+
+      .why .pill {
+        color: var(--warn);
+      }
+
+      .vue .pill {
+        color: var(--sage);
+      }
+
+      .before p,
+      .after p,
+      .why p,
+      .vue p {
+        margin: 0;
+        font-size: 0.95rem;
+      }
+
+      ul {
+        margin: 0.3rem 0 0.9rem;
+        padding-left: 1.2rem;
+      }
+
+      li {
+        margin-bottom: 0.35rem;
+      }
+
+      code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.86em;
+        background: #efe8dc;
+        padding: 0.1em 0.35em;
+        border-radius: 5px;
+      }
+
+      .note {
+        color: var(--muted);
+        font-size: 0.92rem;
+      }
+
+      footer {
+        margin-top: 2.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid var(--line);
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header class="hero">
+        <p class="eyebrow">
+          FitTrack · rama <code>fix/react-doctor-cleanup</code>
+        </p>
+        <h1>Informe de mejoras de React Doctor</h1>
+        <p class="lead">
+          Esta guía explica, en lenguaje sencillo, qué se mejoró en la app, cómo
+          se hacía antes y por qué el cambio es mejor. Si vienes de
+          <strong>Vue</strong>, verás analogías para conectar ideas
+          (componentes, estado, efectos, seguridad).
+        </p>
+      </header>
+
+      <div class="scoreboard">
+        <div class="score before">
+          <div class="label">Puntuación anterior</div>
+          <div class="value">39 / 100</div>
+        </div>
+        <div class="score after">
+          <div class="label">Puntuación actual</div>
+          <div class="value">100 / 100</div>
+        </div>
+        <div class="score meta">
+          <div class="label">Resultado de calidad</div>
+          <div class="value">241 tests OK · build OK</div>
+        </div>
+      </div>
+
+      <nav class="toc" aria-label="Índice">
+        <h2>Índice</h2>
+        <ol>
+          <li><a href="#que-es">¿Qué es React Doctor?</a></li>
+          <li><a href="#mapa-vue">Mapa rápido React ↔ Vue</a></li>
+          <li>
+            <a href="#seguridad">Seguridad (quién es el dueño de los datos)</a>
+          </li>
+          <li><a href="#auth">Login y redirecciones seguras</a></li>
+          <li><a href="#estado">Estado y formularios</a></li>
+          <li><a href="#efectos">Efectos, fechas y “hidratación”</a></li>
+          <li><a href="#a11y">Accesibilidad en la fila de series</a></li>
+          <li><a href="#listas">Listas y keys estables</a></li>
+          <li><a href="#limpieza">Limpieza y configuración</a></li>
+          <li><a href="#resumen">Resumen para recordar</a></li>
+        </ol>
+      </nav>
+
+      <section id="que-es" class="card">
+        <h2>1. ¿Qué es React Doctor?</h2>
+        <p>
+          Es una herramienta que
+          <strong>revisa el código React</strong> buscando problemas de
+          seguridad, bugs, rendimiento, accesibilidad y mantenimiento. Parecido
+          a pasar un “linter avanzado” o un análisis estático, pero centrado en
+          hábitos típicos de React.
+        </p>
+        <p class="note">
+          No sustituye tus tests: te avisa de patrones peligrosos o frágiles.
+          Nosotros corregimos el código y, solo cuando un aviso era un falso
+          positivo intencional (por ejemplo, el kit de componentes shadcn), lo
+          documentamos en <code>doctor.config.json</code>.
+        </p>
+      </section>
+
+      <section id="mapa-vue" class="card">
+        <h2>2. Mapa rápido React ↔ Vue (para orientarte)</h2>
+        <ul>
+          <li>
+            <strong>Componente React</strong> ≈ componente Vue (SFC o Options
+            API).
+          </li>
+          <li>
+            <strong><code>useState</code></strong> ≈ <code>ref</code> /
+            <code>reactive</code> (dato local que dispara re-render).
+          </li>
+          <li>
+            <strong><code>useReducer</code></strong> ≈ un pequeño store local
+            con mutaciones claras (similar a Vuex/Pinia en miniatura, pero
+            dentro del componente).
+          </li>
+          <li>
+            <strong><code>useEffect</code></strong> ≈ <code>watch</code> /
+            <code>onMounted</code> / suscripciones. En React se abusa mucho de
+            él; la regla de oro es:
+            <em>no copies props a state “por si acaso”</em>.
+          </li>
+          <li>
+            <strong><code>key</code> en listas</strong> ≈ el
+            <code>:key</code> de Vue: identifica cada ítem. Si usas el índice
+            del array, al reordenar Vue/React “mezclan” filas.
+          </li>
+          <li>
+            <strong>Server Actions / código <code>*.server.ts</code></strong> ≈
+            lógica que solo corre en el servidor (no en el navegador). En Vue
+            suele vivir en tu API/backend.
+          </li>
+        </ul>
+      </section>
+
+      <section id="seguridad">
+        <h2>3. Seguridad: quién escribe el “dueño” de una rutina</h2>
+        <div class="card">
+          <h3>El problema</h3>
+          <p>
+            En FitTrack, cada rutina pertenece a un usuario
+            (<code>user_id</code>). Si la app envía ese campo desde el cliente,
+            alguien podría intentar guardar datos “como si fuera otra persona”.
+          </p>
+
+          <div class="grid-2">
+            <div class="before">
+              <div class="pill">Antes</div>
+              <p>
+                La función de guardar rutina recibía un <code>userId</code> por
+                parámetro y lo insertaba en la base de datos. Aunque los callers
+                “bien educados” pasaban el usuario correcto, la API
+                <em>permitía</em> confiar en un valor externo.
+              </p>
+            </div>
+            <div class="after">
+              <div class="pill">Ahora</div>
+              <p>
+                1) El usuario se obtiene de la sesión autenticada
+                (<code>auth.getUser()</code>.<br />
+                2) El <code>user_id</code> en inserts lo pone Postgres con
+                <code>DEFAULT auth.uid()</code>.<br />
+                3) El helper se llama
+                <code>insertActiveRoutineTree.server.ts</code> (solo servidor).
+              </p>
+            </div>
+          </div>
+
+          <div class="why" style="margin-top: 0.85rem">
+            <div class="pill">Por qué</div>
+            <p>
+              Defensa en profundidad: aunque alguien manipule el front, la base
+              de datos y las políticas RLS siguen atando filas a
+              <code>auth.uid()</code>. No confíes en el navegador para decidir
+              “quién eres”.
+            </p>
+          </div>
+          <div class="vue" style="margin-top: 0.85rem">
+            <div class="pill">Analogía Vue</div>
+            <p>
+              Igual que no dejarías que el front Vue envíe
+              <code>ownerId</code> libremente a tu API: el backend toma el id
+              del token/sesión. Aquí el “backend” es Supabase + Server Actions.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="auth">
+        <h2>4. Login y redirecciones seguras</h2>
+        <div class="card">
+          <h3>El problema</h3>
+          <p>
+            Tras el login (OAuth), a veces la URL lleva un parámetro
+            <code>?next=/alguna-ruta</code> para volver a donde estabas. Si
+            aceptas cualquier valor, un atacante puede redirigirte a un sitio
+            malicioso o a una pantalla privilegiada no prevista.
+          </p>
+
+          <div class="grid-2">
+            <div class="before">
+              <div class="pill">Antes</div>
+              <p>
+                Se comprobaba poco más que “empieza por <code>/</code>”. Eso no
+                basta: existen trucos tipo <code>//evil.com</code> o rutas
+                inventadas.
+              </p>
+            </div>
+            <div class="after">
+              <div class="pill">Ahora</div>
+              <p>
+                Existe <code>sanitizeAuthRedirectPath</code>: solo permite rutas
+                conocidas de la app (<code>/</code>, <code>/editor</code>,
+                <code>/upload</code>…). Además, las respuestas llevan cabeceras
+                anti-clickjacking (<code>frame-ancestors</code> /
+                <code>X-Frame-Options</code>).
+              </p>
+            </div>
+          </div>
+
+          <div class="why" style="margin-top: 0.85rem">
+            <div class="pill">Por qué</div>
+            <p>
+              Las URLs son entrada de usuario. Trátalas como datos no
+              confiables: allowlist (lista blanca), nunca “casi cualquier path”.
+            </p>
+          </div>
+          <div class="vue" style="margin-top: 0.85rem">
+            <div class="pill">Analogía Vue</div>
+            <p>
+              Como validar <code>route.query.redirect</code> en Vue Router antes
+              de hacer <code>router.push</code>: no redirijas a lo que venga en
+              la query sin filtrar.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="estado">
+        <h2>5. Estado y formularios (import + panel de guardar)</h2>
+
+        <div class="card">
+          <h3>5.1 Formulario de importar Excel</h3>
+          <div class="grid-2">
+            <div class="before">
+              <div class="pill">Antes</div>
+              <p>
+                Varios <code>useState</code> sueltos: fase, archivo, rutina,
+                errores, warnings… Al cambiar de paso había que actualizar
+                muchos setters a la vez (fácil dejar estados a medias).
+              </p>
+            </div>
+            <div class="after">
+              <div class="pill">Ahora</div>
+              <p>
+                Un <code>useReducer</code> con acciones claras:
+                <code>parse_start</code>, <code>parse_ok</code>,
+                <code>save_error</code>, etc. Un evento = una transición
+                completa.
+              </p>
+            </div>
+          </div>
+          <div class="vue" style="margin-top: 0.85rem">
+            <div class="pill">Analogía Vue</div>
+            <p>
+              Parecido a pasar de muchos <code>ref</code> independientes a una
+              máquina de estados / Pinia con mutaciones nombradas. Menos
+              “estados imposibles”.
+            </p>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>5.2 Panel “Guardar entrenamiento”</h3>
+          <div class="grid-2">
+            <div class="before">
+              <div class="pill">Antes</div>
+              <p>
+                Muchos booleanos (<code>isSaving</code>,
+                <code>isSessionSaved</code>, …). Combinarlos explota: ¿puede
+                estar “guardando” y “ya guardado” a la vez?
+              </p>
+            </div>
+            <div class="after">
+              <div class="pill">Ahora</div>
+              <p>
+                Una unión discriminada:
+                <code>status: "saved" | "unsaved"</code> + <code>busy</code>.
+                TypeScript ayuda a no pasar props contradictorias.
+              </p>
+            </div>
+          </div>
+          <div class="why" style="margin-top: 0.85rem">
+            <div class="pill">Por qué</div>
+            <p>
+              Modelar el UI como “modos” (como pantallas de un wizard) es más
+              fácil de razonar y de testear que una sopa de flags.
+            </p>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>5.3 Flags de “guardando…” con <code>try/finally</code></h3>
+          <div class="grid-2">
+            <div class="before">
+              <div class="pill">Antes</div>
+              <p>
+                Se ponía <code>isSaving = true</code>, se hacía el await, y en
+                varios caminos se volvía a <code>false</code>. Si algo fallaba
+                raro, el botón podía quedarse en “Saving…”.
+              </p>
+            </div>
+            <div class="after">
+              <div class="pill">Ahora</div>
+              <p>
+                El apagado del flag va en <code>finally</code>: siempre se
+                limpia, haya éxito o error.
+              </p>
+            </div>
+          </div>
+          <div class="vue" style="margin-top: 0.85rem">
+            <div class="pill">Analogía Vue</div>
+            <p>
+              El mismo patrón que en una action async de Pinia:
+              <code>loading = true</code> en try y <code>loading = false</code>
+              en finally.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="efectos">
+        <h2>6. Efectos, fechas y “hidratación” (SSR)</h2>
+        <div class="card">
+          <h3>El problema</h3>
+          <p>
+            FitTrack usa Next.js: primero puede renderizar en el
+            <strong>servidor</strong> y luego “hidratar” en el navegador. Si
+            durante el render llamas a <code>new Date()</code> o
+            <code>toLocaleDateString()</code>, el servidor y el cliente pueden
+            no coincidir (zona horaria / locale) y React se queja.
+          </p>
+
+          <div class="grid-2">
+            <div class="before">
+              <div class="pill">Antes</div>
+              <p>
+                La fecha de “hoy” se calculaba al renderizar el dashboard (o con
+                un <code>useEffect</code> que chocaba con las reglas de lint de
+                React 19).
+              </p>
+            </div>
+            <div class="after">
+              <div class="pill">Ahora</div>
+              <p>
+                Hook <code>useClientToday</code> con
+                <code>useSyncExternalStore</code>: en servidor muestra un
+                placeholder; en el cliente, la fecha real. Ambos lados coinciden
+                en el primer paint.
+              </p>
+            </div>
+          </div>
+
+          <div class="why" style="margin-top: 0.85rem">
+            <div class="pill">Por qué</div>
+            <p>
+              El render debe ser lo más “puro” posible. Reloj, aleatorio y
+              locale son fuentes típicas de desajuste servidor/cliente.
+            </p>
+          </div>
+          <div class="vue" style="margin-top: 0.85rem">
+            <div class="pill">Analogía Vue</div>
+            <p>
+              En Nuxt (SSR) pasa lo mismo: datos que solo existen en el browser
+              se cargan en <code>onMounted</code> o con composables client-only.
+              Aquí usamos la API recomendada de React para ese caso.
+            </p>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Borrador del editor (<code>useDirtyState</code>)</h3>
+          <p>
+            React Doctor avisa si “copias props a state”. En el editor
+            <em>sí necesitamos</em> un borrador editable distinto de la foto
+            guardada (baseline). Eso es intencional, como un formulario dirty en
+            Vue. Lo dejamos, con comentario/configuración que explica el falso
+            positivo.
+          </p>
+        </div>
+      </section>
+
+      <section id="a11y">
+        <h2>7. Accesibilidad en la fila de series (SetRow)</h2>
+        <div class="card">
+          <div class="grid-2">
+            <div class="before">
+              <div class="pill">Antes</div>
+              <p>
+                Toda la fila era un <code>div</code> con <code>onClick</code>
+                para marcar la serie. Un ratón funciona; un teclado o lector de
+                pantalla, no tanto. Además, meter click en un contenedor que ya
+                tiene checkbox/input es confuso.
+              </p>
+            </div>
+            <div class="after">
+              <div class="pill">Ahora</div>
+              <p>
+                Solo el <strong>checkbox</strong> marca la serie (control nativo
+                accesible). La fila ya no es un “botón falso”.
+              </p>
+            </div>
+          </div>
+          <div class="vue" style="margin-top: 0.85rem">
+            <div class="pill">Analogía Vue</div>
+            <p>
+              Misma regla: evita <code>@click</code> en un
+              <code>&lt;div&gt;</code> si puedes usar
+              <code>&lt;button&gt;</code> o un input real. La semántica HTML
+              ayuda a Vue y a React por igual.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="listas">
+        <h2>8. Listas y keys estables</h2>
+        <div class="card">
+          <div class="grid-2">
+            <div class="before">
+              <div class="pill">Antes</div>
+              <p>
+                Algunas listas usaban <code>key={index}</code> (la posición). Si
+                añades/quitas/reordenas series, React puede reutilizar el
+                componente equivocado y “mover” el texto tipado a otra fila.
+              </p>
+            </div>
+            <div class="after">
+              <div class="pill">Ahora</div>
+              <p>
+                Cada fila de series del editor tiene un <code>id</code> estable
+                (<code>crypto.randomUUID()</code>). Las keys ya no dependen del
+                índice.
+              </p>
+            </div>
+          </div>
+          <div class="vue" style="margin-top: 0.85rem">
+            <div class="pill">Analogía Vue</div>
+            <p>
+              Exactamente el mismo consejo del docs de Vue:
+              <code>:key="item.id"</code>, no <code>:key="i"</code>, cuando la
+              lista muta.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="limpieza">
+        <h2>9. Limpieza, rendimiento “suave” y configuración</h2>
+        <div class="card">
+          <ul>
+            <li>
+              <strong>Dependencias sin uso</strong> eliminadas
+              (<code>sonner</code>, <code>date-fns</code>,
+              <code>next-themes</code>, etc.) → menos superficie de ataque y
+              installs más limpios.
+            </li>
+            <li>
+              <strong>Constantes/helpers</strong> sacados fuera del componente
+              (como funciones puras en un <code>utils.js</code> de Vue) para no
+              recrearlos en cada render.
+            </li>
+            <li>
+              <strong>Context values</strong> memorizados en algunos componentes
+              UI (evita re-renders en cadena; en Vue el reactivity lo disimula
+              más).
+            </li>
+            <li>
+              <strong><code>pnpm-workspace.yaml</code></strong> con
+              <code>minimumReleaseAge</code> y <code>trustPolicy</code>: espera
+              unos días antes de instalar paquetes novísimos (higiene de
+              supply-chain).
+            </li>
+            <li>
+              <strong><code>doctor.config.json</code></strong
+              >: ignora ruido conocido (inventario shadcn en
+              <code>components/ui</code>, artefactos <code>.next</code>), no
+              para “esconder bugs reales”.
+            </li>
+          </ul>
+          <p class="note">
+            Migración DB importante: aplica
+            <code
+              >supabase/migrations/20260811160000_user_id_default_auth_uid.sql</code
+            >
+            (en local suele bastar <code>pnpm supabase:reset</code>).
+          </p>
+        </div>
+      </section>
+
+      <section id="resumen" class="card">
+        <h2>10. Resumen para recordar (desde Vue)</h2>
+        <ol>
+          <li>
+            <strong>No confíes en el front para la identidad</strong> — el
+            servidor/DB decide el <code>user_id</code>.
+          </li>
+          <li>
+            <strong>Valida redirects</strong> como validarías query params en
+            Vue Router.
+          </li>
+          <li>
+            <strong>Estado relacionado → un solo modelo</strong>
+            (<code>useReducer</code> / uniones de modos, no 8 booleanos).
+          </li>
+          <li>
+            <strong>SSR = cuidado con Date/locale</strong> (como en Nuxt).
+          </li>
+          <li><strong>HTML semántico &gt; divs clickables</strong>.</li>
+          <li>
+            <strong>Keys estables</strong> = el mismo mantra que en
+            <code>v-for</code>.
+          </li>
+          <li>
+            <strong>Loading flags en <code>finally</code></strong> siempre.
+          </li>
+        </ol>
+        <p>
+          Resultado práctico: misma app FitTrack, pero más segura, más
+          predecible y más fácil de mantener — con una puntuación React Doctor
+          de <strong>100/100</strong> en esta rama.
+        </p>
+      </section>
+
+      <footer>
+        Informe generado para explicar la rama
+        <code>fix/react-doctor-cleanup</code>. Ábrelo en el navegador (doble
+        clic o “Open with Live Server”). No forma parte del runtime de la app.
+      </footer>
+    </div>
+  </body>
+</html>

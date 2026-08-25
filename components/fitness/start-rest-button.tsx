@@ -14,7 +14,6 @@ interface StartRestButtonProps {
   onStart: (exercise: Exercise) => void;
 }
 
-/** Manual rest start control for an exercise card. */
 export function StartRestButton({
   exercise,
   status,

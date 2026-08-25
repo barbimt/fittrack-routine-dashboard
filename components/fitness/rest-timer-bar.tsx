@@ -13,8 +13,7 @@ interface RestTimerBarProps {
   onDismiss: () => void;
 }
 
-/** Fixed bottom rest countdown — stays visible while you keep training. */
-export function RestTimerBar({
+function RestTimerBar({
   countdownLabel,
   isPaused,
   onPause,
@@ -77,7 +76,6 @@ export function RestTimerBar({
   );
 }
 
-/** Renders the bottom bar when a rest timer from `useRestTimer` is active. */
 export function WorkoutRestTimerBar({ timer }: { timer: RestTimerViewModel }) {
   if (!timer.active) return null;
 

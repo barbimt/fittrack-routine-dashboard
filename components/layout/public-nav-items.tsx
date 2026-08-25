@@ -24,7 +24,6 @@ const ALL_PUBLIC_NAV_ITEMS: NavItem[] = [
   },
 ];
 
-/** Public demo nav — only released features with audience `public`. */
 export const publicNavItems: NavItem[] = filterEnabledNavItems(
   ALL_PUBLIC_NAV_ITEMS,
   { isAuthenticated: false }

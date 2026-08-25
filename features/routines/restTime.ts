@@ -3,7 +3,6 @@ export type RestParts = {
   seconds: number;
 };
 
-/** Split total seconds into whole minutes + remainder seconds (0–59). */
 export function secondsToParts(totalSeconds: number): RestParts {
   if (!Number.isFinite(totalSeconds) || totalSeconds <= 0) {
     return { minutes: 0, seconds: 0 };
@@ -76,7 +75,6 @@ export function formatRestTime(
   return `${total}s`;
 }
 
-/** Human label for the closed input (e.g. `1m 30s`, `45s`). */
 export function formatRestLabel(value: string | null | undefined): string {
   const { minutes, seconds } = parseRestTime(value);
   if (minutes <= 0 && seconds <= 0) return "";
@@ -85,13 +83,11 @@ export function formatRestLabel(value: string | null | undefined): string {
   return `${seconds}s`;
 }
 
-/** Total seconds from a stored rest_time value (0 if empty/invalid). */
 export function restTimeToSeconds(value: string | null | undefined): number {
   const { minutes, seconds } = parseRestTime(value);
   return Math.max(0, minutes * 60 + seconds);
 }
 
-/** Format remaining seconds as `m:ss` (e.g. `1:05`, `0:45`). */
 export function formatCountdown(totalSeconds: number): string {
   const whole = Math.max(0, Math.ceil(totalSeconds));
   const minutes = Math.floor(whole / 60);

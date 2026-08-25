@@ -6,6 +6,7 @@ import {
   findFeatureByPath,
   getFeatureRelease,
 } from "@/lib/features";
+import { sanitizeAuthRedirectPath } from "@/lib/auth/safe-redirect-path";
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
@@ -39,7 +40,6 @@ export async function updateSession(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
   const accessCtx = {
     isAuthenticated: Boolean(user),
-    // Wire from billing / Supabase when paid plans exist.
     isPaid: false,
   };
 
@@ -49,13 +49,20 @@ export async function updateSession(request: NextRequest) {
   if (authCode && !pathname.startsWith("/auth/callback")) {
     const callbackUrl = request.nextUrl.clone();
     callbackUrl.pathname = "/auth/callback";
-    if (!callbackUrl.searchParams.get("next")) {
-      callbackUrl.searchParams.set("next", "/");
-    }
-    return NextResponse.redirect(callbackUrl);
+    const safeNext = sanitizeAuthRedirectPath(
+      callbackUrl.searchParams.get("next") ?? pathname,
+      "/"
+    );
+    callbackUrl.searchParams.set("next", safeNext);
+    const redirectResponse = NextResponse.redirect(callbackUrl);
+    redirectResponse.headers.set("X-Frame-Options", "DENY");
+    redirectResponse.headers.set(
+      "Content-Security-Policy",
+      "frame-ancestors 'none'"
+    );
+    return redirectResponse;
   }
 
-  // Catalogued features: respect release + audience (public / auth / paid).
   if (!canAccessPath(pathname, accessCtx)) {
     const fallbackUrl = request.nextUrl.clone();
     fallbackUrl.pathname = featureAccessFallbackPath(accessCtx);

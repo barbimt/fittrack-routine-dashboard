@@ -61,8 +61,6 @@ export default function PrivacyPolicyPage() {
       <p className="text-muted-foreground text-xs">
         Last updated: August 10, 2026
       </p>
-
-      {/* Expand with retention, cookies, deletion requests, and regional notices. */}
     </HelpArticle>
   );
 }

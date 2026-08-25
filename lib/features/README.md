@@ -9,7 +9,7 @@ Next.js does **not** ship a product feature-flag system. FitTrack uses:
 | `.env` / `.env.local` | Optional overrides (`NEXT_PUBLIC_FEATURE_*`) |
 | Middleware | Enforces access; redirects away when blocked |
 
-See also [`docs/FEATURES.md`](../../docs/FEATURES.md). **This file is the published source of truth.**
+See also [`docs/FEATURES.md`](../../docs/FEATURES.md).
 
 ## Turn a feature on
 

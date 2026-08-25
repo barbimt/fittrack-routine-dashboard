@@ -2,12 +2,21 @@ import { expandPrescriptionToSets } from "@/features/routine-import/utils/parseP
 import type { EditorExercise } from "./editorTypes";
 import { buildPrescription } from "./prescription";
 
-/** One editable set row in the routine editor (no schema change — maps to prescription). */
 export type EditorSetRow = {
+  id: string;
   reps: string;
-  /** Numeric weight without unit (UI shows KG; persisted as e.g. `60kg`). */
+  /** UI is KG; persisted as `60kg`. */
   weightKg: string;
 };
+
+function newSetRowId(): string {
+  return crypto.randomUUID();
+}
+
+/** Stable across re-hydrates of the same exercise so inputs keep focus while typing. */
+function stableSetRowId(exerciseId: string, index: number): string {
+  return `${exerciseId}-set-${index}`;
+}
 
 export function stripWeightUnit(weight: string | null | undefined): string {
   if (!weight) return "";
@@ -21,16 +30,13 @@ export function formatWeightKg(weightKg: string): string | null {
   return `${trimmed}kg`;
 }
 
-/**
- * Hydrate per-set editor rows from the existing exercise fields
- * (`prescription` / `plannedSets` / `targetReps` / `weight`).
- */
 export function exerciseToSetRows(exercise: EditorExercise): EditorSetRow[] {
   const prescription = exercise.prescription?.trim();
   if (prescription && prescription !== "—") {
     const expanded = expandPrescriptionToSets(prescription, exercise.weight);
     if (expanded.length > 0) {
-      return expanded.map((set) => ({
+      return expanded.map((set, index) => ({
+        id: stableSetRowId(exercise.id, index),
         reps: set.targetReps > 0 ? String(set.targetReps) : "",
         weightKg: stripWeightUnit(set.targetWeight),
       }));
@@ -42,7 +48,11 @@ export function exerciseToSetRows(exercise: EditorExercise): EditorSetRow[] {
   const reps = exercise.targetReps?.trim() ?? "";
   const weightKg = stripWeightUnit(exercise.weight);
 
-  return Array.from({ length: count }, () => ({ reps, weightKg }));
+  return Array.from({ length: count }, (_, index) => ({
+    id: stableSetRowId(exercise.id, index),
+    reps,
+    weightKg,
+  }));
 }
 
 type SetBlock = { sets: number; reps: string; weightKg: string };
@@ -65,8 +75,7 @@ function groupSetRows(rows: EditorSetRow[]): SetBlock[] {
 }
 
 /**
- * Serialize set rows back into the DB-backed exercise fields (no new columns).
- * Uniform sets → `NxR` + `weight`; mixed loads → compact prescription string.
+ * Uniform sets → `NxR` + `weight`; mixed loads stay in the prescription string.
  */
 export function setRowsToExercisePatch(
   rows: EditorSetRow[]
@@ -74,7 +83,8 @@ export function setRowsToExercisePatch(
   EditorExercise,
   "prescription" | "plannedSets" | "targetReps" | "weight"
 > {
-  const cleaned = rows.length > 0 ? rows : [{ reps: "12", weightKg: "" }];
+  const cleaned =
+    rows.length > 0 ? rows : [{ id: newSetRowId(), reps: "12", weightKg: "" }];
   const blocks = groupSetRows(cleaned);
   const plannedSets = cleaned.length;
 
@@ -117,6 +127,7 @@ export function setRowsToExercisePatch(
 
 export function defaultSetRow(from?: EditorSetRow): EditorSetRow {
   return {
+    id: newSetRowId(),
     reps: from?.reps?.trim() ? from.reps : "12",
     weightKg: from?.weightKg ?? "",
   };
@@ -130,18 +141,16 @@ export function updateEditorSetRow(
   return rows.map((row, i) => (i === index ? { ...row, ...patch } : row));
 }
 
-/** Append a set, copying the last row when present. */
 export function addEditorSetRow(rows: EditorSetRow[]): EditorSetRow[] {
   return [...rows, defaultSetRow(rows[rows.length - 1])];
 }
 
-/** Remove a set; keep one empty row when the list would become empty. */
 export function removeEditorSetRow(
   rows: EditorSetRow[],
   index: number
 ): EditorSetRow[] {
   if (rows.length <= 1) {
-    return [{ reps: "", weightKg: "" }];
+    return [{ id: newSetRowId(), reps: "", weightKg: "" }];
   }
   return rows.filter((_, i) => i !== index);
 }

@@ -13,10 +13,6 @@ interface RoutineEditorSaveBarProps {
   onSave: () => void;
 }
 
-/**
- * Editor save chrome — render via AppShell `bottomChrome` (in layout flow),
- * not `position: fixed`, so scrollable content is never covered on mobile.
- */
 export function RoutineEditorSaveBar({
   isNew,
   isDirty,

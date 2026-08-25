@@ -24,7 +24,7 @@ vi.mock("@/lib/supabase/server", () => ({
   })),
 }));
 
-vi.mock("@/features/routines/insertActiveRoutineTree", () => ({
+vi.mock("@/features/routines/insertActiveRoutineTree.server", () => ({
   insertActiveRoutineTree: insertTreeMock,
 }));
 

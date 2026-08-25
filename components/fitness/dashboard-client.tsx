@@ -22,6 +22,7 @@ import {
 } from "@/features/routines/restTimerUi";
 import { useWorkoutSession } from "@/hooks/use-workout-session";
 import { useRestTimer } from "@/hooks/use-rest-timer";
+import { useClientToday } from "@/hooks/use-client-today";
 import { Calendar, RotateCcw } from "lucide-react";
 
 interface DashboardClientProps {
@@ -85,11 +86,7 @@ export function DashboardClient({
     handleEditExercise,
   } = workout;
 
-  const today = new Date().toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-  });
+  const today = useClientToday();
 
   if (!selectedDay) return null;
 
@@ -114,9 +111,7 @@ export function DashboardClient({
         <header className="mb-6">
           <div className="text-muted-foreground mb-1 flex items-center gap-2 text-sm">
             <Calendar className="h-4 w-4" aria-hidden />
-            <time dateTime={new Date().toISOString().split("T")[0]}>
-              {today}
-            </time>
+            <time dateTime={today?.iso}>{today?.label ?? "—"}</time>
           </div>
           <h1 className="text-foreground text-2xl font-bold tracking-tight">
             Today&apos;s Workout
@@ -188,21 +183,35 @@ export function DashboardClient({
           ) : null}
         </section>
 
-        <WorkoutSavePanel
-          isSessionSaved={isSessionSaved}
-          sessionSavedNotice={sessionSavedNotice}
-          isDayComplete={isDayComplete}
-          completedSets={completedSets}
-          totalSets={totalSets}
-          canSaveWorkout={canSaveWorkout}
-          isPending={isPending}
-          isSaving={isSaving}
-          isReopening={isReopening}
-          isResetting={isResetting}
-          onSave={handleSaveWorkout}
-          onEdit={handleEditWorkout}
-          onResetDay={requestResetDay}
-        />
+        {isSessionSaved ? (
+          <WorkoutSavePanel
+            status="saved"
+            sessionSavedNotice={sessionSavedNotice}
+            busy={
+              isPending
+                ? "pending"
+                : isReopening
+                  ? "reopening"
+                  : isResetting
+                    ? "resetting"
+                    : "idle"
+            }
+            onEdit={handleEditWorkout}
+            onResetDay={requestResetDay}
+          />
+        ) : (
+          <WorkoutSavePanel
+            status="unsaved"
+            progress={{
+              completedSets,
+              totalSets,
+              dayComplete: isDayComplete,
+              canSave: canSaveWorkout,
+            }}
+            busy={isPending ? "pending" : isSaving ? "saving" : "idle"}
+            onSave={handleSaveWorkout}
+          />
+        )}
 
         <ResetDayDialog
           open={resetDayDialogOpen}

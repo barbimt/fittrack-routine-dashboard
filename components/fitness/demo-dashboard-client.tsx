@@ -19,6 +19,7 @@ import {
 } from "@/features/routines/restTimerUi";
 import { useDemoWorkoutSession } from "@/hooks/use-demo-workout-session";
 import { useRestTimer } from "@/hooks/use-rest-timer";
+import { useClientToday } from "@/hooks/use-client-today";
 import { Calendar, RotateCcw, Sparkles } from "lucide-react";
 
 interface DemoDashboardClientProps {
@@ -68,11 +69,7 @@ export function DemoDashboardClient({
     handleEditWorkout,
   } = workout;
 
-  const today = new Date().toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-  });
+  const today = useClientToday();
 
   if (!selectedDay) return null;
 
@@ -105,11 +102,11 @@ export function DemoDashboardClient({
             />
             <div>
               <p className="text-foreground text-sm font-semibold">
-                Interactive demo — no account needed
+                Sample week — no account needed
               </p>
               <p className="text-muted-foreground mt-0.5 text-sm">
-                Explore FitTrack with sample data. Sign up to import your own
-                routine and save progress.
+                You can tick sets here, but nothing is stored. Sign up to use
+                your own routine.
               </p>
             </div>
           </div>
@@ -121,9 +118,7 @@ export function DemoDashboardClient({
         <header className="mb-6">
           <div className="text-muted-foreground mb-1 flex items-center gap-2 text-sm">
             <Calendar className="h-4 w-4" aria-hidden />
-            <time dateTime={new Date().toISOString().split("T")[0]}>
-              {today}
-            </time>
+            <time dateTime={today?.iso}>{today?.label ?? "—"}</time>
           </div>
           <h1 className="text-foreground text-2xl font-bold tracking-tight">
             Today&apos;s Workout
@@ -186,21 +181,35 @@ export function DemoDashboardClient({
           ))}
         </section>
 
-        <WorkoutSavePanel
-          isSessionSaved={isSessionSaved}
-          sessionSavedNotice={sessionSavedNotice}
-          isDayComplete={isDayComplete}
-          completedSets={completedSets}
-          totalSets={totalSets}
-          canSaveWorkout={canSaveWorkout}
-          isPending={isPending}
-          isSaving={isSaving}
-          isReopening={isReopening}
-          isResetting={isResetting}
-          onSave={handleSaveWorkout}
-          onEdit={handleEditWorkout}
-          onResetDay={requestResetDay}
-        />
+        {isSessionSaved ? (
+          <WorkoutSavePanel
+            status="saved"
+            sessionSavedNotice={sessionSavedNotice}
+            busy={
+              isPending
+                ? "pending"
+                : isReopening
+                  ? "reopening"
+                  : isResetting
+                    ? "resetting"
+                    : "idle"
+            }
+            onEdit={handleEditWorkout}
+            onResetDay={requestResetDay}
+          />
+        ) : (
+          <WorkoutSavePanel
+            status="unsaved"
+            progress={{
+              completedSets,
+              totalSets,
+              dayComplete: isDayComplete,
+              canSave: canSaveWorkout,
+            }}
+            busy={isPending ? "pending" : isSaving ? "saving" : "idle"}
+            onSave={handleSaveWorkout}
+          />
+        )}
 
         <ResetDayDialog
           open={resetDayDialogOpen}

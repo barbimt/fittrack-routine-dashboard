@@ -165,9 +165,9 @@ export default function ProgressPage() {
             }
           >
             <div className="space-y-3">
-              {personalRecords.map((record, index) => (
+              {personalRecords.map((record) => (
                 <div
-                  key={index}
+                  key={`${record.exercise}-${record.date}`}
                   className="bg-success/5 border-success/20 flex items-center justify-between rounded-lg border p-3"
                 >
                   <div className="flex items-center gap-3">

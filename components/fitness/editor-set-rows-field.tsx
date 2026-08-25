@@ -13,7 +13,6 @@ interface EditorSetRowsFieldProps {
   onRemoveRow: (index: number) => void;
 }
 
-/** Compact set table for editor + edit modal — readable on narrow screens. */
 export function EditorSetRowsField({
   idPrefix,
   rows,
@@ -33,7 +32,7 @@ export function EditorSetRowsField({
       <div className="space-y-1.5">
         {rows.map((row, index) => (
           <div
-            key={`${idPrefix}-set-${index}`}
+            key={row.id}
             className="grid grid-cols-[1.75rem_minmax(0,1fr)_minmax(0,1fr)_2.25rem] items-center gap-1.5"
           >
             <span className="text-muted-foreground text-center text-sm tabular-nums">

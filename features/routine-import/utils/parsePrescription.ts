@@ -123,7 +123,6 @@ export function hasWeightInPrescriptionText(prescription: string): boolean {
   return segments.some((block) => block !== null && block.weight !== null);
 }
 
-/** True when the prescription has multiple blocks (e.g. `1x12-3x10`). */
 export function isVariablePrescriptionStructure(prescription: string): boolean {
   const trimmed = normalizePrescriptionInput(prescription).trim();
   if (!trimmed) return false;
@@ -134,10 +133,10 @@ export function splitPrescriptionBlocks(prescription: string): string[] {
   const trimmed = normalizePrescriptionInput(prescription).trim();
   if (!trimmed) return [];
 
-  return trimmed
-    .split(/\s*-\s*|\s+(?=\d+\s*x\s*\d+)/i)
-    .map((part) => part.trim())
-    .filter((part) => part.length > 0);
+  return trimmed.split(/\s*-\s*|\s+(?=\d+\s*x\s*\d+)/i).flatMap((part) => {
+    const trimmedPart = part.trim();
+    return trimmedPart.length > 0 ? [trimmedPart] : [];
+  });
 }
 
 export function parsePrescriptionBlocks(
@@ -150,7 +149,10 @@ export function parsePrescriptionBlocks(
   const blockStrings = splitPrescriptionBlocks(trimmed);
   const segments =
     blockStrings.length > 0
-      ? blockStrings.map((block) => parseBlock(block)).filter(Boolean)
+      ? blockStrings.flatMap((block) => {
+          const parsed = parseBlock(block);
+          return parsed ? [parsed] : [];
+        })
       : [parseBlock(trimmed)];
 
   const normalizedFallback =
@@ -158,12 +160,11 @@ export function parsePrescriptionBlocks(
       ? fallbackWeight.trim()
       : null;
 
-  return segments
-    .filter((segment): segment is PrescriptionBlock => segment !== null)
-    .map((block) => ({
-      ...block,
-      weight: block.weight ?? normalizedFallback,
-    }));
+  return segments.flatMap((segment) =>
+    segment
+      ? [{ ...segment, weight: segment.weight ?? normalizedFallback }]
+      : []
+  );
 }
 
 export function expandPrescriptionToSets(
@@ -191,7 +192,6 @@ export function expandPrescriptionToSets(
   return sets;
 }
 
-/** Human-readable block lines for exercise headers, e.g. `1 × 12 · 15kg`. */
 export function formatPrescriptionBlockLines(
   prescription: string,
   fallbackWeight?: string | null

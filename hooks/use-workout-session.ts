@@ -312,21 +312,24 @@ export function useWorkoutSession({
     const isUpdate = hasSavedOnceRef.current[sessionId] === true;
 
     setIsSaving(true);
-    const result = await completeDaySession(sessionId);
-    setIsSaving(false);
+    try {
+      const result = await completeDaySession(sessionId);
 
-    if (!result.ok) {
-      notify.workout.workoutSaveFailed(result.error);
-      return;
+      if (!result.ok) {
+        notify.workout.workoutSaveFailed(result.error);
+        return;
+      }
+
+      hasSavedOnceRef.current[sessionId] = true;
+      setSavedNotice((prev) => ({
+        ...prev,
+        [sessionId]: isUpdate ? "updated" : "first",
+      }));
+      setCompletedSessionIds((prev) => ({ ...prev, [sessionId]: true }));
+      notify.workout.workoutSaved(isUpdate, "live");
+    } finally {
+      setIsSaving(false);
     }
-
-    hasSavedOnceRef.current[sessionId] = true;
-    setSavedNotice((prev) => ({
-      ...prev,
-      [sessionId]: isUpdate ? "updated" : "first",
-    }));
-    setCompletedSessionIds((prev) => ({ ...prev, [sessionId]: true }));
-    notify.workout.workoutSaved(isUpdate, "live");
   };
 
   const handleAddExercise = async (input: AddExerciseToDayInput) => {

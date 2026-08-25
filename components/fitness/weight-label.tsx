@@ -7,12 +7,7 @@ interface WeightLabelProps {
   iconClassName?: string;
 }
 
-/** Dumbbell icon + load text — shared in exercise header and set rows. */
-export function WeightLabel({
-  weight,
-  className,
-  iconClassName,
-}: WeightLabelProps) {
+function WeightLabel({ weight, className, iconClassName }: WeightLabelProps) {
   return (
     <span className={cn("inline-flex items-center gap-1", className)}>
       <Weight
@@ -30,7 +25,6 @@ interface SetTargetLabelProps {
   className?: string;
 }
 
-/** Compact target: `12 · 40kg` (no “Target:” label — keeps mobile rows short). */
 export function SetTargetLabel({
   targetReps,
   targetWeight,
@@ -55,31 +49,6 @@ export function SetTargetLabel({
             className="min-w-0"
             iconClassName="text-muted-foreground"
           />
-        </>
-      ) : null}
-    </span>
-  );
-}
-
-interface PrescriptionBlockLineProps {
-  sets: number;
-  reps: number | string;
-  weight?: string | null;
-}
-
-/** One prescription block in the exercise card header, e.g. `1 × 12 · 15kg`. */
-export function PrescriptionBlockLine({
-  sets,
-  reps,
-  weight,
-}: PrescriptionBlockLineProps) {
-  return (
-    <span className="text-foreground/90 flex items-center gap-1 font-medium">
-      {sets} × {reps}
-      {weight ? (
-        <>
-          <span className="text-muted-foreground">·</span>
-          <WeightLabel weight={weight} iconClassName="text-muted-foreground" />
         </>
       ) : null}
     </span>

@@ -40,8 +40,6 @@ export default function SupportPage() {
           that message.
         </p>
       </section>
-
-      {/* Add FAQ, status page link, or a contact form here later. */}
     </HelpArticle>
   );
 }

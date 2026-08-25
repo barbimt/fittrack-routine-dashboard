@@ -1,4 +1,3 @@
-/** Fixed list of muscle groups offered in the routine editor's muscle select. */
 export const MUSCLE_GROUPS = [
   "Glutes",
   "Hamstrings",

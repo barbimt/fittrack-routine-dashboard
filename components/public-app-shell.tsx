@@ -10,13 +10,9 @@ import { createClient } from "@/lib/supabase/client";
 
 interface PublicAppShellProps {
   children: React.ReactNode;
-  /** Optional right column (e.g. SummaryPanel) — desktop xl+ */
   aside?: React.ReactNode;
 }
 
-/**
- * Demo/public shell — shows sign-up nav for visitors, full app nav when logged in.
- */
 export function PublicAppShell({ children, aside }: PublicAppShellProps) {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 

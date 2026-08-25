@@ -12,9 +12,6 @@ import {
 
 type SetRowsPatch = ReturnType<typeof setRowsToExercisePatch>;
 
-/**
- * Shared set-row editing for routine editor rows and the Today edit dialog.
- */
 export function useEditorSetRows(
   exercise: EditorExercise,
   onPatch: (patch: SetRowsPatch) => void

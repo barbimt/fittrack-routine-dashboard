@@ -13,7 +13,6 @@ export type RestTimerState = {
   exerciseName: string;
   endsAt: number;
   totalSeconds: number;
-  /** When paused, remaining seconds frozen here. */
   pausedRemaining: number | null;
 };
 

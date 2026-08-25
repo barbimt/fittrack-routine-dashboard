@@ -63,7 +63,7 @@ export function ExerciseCard({
         <button
           type="button"
           onClick={() => setExpanded(!expanded)}
-          className="hover:bg-muted/30 -m-2 flex min-w-0 flex-1 items-center justify-between rounded-xl p-2 text-left transition-colors"
+          className="hover:bg-muted/30 -m-2 flex min-w-0 flex-1 items-center rounded-xl p-2 text-left transition-colors"
           aria-expanded={expanded}
           aria-controls={`exercise-${exercise.id}-content`}
         >
@@ -88,44 +88,35 @@ export function ExerciseCard({
             ) : null}
           </div>
 
-          <div className="ml-3 flex items-center gap-2">
-            <div className="relative h-10 w-10 shrink-0">
-              <svg className="h-10 w-10 -rotate-90">
-                <circle
-                  cx="20"
-                  cy="20"
-                  r="16"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                  className="text-muted"
-                />
-                <circle
-                  cx="20"
-                  cy="20"
-                  r="16"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                  strokeDasharray={`${progressPercentage} 100`}
-                  strokeLinecap="round"
-                  className={cn(
-                    "transition-all duration-500",
-                    progressPercentage === 100 ? "text-success" : "text-primary"
-                  )}
-                />
-              </svg>
-              <span className="absolute inset-0 flex items-center justify-center text-xs font-semibold">
-                {progress.completed}/{progress.total}
-              </span>
-            </div>
-
-            <ChevronDown
-              className={cn(
-                "text-muted-foreground h-5 w-5 shrink-0 transition-transform",
-                expanded && "rotate-180"
-              )}
-            />
+          <div className="relative ml-3 h-10 w-10 shrink-0">
+            <svg className="h-10 w-10 -rotate-90">
+              <circle
+                cx="20"
+                cy="20"
+                r="16"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="3"
+                className="text-muted"
+              />
+              <circle
+                cx="20"
+                cy="20"
+                r="16"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="3"
+                strokeDasharray={`${progressPercentage} 100`}
+                strokeLinecap="round"
+                className={cn(
+                  "transition-all duration-500",
+                  progressPercentage === 100 ? "text-success" : "text-primary"
+                )}
+              />
+            </svg>
+            <span className="absolute inset-0 flex items-center justify-center text-xs font-semibold">
+              {progress.completed}/{progress.total}
+            </span>
           </div>
         </button>
 
@@ -142,6 +133,23 @@ export function ExerciseCard({
             <Pencil className="h-4 w-4" aria-hidden />
           </Button>
         ) : null}
+
+        <button
+          type="button"
+          onClick={() => setExpanded(!expanded)}
+          className="hover:bg-muted/30 text-muted-foreground flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-colors"
+          aria-expanded={expanded}
+          aria-controls={`exercise-${exercise.id}-content`}
+          aria-label={expanded ? "Collapse exercise" : "Expand exercise"}
+        >
+          <ChevronDown
+            className={cn(
+              "h-5 w-5 shrink-0 transition-transform",
+              expanded && "rotate-180"
+            )}
+            aria-hidden
+          />
+        </button>
       </div>
 
       {canStartRest && onStartRest ? (

@@ -40,11 +40,6 @@ export type UseRoutineEditorOptions = {
   isNew?: boolean;
 };
 
-/**
- * Owns all editor state: the working copy of days, dirty tracking against the
- * last-saved baseline, validation, and the patch-based save. UI components stay
- * presentational and only call the returned actions.
- */
 export function useRoutineEditor(
   routine: EditorRoutine,
   options: UseRoutineEditorOptions = {}
@@ -52,8 +47,6 @@ export function useRoutineEditor(
   const { isNew = false } = options;
   const router = useRouter();
 
-  // Editable draft of the routine's days plus dirty tracking against the last
-  // server-provided baseline (re-seeded after a save + refresh).
   const {
     value: days,
     setValue: setDays,
@@ -208,35 +201,35 @@ export function useRoutineEditor(
     setDayErrors([]);
 
     setSaving(true);
+    try {
+      if (isNew) {
+        const result = await createRoutine({ name: name.trim(), days });
+        if (result.ok) {
+          setSaved(true);
+          router.refresh();
+        } else {
+          setSaveError(result.error);
+        }
+        return;
+      }
 
-    if (isNew) {
-      const result = await createRoutine({ name: name.trim(), days });
+      const patch = computeRoutinePatch(routine.id, baseline, days);
+
+      if (isEmptyPatch(patch)) {
+        setSaved(true);
+        return;
+      }
+
+      const result = await updateRoutine(patch);
       if (result.ok) {
         setSaved(true);
         router.refresh();
       } else {
         setSaveError(result.error);
       }
+    } finally {
       setSaving(false);
-      return;
     }
-
-    const patch = computeRoutinePatch(routine.id, baseline, days);
-
-    if (isEmptyPatch(patch)) {
-      setSaved(true);
-      setSaving(false);
-      return;
-    }
-
-    const result = await updateRoutine(patch);
-    if (result.ok) {
-      setSaved(true);
-      router.refresh();
-    } else {
-      setSaveError(result.error);
-    }
-    setSaving(false);
   }, [baseline, days, isNew, name, routine.id, router]);
 
   const dayErrorsById = useMemo(

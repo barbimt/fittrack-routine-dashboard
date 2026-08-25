@@ -65,46 +65,43 @@ export function getWorkoutSavePanelCopy({
   };
 }
 
-export interface WorkoutSavePanelProps {
-  isSessionSaved: boolean;
-  sessionSavedNotice: SessionSavedNotice;
-  isDayComplete: boolean;
-  completedSets: number;
-  totalSets: number;
-  canSaveWorkout: boolean;
-  isPending: boolean;
-  isSaving: boolean;
-  isReopening: boolean;
-  isResetting: boolean;
-  onSave: () => void;
-  onEdit: () => void;
-  onResetDay: () => void;
-}
+export type WorkoutSavePanelProps =
+  | {
+      status: "saved";
+      sessionSavedNotice: SessionSavedNotice;
+      busy: "idle" | "pending" | "reopening" | "resetting";
+      onEdit: () => void;
+      onResetDay: () => void;
+    }
+  | {
+      status: "unsaved";
+      progress: {
+        completedSets: number;
+        totalSets: number;
+        dayComplete: boolean;
+        canSave: boolean;
+      };
+      busy: "idle" | "pending" | "saving";
+      onSave: () => void;
+    };
 
-export function WorkoutSavePanel({
-  isSessionSaved,
-  sessionSavedNotice,
-  isDayComplete,
-  completedSets,
-  totalSets,
-  canSaveWorkout,
-  isPending,
-  isSaving,
-  isReopening,
-  isResetting,
-  onSave,
-  onEdit,
-  onResetDay,
-}: WorkoutSavePanelProps) {
+export function WorkoutSavePanel(props: WorkoutSavePanelProps) {
+  const isSessionSaved = props.status === "saved";
   const { title, description, variant } = getWorkoutSavePanelCopy({
     isSessionSaved,
-    sessionSavedNotice,
-    isDayComplete,
-    completedSets,
-    totalSets,
+    sessionSavedNotice:
+      props.status === "saved" ? props.sessionSavedNotice : "first",
+    isDayComplete:
+      props.status === "unsaved" ? props.progress.dayComplete : false,
+    completedSets:
+      props.status === "unsaved" ? props.progress.completedSets : 0,
+    totalSets: props.status === "unsaved" ? props.progress.totalSets : 0,
   });
 
-  const showSuccessStyle = isSessionSaved || isDayComplete;
+  const showSuccessStyle =
+    isSessionSaved ||
+    (props.status === "unsaved" && props.progress.dayComplete);
+  const actionsDisabled = props.busy !== "idle";
 
   return (
     <section
@@ -133,15 +130,15 @@ export function WorkoutSavePanel({
           <p className="text-muted-foreground text-sm">{description}</p>
         </div>
       </div>
-      {!isSessionSaved ? (
+      {props.status === "unsaved" ? (
         <Button
           type="button"
           size="sm"
           className="shrink-0"
-          disabled={isSaving || isPending || !canSaveWorkout}
-          onClick={onSave}
+          disabled={actionsDisabled || !props.progress.canSave}
+          onClick={props.onSave}
         >
-          {isSaving ? "Saving…" : "Save workout"}
+          {props.busy === "saving" ? "Saving…" : "Save workout"}
         </Button>
       ) : (
         <div className="flex w-full shrink-0 flex-col gap-2 sm:w-auto sm:flex-row">
@@ -150,22 +147,22 @@ export function WorkoutSavePanel({
             variant="outline"
             size="sm"
             className="shrink-0"
-            disabled={isReopening || isResetting || isPending}
-            onClick={onEdit}
+            disabled={actionsDisabled}
+            onClick={props.onEdit}
           >
-            {isReopening ? "Opening…" : "Edit workout"}
+            {props.busy === "reopening" ? "Opening…" : "Edit workout"}
           </Button>
           <Button
             type="button"
             variant="outline"
             size="sm"
             className="text-destructive hover:text-destructive shrink-0"
-            disabled={isReopening || isResetting || isPending}
+            disabled={actionsDisabled}
             onMouseDown={(e) => e.preventDefault()}
-            onClick={onResetDay}
+            onClick={props.onResetDay}
           >
             <RotateCcw className="mr-2 h-4 w-4" aria-hidden />
-            {isResetting ? "Resetting…" : "Reset day"}
+            {props.busy === "resetting" ? "Resetting…" : "Reset day"}
           </Button>
         </div>
       )}

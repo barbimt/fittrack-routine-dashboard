@@ -48,8 +48,6 @@ export default function GettingStartedPage() {
           confirmation link before it becomes your login address.
         </p>
       </section>
-
-      {/* Add more sections here as the product grows. */}
     </HelpArticle>
   );
 }

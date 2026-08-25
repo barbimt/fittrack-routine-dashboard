@@ -10,7 +10,6 @@ interface HelpArticleProps {
   children: React.ReactNode;
 }
 
-/** Shared shell for Settings → Help pages. Edit page bodies to expand content. */
 export function HelpArticle({
   title,
   description,

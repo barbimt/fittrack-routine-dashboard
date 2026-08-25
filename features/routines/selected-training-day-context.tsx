@@ -12,7 +12,6 @@ import {
 type SelectedDayByRoutine = Record<string, string>;
 
 type SelectedTrainingDayContextValue = {
-  /** Last selected training-day id for a routine, if any. */
   getSelectedDayId: (routineId: string) => string | null;
   setSelectedDayId: (routineId: string, dayId: string) => void;
 };
@@ -20,10 +19,6 @@ type SelectedTrainingDayContextValue = {
 const SelectedTrainingDayContext =
   createContext<SelectedTrainingDayContextValue | null>(null);
 
-/**
- * Holds the active Today day across authenticated navigations (e.g. `/` →
- * `/editor` → `/`). Lives in the root client tree so route changes do not reset it.
- */
 export function SelectedTrainingDayProvider({
   children,
 }: {

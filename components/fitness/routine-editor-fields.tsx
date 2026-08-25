@@ -24,7 +24,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-/** Trim a text value and collapse empty strings to null (DB-friendly). */
 export function emptyToNull(value: string): string | null {
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : null;
@@ -37,7 +36,6 @@ interface EditorFieldProps {
   children: ReactNode;
 }
 
-/** Label + control wrapper shared by every editor field. */
 export function EditorField({
   id,
   label,
@@ -65,7 +63,6 @@ interface EditorTextFieldProps {
   disabled?: boolean;
 }
 
-/** Nullable single-line text field (empty input → null). */
 export function EditorTextField({
   id,
   label,
@@ -101,7 +98,6 @@ interface EditorPlainTextFieldProps {
   className?: string;
 }
 
-/** Required single-line text field (keeps raw value, e.g. day/exercise name). */
 export function EditorPlainTextField({
   id,
   label,
@@ -132,7 +128,6 @@ interface EditorNumberFieldProps {
   hint?: string;
 }
 
-/** Positive-integer field; non-positive or empty values become null. */
 export function EditorNumberField({
   id,
   label,
@@ -164,44 +159,12 @@ export function EditorNumberField({
   );
 }
 
-interface EditorReadOnlyFieldProps {
-  id: string;
-  label: string;
-  value: string;
-  hint?: string;
-  className?: string;
-}
-
-/** Non-editable field — used when another input owns the value (e.g. weight in prescription). */
-export function EditorReadOnlyField({
-  id,
-  label,
-  value,
-  hint,
-  className,
-}: EditorReadOnlyFieldProps) {
-  return (
-    <EditorField id={id} label={label} className={className}>
-      <div
-        id={id}
-        className="border-input bg-muted/40 text-muted-foreground flex min-h-9 items-center rounded-md border px-3 py-2 text-sm leading-snug"
-      >
-        {value}
-      </div>
-      {hint ? (
-        <p className="text-muted-foreground mt-1 text-xs">{hint}</p>
-      ) : null}
-    </EditorField>
-  );
-}
-
 interface MuscleSelectProps {
   id: string;
   value: string | null;
   onValueChange: (value: string | null) => void;
 }
 
-/** Muscle group picker backed by the fixed `MUSCLE_GROUPS` list. */
 export function MuscleSelect({ id, value, onValueChange }: MuscleSelectProps) {
   return (
     <Select
@@ -237,7 +200,7 @@ function parseNonNegativeInt(raw: string, max?: number): number {
   return parsed;
 }
 
-/** Input that opens a minutes + seconds picker; persisted as `Ns` (e.g. `90s`). */
+/** Minutes + seconds picker; stored as `90s`. */
 export function RestDurationField({
   id,
   value,
@@ -346,7 +309,6 @@ interface StatusBannerProps {
   children: ReactNode;
 }
 
-/** Inline error/success banner (prefer `notify` for transient feedback). */
 export function StatusBanner({ variant, children }: StatusBannerProps) {
   const isError = variant === "error";
   const Icon = isError ? AlertTriangle : CheckCircle2;

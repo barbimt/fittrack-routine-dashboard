@@ -11,7 +11,6 @@ export function findSetInDays(
   return findExerciseForSetInDays(days, setId)?.set ?? null;
 }
 
-/** Locate the exercise (and set) that owns a set id across training days. */
 export function findExerciseForSetInDays(
   days: TrainingDay[],
   setId: string

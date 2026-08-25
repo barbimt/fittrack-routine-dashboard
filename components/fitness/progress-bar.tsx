@@ -9,6 +9,21 @@ interface ProgressBarProps {
   className?: string;
 }
 
+const sizeClasses = {
+  sm: "h-1",
+  md: "h-2",
+  lg: "h-3",
+} as const;
+
+const variantClasses = {
+  default:
+    "[&::-webkit-progress-value]:bg-primary [&::-moz-progress-bar]:bg-primary",
+  success:
+    "[&::-webkit-progress-value]:bg-success [&::-moz-progress-bar]:bg-success",
+  warning:
+    "[&::-webkit-progress-value]:bg-warning [&::-moz-progress-bar]:bg-warning",
+} as const;
+
 export function ProgressBar({
   value,
   max = 100,
@@ -19,38 +34,20 @@ export function ProgressBar({
 }: ProgressBarProps) {
   const percentage = Math.min(Math.round((value / max) * 100), 100);
 
-  const sizeClasses = {
-    sm: "h-1",
-    md: "h-2",
-    lg: "h-3",
-  };
-
-  const variantClasses = {
-    default: "bg-primary",
-    success: "bg-success",
-    warning: "bg-warning",
-  };
-
   return (
     <div className={cn("w-full", className)}>
-      <div
+      <progress
+        value={value}
+        max={max}
+        aria-valuenow={value}
+        aria-valuemin={0}
+        aria-valuemax={max}
         className={cn(
-          "bg-muted overflow-hidden rounded-full",
-          sizeClasses[size]
+          "bg-muted [&::-webkit-progress-bar]:bg-muted w-full appearance-none overflow-hidden rounded-full [&::-webkit-progress-bar]:rounded-full [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:transition-[width] [&::-webkit-progress-value]:duration-500",
+          sizeClasses[size],
+          variantClasses[variant]
         )}
-      >
-        <div
-          className={cn(
-            "h-full rounded-full transition-all duration-500",
-            variantClasses[variant]
-          )}
-          style={{ width: `${percentage}%` }}
-          role="progressbar"
-          aria-valuenow={value}
-          aria-valuemin={0}
-          aria-valuemax={max}
-        />
-      </div>
+      />
       {showLabel && (
         <p className="text-muted-foreground mt-1 text-sm">{percentage}%</p>
       )}

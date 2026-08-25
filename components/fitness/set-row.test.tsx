@@ -59,7 +59,7 @@ describe("SetRow", () => {
     expect(onToggle).toHaveBeenCalledWith("set-1");
   });
 
-  it("calls onToggle when the row is clicked outside the input", async () => {
+  it("toggles when clicking the row (set number / target), not only the checkbox", async () => {
     const onToggle = vi.fn();
     render(
       <SetRow set={{ ...baseSet, completed: false }} onToggle={onToggle} />
