@@ -55,11 +55,7 @@ supabase/                 schema, migrations, local stack
 docs/                     architecture, domain, import, roadmap
 ```
 
-**Data flow (dashboard):** Server Component loads the user + active routine from Postgres → maps rows to `TrainingDay[]` → `DashboardClient` + `useWorkoutSession`. Checkboxes and rep edits go through Server Actions (`toggleSetLog`, `updateSetReps`).
-
-**Editor saves:** draft vs baseline (`useDirtyState`) → Zod (`validateRoutineDays`) → `computeRoutinePatch` → `updateRoutine` writes only changed rows.
-
-Deeper diagrams: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). Domain rules: [docs/DOMAIN.md](docs/DOMAIN.md).
+Folder layout and data flow: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). Domain rules: [docs/DOMAIN.md](docs/DOMAIN.md).
 
 ## Decisions worth a look
 
