@@ -38,7 +38,7 @@ export function AppShell({
   );
 
   return (
-    <div className="bg-background flex h-dvh max-h-dvh min-h-0 overflow-hidden">
+    <div className="bg-background flex h-full max-h-full min-h-0 overflow-hidden">
       <Sidebar
         className="hidden lg:fixed lg:inset-y-0 lg:z-20 lg:flex lg:w-64"
         {...shellNavProps}
@@ -57,13 +57,14 @@ export function AppShell({
           `h-0 flex-1` gives the pane a real height in mobile Chrome.
           Without it the flex child can collapse and the page looks blank.
         */}
-        <main
-          className={cn(
-            "flex min-h-0 flex-1 flex-col overflow-hidden",
-            !hasBottomChrome && "safe-area-pb"
-          )}
-        >
-          <div className="h-0 min-h-0 flex-1 overflow-y-auto overscroll-y-contain">
+        <main className="flex min-h-0 flex-1 flex-col overflow-hidden">
+          <div
+            data-scroll-region=""
+            className={cn(
+              "h-0 min-h-0 flex-1 overflow-y-auto overscroll-y-contain",
+              !hasBottomChrome && "safe-area-pb"
+            )}
+          >
             {page}
           </div>
 

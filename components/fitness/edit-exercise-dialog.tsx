@@ -69,7 +69,7 @@ export function EditExerciseDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex max-h-[90vh] max-w-md flex-col gap-0 overflow-hidden p-0">
+      <DialogContent className="flex max-w-md flex-col gap-0 overflow-hidden p-0">
         <DialogHeader className="border-border shrink-0 border-b px-5 py-3">
           <DialogTitle>Edit exercise</DialogTitle>
           <DialogDescription>
@@ -77,7 +77,10 @@ export function EditExerciseDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="min-h-0 flex-1 space-y-2.5 overflow-y-auto px-5 py-3">
+        <div
+          data-scroll-region=""
+          className="min-h-0 flex-1 space-y-2.5 overflow-y-auto overscroll-contain px-5 py-3"
+        >
           <EditorPlainTextField
             id={`${exercise.id}-edit-name`}
             label="Exercise"

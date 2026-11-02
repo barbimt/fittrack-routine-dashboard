@@ -10,7 +10,10 @@ import { SignupForm } from "@/features/auth/components/SignupForm";
 
 export default function SignupPage() {
   return (
-    <div className="bg-background flex min-h-screen items-center justify-center px-4">
+    <div
+      data-scroll-region=""
+      className="bg-background flex h-full items-center justify-center overflow-y-auto overscroll-contain px-4"
+    >
       <div className="w-full max-w-sm">
         <div className="mb-8 flex items-center justify-center gap-2.5">
           <div

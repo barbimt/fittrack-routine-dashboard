@@ -53,6 +53,12 @@ describe("EditExerciseDialog", () => {
       />
     );
 
+    expect(
+      document.querySelector("[data-slot='visual-viewport-frame']")
+    ).toBeTruthy();
+    expect(
+      screen.getByLabelText("Exercise").closest("[data-scroll-region]")
+    ).toHaveClass("overflow-y-auto");
     expect(screen.getByLabelText("Exercise")).toHaveValue("Calf raise");
     expect(screen.getByLabelText("Set 1 reps")).toHaveValue("12");
     expect(screen.getByLabelText("Set 1 weight in kg")).toHaveValue("40");
