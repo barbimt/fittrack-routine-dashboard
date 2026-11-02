@@ -182,7 +182,7 @@
   }
 
   .safe-area-pb {
-    padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
   .app-bottom-chrome {
@@ -195,5 +195,34 @@
   }
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
+  }
+}
+
+/*
+  Size the document to the visible viewport, not 100dvh. On iPhone Chrome,
+  dvh stays taller than the screen once the toolbars or keyboard move, which
+  paints a blank band and shoves fixed dialogs off the input being edited.
+*/
+html {
+  position: fixed;
+  top: var(--vv-offset-top, 0px);
+  left: 0;
+  width: 100%;
+  height: var(--vv-height, 100dvh);
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+body {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+@media (pointer: coarse) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
   }
 }

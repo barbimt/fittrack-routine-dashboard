@@ -33,7 +33,10 @@ describe("AppShell", () => {
     ).not.toBeInTheDocument();
     expect(screen.getByText("Page content")).toBeInTheDocument();
     expect(document.querySelector("header")).toHaveClass("safe-area-pt");
-    expect(document.querySelector("main")).toHaveClass("safe-area-pb");
+    expect(document.querySelector("[data-scroll-region]")).toHaveClass(
+      "safe-area-pb"
+    );
+    expect(document.querySelector("main")).not.toHaveClass("safe-area-pb");
   });
 
   it("docks bottomChrome outside the scroll region", () => {
@@ -45,6 +48,9 @@ describe("AppShell", () => {
 
     const main = document.querySelector("main");
     expect(main).not.toHaveClass("safe-area-pb");
+    expect(main?.querySelector("[data-scroll-region]")).not.toHaveClass(
+      "safe-area-pb"
+    );
     expect(main?.querySelector(".app-bottom-chrome")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Save" })).toBeInTheDocument();
     expect(screen.getByText("Page content")).toBeInTheDocument();
