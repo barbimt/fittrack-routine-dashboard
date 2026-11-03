@@ -64,7 +64,7 @@ tools/
 
 **One sheet = one training day.** First row with both required headers = header row. Rows below = exercises.
 
-Ignored sheets: hidden sheets, and tabs named `How to` or `Example`.
+Ignored sheets: hidden sheets, and tabs named `How to`, `Example`, or `Lists`.
 
 | Column | Required | Maps to |
 |--------|----------|---------|

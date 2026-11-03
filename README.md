@@ -23,7 +23,7 @@ FitTrack is the app I would use between Excel (coach / self-written routine) and
 | **Routine editor** (`/editor`) | Add / rename / remove days and exercises, drag-and-drop reorder, save only the diff. |
 | **Public demo** (`/demo`) | Same dashboard UI with mock data — no login. |
 
-Week overview and progress charts exist as gated UI (`/week`, `/progress`); they still use mock data. See [docs/ROADMAP.md](docs/ROADMAP.md).
+Week overview (`/week`) is still gated mock UI. Progress (`/progress`) reads logged sessions. See [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## Stack
 
@@ -68,7 +68,7 @@ These are the parts I would walk through in an interview:
 5. **Diff-based editor persistence** — avoid rewriting the whole tree on every save.
 6. **Feature catalog** — incomplete screens stay behind `NEXT_PUBLIC_FEATURE_*` instead of shipping dead nav.
 
-Honest limits: `/week` and `/progress` are not wired to `workout_sessions` yet; settings are a placeholder.
+Honest limits: `/week` is not wired to `workout_sessions` yet; settings are a placeholder. `/progress` aggregates the signed-in user’s logs in Postgres.
 
 ## Local setup
 

@@ -31,10 +31,10 @@ export const FEATURE_CATALOG: Record<FeatureId, FeatureDefinition> = {
     id: "progress",
     name: "Progress",
     description:
-      "Long-term analytics and PRs. Still placeholder UI — keep off until analytics exist.",
+      "Training volume, strength, and an exportable report from logged sessions.",
     path: "/progress",
     audience: "authenticated",
-    defaultRelease: "off",
+    defaultRelease: "on",
     envKey: "NEXT_PUBLIC_FEATURE_PROGRESS",
   },
 };

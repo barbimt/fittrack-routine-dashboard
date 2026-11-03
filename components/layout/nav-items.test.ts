@@ -10,10 +10,15 @@ describe("navItems", () => {
   it("includes primary app routes that are enabled", () => {
     const hrefs = navItems.map((item) => item.href);
     expect(hrefs).toEqual(
-      expect.arrayContaining(["/", "/upload", "/editor", "/settings"])
+      expect.arrayContaining([
+        "/",
+        "/upload",
+        "/editor",
+        "/settings",
+        "/progress",
+      ])
     );
     expect(hrefs).not.toContain("/week");
-    expect(hrefs).not.toContain("/progress");
   });
 
   it("defines a label for each item", () => {

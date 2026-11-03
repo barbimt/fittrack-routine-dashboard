@@ -40,9 +40,9 @@ Change `audience` in the catalog when the product decision changes — no scatte
 | Feature | Path | Default | Audience |
 |---------|------|---------|----------|
 | Week Overview | `/week` | `off` | authenticated |
-| Progress | `/progress` | `off` | authenticated |
+| Progress | `/progress` | `on` | authenticated |
 
-While `off`, links are hidden from nav and the middleware redirects `/week` and `/progress` to `/` (signed-in) or `/demo` (visitor).
+While a feature is `off`, its link is hidden and the middleware redirects that path to `/` (signed-in) or `/demo` (visitor). Progress is on for signed-in users. Visitors still cannot open it.
 
 ## Add a new gated feature
 

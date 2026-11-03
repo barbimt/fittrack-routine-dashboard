@@ -44,15 +44,26 @@ describe("updateSession", () => {
     }
   );
 
-  it("redirects unfinished surfaces to / when authenticated", async () => {
+  it("redirects the unfinished week surface to / when authenticated", async () => {
+    mockGetUser.mockResolvedValue({
+      data: { user: { id: "user-1", email: "demo@example.com" } },
+    });
+
+    const response = await updateSession(makeRequest("/week"));
+
+    expect(response.status).toBe(307);
+    expect(response.headers.get("location")).toBe("http://localhost:3000/");
+  });
+
+  it("lets an authenticated user open progress", async () => {
     mockGetUser.mockResolvedValue({
       data: { user: { id: "user-1", email: "demo@example.com" } },
     });
 
     const response = await updateSession(makeRequest("/progress"));
 
-    expect(response.status).toBe(307);
-    expect(response.headers.get("location")).toBe("http://localhost:3000/");
+    expect(response.status).toBe(200);
+    expect(response.headers.get("location")).toBeNull();
   });
 
   it("redirects unauthenticated users from protected routes to /login", async () => {
