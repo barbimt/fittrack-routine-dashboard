@@ -1,24 +1,78 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown } from "lucide-react";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import { AlertTriangle, ChevronDown } from "lucide-react";
+import { Badge } from "@/components/fitness/badge";
+import { muscleGroupLabel } from "@/features/routines/muscleGroups";
+import { formatSetsSummary } from "@/features/routines/sets";
 import { cn } from "@/lib/utils";
 import type { ParsedRoutineExercise } from "../types";
-
-const INITIAL_VISIBLE = 3;
+import { PlannedSetsTable } from "./PlannedSetsTable";
 
 function ExerciseRow({ exercise }: { exercise: ParsedRoutineExercise }) {
+  const [open, setOpen] = useState(exercise.warnings.length > 0);
+  const muscle = muscleGroupLabel(exercise.muscleGroup);
+  const contentId = `import-exercise-${exercise.sortOrder}-${exercise.name.replace(/\W+/g, "-")}`;
+
   return (
-    <li className="text-sm">
-      <span className="text-foreground font-medium">{exercise.name}</span>
-      <span className="text-muted-foreground"> · {exercise.prescription}</span>
-      {exercise.weight ? (
-        <span className="text-muted-foreground"> · {exercise.weight}</span>
+    <li className="border-border/60 border-t first:border-t-0">
+      <button
+        type="button"
+        onClick={() => setOpen((current) => !current)}
+        aria-expanded={open}
+        aria-controls={contentId}
+        className="hover:bg-muted/40 -mx-2 flex min-h-11 w-[calc(100%+1rem)] items-center gap-2 rounded-lg px-2 py-2 text-left"
+      >
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="text-foreground text-sm font-medium">
+              {exercise.name}
+            </span>
+            {muscle ? (
+              <Badge variant="muscle" className="text-[11px]">
+                {muscle}
+              </Badge>
+            ) : null}
+            {exercise.warnings.length > 0 ? (
+              <AlertTriangle
+                className="text-warning h-3.5 w-3.5 shrink-0"
+                aria-label="Needs a check"
+              />
+            ) : null}
+          </div>
+          <p className="text-muted-foreground text-xs tabular-nums">
+            {formatSetsSummary(exercise.sets)}
+          </p>
+        </div>
+        <ChevronDown
+          className={cn(
+            "text-muted-foreground h-4 w-4 shrink-0 transition-transform",
+            open && "rotate-180"
+          )}
+          aria-hidden
+        />
+      </button>
+
+      {open ? (
+        <div id={contentId} className="space-y-2 pb-3">
+          {exercise.warnings.map((warning) => (
+            <p
+              key={warning}
+              className="bg-warning/10 text-foreground rounded-md px-2 py-1.5 text-xs"
+            >
+              {warning}
+            </p>
+          ))}
+          <PlannedSetsTable
+            sets={exercise.sets}
+            caption={`Sets for ${exercise.name}`}
+          />
+          {exercise.notes ? (
+            <p className="text-muted-foreground text-xs">
+              Notes: {exercise.notes}
+            </p>
+          ) : null}
+        </div>
       ) : null}
     </li>
   );
@@ -26,67 +80,17 @@ function ExerciseRow({ exercise }: { exercise: ParsedRoutineExercise }) {
 
 interface ImportDayExercisesProps {
   exercises: ParsedRoutineExercise[];
-  dayLabel: string;
 }
 
-export function ImportDayExercises({
-  exercises,
-  dayLabel,
-}: ImportDayExercisesProps) {
-  const [open, setOpen] = useState(false);
-  const visible = exercises.slice(0, INITIAL_VISIBLE);
-  const hidden = exercises.slice(INITIAL_VISIBLE);
-  const hiddenCount = hidden.length;
-
+export function ImportDayExercises({ exercises }: ImportDayExercisesProps) {
   return (
-    <div>
-      <ul className="border-border/60 space-y-2 border-t pt-3">
-        {visible.map((exercise) => (
-          <ExerciseRow
-            key={`${exercise.sortOrder}-${exercise.name}`}
-            exercise={exercise}
-          />
-        ))}
-      </ul>
-
-      {hiddenCount > 0 ? (
-        <Collapsible open={open} onOpenChange={setOpen} className="mt-2">
-          <CollapsibleTrigger
-            className={cn(
-              "text-primary flex min-h-11 w-full items-center justify-between gap-2 rounded-lg px-2 py-2 text-left text-sm font-medium",
-              "hover:bg-muted/50 focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none"
-            )}
-            aria-label={
-              open
-                ? `Hide ${hiddenCount} more exercises for ${dayLabel}`
-                : `Show ${hiddenCount} more exercises for ${dayLabel}`
-            }
-          >
-            <span>
-              {open
-                ? `Hide ${hiddenCount} more ${hiddenCount === 1 ? "exercise" : "exercises"}`
-                : `Show ${hiddenCount} more ${hiddenCount === 1 ? "exercise" : "exercises"}`}
-            </span>
-            <ChevronDown
-              className={cn(
-                "h-4 w-4 shrink-0 transition-transform",
-                open && "rotate-180"
-              )}
-              aria-hidden
-            />
-          </CollapsibleTrigger>
-          <CollapsibleContent>
-            <ul className="border-border/40 mt-2 space-y-2 border-t pt-3">
-              {hidden.map((exercise) => (
-                <ExerciseRow
-                  key={`${exercise.sortOrder}-${exercise.name}`}
-                  exercise={exercise}
-                />
-              ))}
-            </ul>
-          </CollapsibleContent>
-        </Collapsible>
-      ) : null}
-    </div>
+    <ul>
+      {exercises.map((exercise) => (
+        <ExerciseRow
+          key={`${exercise.sortOrder}-${exercise.name}`}
+          exercise={exercise}
+        />
+      ))}
+    </ul>
   );
 }

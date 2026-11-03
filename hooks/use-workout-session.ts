@@ -33,6 +33,7 @@ import type {
 import { notify } from "@/lib/notify";
 import {
   buildRepsChangePatch,
+  buildWeightChangePatch,
   buildSetTogglePatch,
   bumpRevisionMap,
 } from "@/features/routines/setProgress";
@@ -220,6 +221,7 @@ export function useWorkoutSession({
           updateSetInDays(prev, setId, {
             completed: currentSet.completed,
             actualReps: currentSet.actualReps,
+            actualWeightKg: currentSet.actualWeightKg ?? null,
           })
         );
         notify.workout.setUpdateFailed(result.error);
@@ -243,6 +245,26 @@ export function useWorkoutSession({
   const handleRepsSave = (setId: string, reps: number | null) => {
     if (!isUuid(setId)) return;
     updateSetLogProgress(setId, buildRepsChangePatch(reps));
+  };
+
+  const handleWeightChange = (setId: string, kg: number | null) => {
+    if (isReadOnly || !isUuid(setId)) return;
+
+    hasLocalEditsRef.current = true;
+    setDaysData((prev) =>
+      updateSetInDays(prev, setId, buildWeightChangePatch(kg))
+    );
+
+    if (currentSessionId) {
+      markSessionEditable(currentSessionId);
+    }
+  };
+
+  const handleWeightSave = (setId: string, kg: number | null) => {
+    if (!isUuid(setId)) return;
+    updateSetLogProgress(setId, buildWeightChangePatch(kg)).then((result) => {
+      if (!result.ok) notify.workout.setUpdateFailed(result.error);
+    });
   };
 
   const handleSelectDay = (dayId: string) => {
@@ -440,6 +462,8 @@ export function useWorkoutSession({
     handleSetToggle,
     handleRepsChange,
     handleRepsSave,
+    handleWeightChange,
+    handleWeightSave,
     handleResetExercise,
     handleResetDay,
     handleSaveWorkout,

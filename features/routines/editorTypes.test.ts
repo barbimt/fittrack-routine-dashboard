@@ -85,13 +85,17 @@ describe("mapRoutineToEditor", () => {
     expect(pulldown).toMatchObject({
       name: "Pulldown",
       muscleGroup: null,
-      prescription: "3x12",
-      plannedSets: 3,
-      targetReps: "12",
-      weight: "30kg",
+      secondaryMuscles: [],
       restTime: null,
     });
-    expect(editor.days[1].exercises[1].muscleGroup).toBe("Back");
+    expect(pulldown.sets).toEqual(
+      Array.from({ length: 3 }, () => ({
+        setType: "working",
+        reps: "12",
+        weightKg: "30",
+      }))
+    );
+    expect(editor.days[1].exercises[1].muscleGroup).toBe("back");
   });
 
   it("maps variable prescriptions from the database", () => {
@@ -114,11 +118,38 @@ describe("mapRoutineToEditor", () => {
     };
 
     const exercise = mapRoutineToEditor(variable).days[0].exercises[0];
-    expect(exercise).toMatchObject({
-      prescription: "1x12 15kg-3x12 20kg",
-      plannedSets: 4,
-      targetReps: "12",
-      weight: null,
+    expect(exercise.sets.map((set) => set.weightKg)).toEqual([
+      "15",
+      "20",
+      "20",
+      "20",
+    ]);
+  });
+
+  it("keeps legacy leftovers in notes until the exercise has set rows", () => {
+    const legacy: RoutineWithDays = {
+      ...routine,
+      routine_days: [
+        {
+          ...routine.routine_days[1],
+          routine_exercises: [
+            {
+              ...routine.routine_days[1].routine_exercises[0],
+              prescription: "3x10 per leg",
+              weight: "8kg each",
+              notes: "Slow",
+            },
+          ],
+        },
+      ],
+    };
+
+    const exercise = mapRoutineToEditor(legacy).days[0].exercises[0];
+    expect(exercise.notes).toBe("Slow · per leg · each");
+    expect(exercise.sets[0]).toEqual({
+      setType: "working",
+      reps: "10",
+      weightKg: "8",
     });
   });
 

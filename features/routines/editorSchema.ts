@@ -1,12 +1,25 @@
 import { z } from "zod";
+import { validateEditorSets } from "./editorSetRows";
 import type { EditorDay } from "./editorTypes";
+import { MAX_SETS_PER_EXERCISE } from "./sets";
+
+const setInputSchema = z.object({
+  setType: z.enum(["warmup", "working", "drop"]),
+  reps: z.string(),
+  weightKg: z.string(),
+});
 
 const exerciseSchema = z.object({
   name: z.string().trim().min(1, "Exercise name is required"),
-  plannedSets: z
-    .number({ invalid_type_error: "Sets must be at least 1" })
-    .int("Sets must be a whole number")
-    .positive("Sets must be at least 1"),
+  sets: z
+    .array(setInputSchema)
+    .min(1, "Add at least one set")
+    .max(MAX_SETS_PER_EXERCISE, `Use ${MAX_SETS_PER_EXERCISE} sets or fewer`)
+    .superRefine((sets, ctx) => {
+      for (const issue of validateEditorSets(sets)) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: issue.message });
+      }
+    }),
 });
 
 const daySchema = z.object({

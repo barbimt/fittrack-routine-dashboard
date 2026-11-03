@@ -1,4 +1,8 @@
 import type { RoutineWithDays } from "./types";
+import { hasSetRows, legacyExercisePlan, mergeNotes, exercisePlannedSets } from "./exercisePlan";
+import { toMuscleGroup } from "./muscleGroups";
+import type { SetType } from "./sets";
+import { plannedToEditorSets } from "./editorSetRows";
 
 /** Prefix for ids created client-side; not a UUID so the server treats them as inserts. */
 export const NEW_ID_PREFIX = "new-";
@@ -7,14 +11,22 @@ export function createNewId(): string {
   return `${NEW_ID_PREFIX}${crypto.randomUUID()}`;
 }
 
+/** One planned set as typed in the editor (raw strings so partial input like `7,` survives). */
+export interface EditorSetInput {
+  setType: SetType;
+  /** `12` or a range like `8-10`. */
+  reps: string;
+  /** Kilograms; accepts `7,5` or `7.5`. Empty = no load. */
+  weightKg: string;
+}
+
 export interface EditorExercise {
   id: string;
   name: string;
+  /** Primary muscle slug. */
   muscleGroup: string | null;
-  prescription: string | null;
-  plannedSets: number | null;
-  targetReps: string | null;
-  weight: string | null;
+  secondaryMuscles: string[];
+  sets: EditorSetInput[];
   restTime: string | null;
   notes: string | null;
   sortOrder: number;
@@ -46,18 +58,26 @@ export function mapRoutineToEditor(routine: RoutineWithDays): EditorRoutine {
       sortOrder: day.sort_order,
       exercises: [...day.routine_exercises]
         .sort((a, b) => a.sort_order - b.sort_order)
-        .map((ex) => ({
-          id: ex.id,
-          name: ex.name,
-          muscleGroup: ex.muscle_group,
-          prescription: ex.prescription,
-          plannedSets: ex.planned_sets,
-          targetReps: ex.target_reps,
-          weight: ex.weight,
-          restTime: ex.rest_time,
-          notes: ex.notes,
-          sortOrder: ex.sort_order,
-        })),
+        .map((ex) => {
+          const extraNotes = hasSetRows(ex)
+            ? []
+            : legacyExercisePlan(ex).extraNotes;
+          return {
+            id: ex.id,
+            name: ex.name,
+            muscleGroup: toMuscleGroup(ex.muscle_group),
+            secondaryMuscles: (ex.muscle_groups_secondary ?? []).flatMap(
+              (value) => {
+                const slug = toMuscleGroup(value);
+                return slug ? [slug] : [];
+              }
+            ),
+            sets: plannedToEditorSets(exercisePlannedSets(ex)),
+            restTime: ex.rest_time,
+            notes: mergeNotes(ex.notes, extraNotes),
+            sortOrder: ex.sort_order,
+          };
+        }),
     }));
 
   return { id: routine.id, name: routine.name, days };

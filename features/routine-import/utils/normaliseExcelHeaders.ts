@@ -17,6 +17,26 @@ const HEADER_ALIASES: Record<string, CanonicalColumn> = {
   REPS: "SETS_X_REPS",
   WEIGHT: "WEIGHT",
   PESO: "WEIGHT",
+  KG: "WEIGHT",
+  LOAD: "WEIGHT",
+  CARGA: "WEIGHT",
+  MUSCLE: "MUSCLE",
+  MUSCLES: "MUSCLE",
+  "MUSCLE GROUP": "MUSCLE",
+  "MAIN MUSCLE": "MUSCLE",
+  "PRIMARY MUSCLE": "MUSCLE",
+  MUSCULO: "MUSCLE",
+  "GRUPO MUSCULAR": "MUSCLE",
+  "MUSCULO PRINCIPAL": "MUSCLE",
+  SECONDARY: "SECONDARY",
+  "SECONDARY MUSCLES": "SECONDARY",
+  "ALSO WORKS": "SECONDARY",
+  SECUNDARIO: "SECONDARY",
+  SECUNDARIOS: "SECONDARY",
+  "MUSCULOS SECUNDARIOS": "SECONDARY",
+  REST: "REST",
+  "REST TIME": "REST",
+  DESCANSO: "REST",
   NOTES: "NOTES",
   NOTE: "NOTES",
   NOTAS: "NOTES",
@@ -33,7 +53,17 @@ function canonicaliseHeader(normalised: string): CanonicalColumn | null {
   const direct = HEADER_ALIASES[normalised];
   if (direct) return direct;
 
-  if (/^(SETS|SERIES)\s*X\s*REPS?$/i.test(normalised.replace(/\s+/g, " "))) {
+  // "MÚSCULO", "WEIGHT (kg)", "REST (sec)", "NOTES *" → base header
+  const stripped = normalised
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\(.*?\)|[*:]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  const fromStripped = HEADER_ALIASES[stripped];
+  if (fromStripped) return fromStripped;
+
+  if (/^(SETS|SERIES)\s*X\s*(REPS?|REPETICIONES)$/i.test(stripped)) {
     return "SETS_X_REPS";
   }
 

@@ -47,7 +47,11 @@ describe("insertActiveRoutineTree", () => {
       error: null,
     });
     const dayInsert = createThenable({ data: { id: "day-1" }, error: null });
-    const exerciseInsert = createThenable({ data: null, error: null });
+    const exerciseInsert = createThenable({
+      data: [{ id: "ex-1" }],
+      error: null,
+    });
+    const setInsert = createThenable({ data: null, error: null });
 
     fromMock.mockImplementation((table: string) => {
       if (table === "routines") {
@@ -56,6 +60,7 @@ describe("insertActiveRoutineTree", () => {
       }
       if (table === "routine_days") return dayInsert;
       if (table === "routine_exercises") return exerciseInsert;
+      if (table === "routine_exercise_sets") return setInsert;
       throw new Error(`unexpected table ${table}`);
     });
 
@@ -71,10 +76,13 @@ describe("insertActiveRoutineTree", () => {
           exercises: [
             {
               name: "Bench",
-              prescription: "3x10",
-              plannedSets: 3,
-              targetReps: "10",
-              weight: null,
+              sets: [
+                { setType: "warmup", repsMin: 12, repsMax: 12, weightKg: 20 },
+                { setType: "working", repsMin: 10, repsMax: 10, weightKg: 40 },
+                { setType: "working", repsMin: 10, repsMax: 10, weightKg: 40 },
+              ],
+              muscleGroup: "chest",
+              secondaryMuscles: ["triceps"],
               notes: null,
               sortOrder: 0,
             },
@@ -106,11 +114,24 @@ describe("insertActiveRoutineTree", () => {
       expect.arrayContaining([
         expect.objectContaining({
           name: "Bench",
-          prescription: "3x10",
+          prescription: "W1x12 20kg-2x10 40kg",
+          planned_sets: 3,
+          muscle_group: "chest",
+          muscle_groups_secondary: ["triceps"],
           routine_day_id: "day-1",
         }),
       ])
     );
+    expect(setInsert.insert).toHaveBeenCalledWith([
+      expect.objectContaining({
+        routine_exercise_id: "ex-1",
+        set_number: 1,
+        set_type: "warmup",
+        target_weight_kg: 20,
+      }),
+      expect.objectContaining({ set_number: 2, reps_min: 10, target_weight_kg: 40 }),
+      expect.objectContaining({ set_number: 3 }),
+    ]);
   });
 
   it("returns an error when not authenticated", async () => {

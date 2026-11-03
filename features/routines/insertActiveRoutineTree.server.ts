@@ -1,15 +1,15 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { buildExerciseSetRows, exercisePlanColumns } from "./exerciseSets.server";
+import type { PlannedSet } from "./sets";
 import type { RoutineSource } from "./types";
 
 export type RoutineTreeExerciseInput = {
   name: string;
-  prescription: string;
-  plannedSets: number | null;
-  targetReps: string | null;
-  weight: string | null;
+  sets: PlannedSet[];
   restTime?: string | null;
   notes: string | null;
   muscleGroup?: string | null;
+  secondaryMuscles?: string[];
   sortOrder: number;
 };
 
@@ -33,7 +33,8 @@ export type InsertActiveRoutineTreeResult =
 
 /**
  * Deactivate the user's other active routines, then insert a new active routine
- * with its days and exercises. Shared by Excel import and create-from-scratch.
+ * with its days, exercises, and planned sets. Shared by Excel import and
+ * create-from-scratch.
  *
  * Ownership (`user_id`) is always taken from the authenticated session — never
  * from caller-supplied input.
@@ -105,25 +106,50 @@ export async function insertActiveRoutineTree(
       const exerciseRows = day.exercises.map((exercise, exerciseIndex) => ({
         routine_day_id: dayId,
         name: exercise.name,
-        prescription: exercise.prescription,
-        planned_sets: exercise.plannedSets,
-        target_reps: exercise.targetReps,
-        weight: exercise.weight,
-        rest_time: exercise.restTime ?? null,
         notes: exercise.notes,
-        muscle_group: exercise.muscleGroup ?? null,
         sort_order: exercise.sortOrder ?? exerciseIndex,
+        ...exercisePlanColumns({
+          sets: exercise.sets,
+          restTime: exercise.restTime ?? null,
+          muscleGroup: exercise.muscleGroup ?? null,
+          secondaryMuscles: exercise.secondaryMuscles ?? [],
+        }),
       }));
 
-      const { error: exerciseError } = await supabase
+      const { data: insertedExercises, error: exerciseError } = await supabase
         .from("routine_exercises")
-        .insert(exerciseRows);
+        .insert(exerciseRows)
+        .select("id");
 
-      if (exerciseError) {
+      if (
+        exerciseError ||
+        !insertedExercises ||
+        insertedExercises.length !== day.exercises.length
+      ) {
         return {
           ok: false,
           error: `Failed to save exercises for "${day.name}".`,
         };
+      }
+
+      const setRows = insertedExercises.flatMap((row, exerciseIndex) =>
+        buildExerciseSetRows(
+          row.id as string,
+          day.exercises[exerciseIndex].sets
+        )
+      );
+
+      if (setRows.length > 0) {
+        const { error: setsError } = await supabase
+          .from("routine_exercise_sets")
+          .insert(setRows);
+
+        if (setsError) {
+          return {
+            ok: false,
+            error: `Failed to save sets for "${day.name}".`,
+          };
+        }
       }
 
       totalExerciseCount += day.exercises.length;

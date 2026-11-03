@@ -6,11 +6,9 @@ function exercise(overrides: Partial<EditorExercise> = {}): EditorExercise {
   return {
     id: "ex-1",
     name: "Hip Thrust",
-    muscleGroup: "Glutes",
-    prescription: "4x10",
-    plannedSets: 4,
-    targetReps: "10",
-    weight: "60kg",
+    muscleGroup: "glutes",
+    secondaryMuscles: [],
+    sets: [{ setType: "working", reps: "10", weightKg: "60" }],
     restTime: null,
     notes: null,
     sortOrder: 0,
@@ -62,17 +60,22 @@ describe("validateRoutineDays", () => {
     );
   });
 
-  it("flags an exercise with non-positive or missing sets", () => {
+  it("flags an exercise without sets or with unreadable set values", () => {
     const errors = validateRoutineDays([
       day({
         exercises: [
-          exercise({ plannedSets: null }),
-          exercise({ id: "ex-2", plannedSets: 0 }),
+          exercise({ sets: [] }),
+          exercise({
+            id: "ex-2",
+            sets: [{ setType: "working", reps: "10", weightKg: "heavy" }],
+          }),
         ],
       }),
     ]);
-    expect(errors[0].messages).toContain("Exercise 1: Sets must be at least 1");
-    expect(errors[0].messages).toContain("Exercise 2: Sets must be at least 1");
+    expect(errors[0].messages).toContain("Exercise 1: Add at least one set");
+    expect(errors[0].messages).toContain(
+      "Exercise 2: Set 1: enter kg as a number, like 20 or 7.5"
+    );
   });
 
   it("aggregates multiple issues per day and keeps the day name", () => {

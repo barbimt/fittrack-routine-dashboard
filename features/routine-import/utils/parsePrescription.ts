@@ -1,230 +1,216 @@
+import {
+  MAX_REPS,
+  MAX_SETS_PER_EXERCISE,
+  type PlannedSet,
+  type SetType,
+} from "@/features/routines/sets";
+import { parseLoad } from "@/features/routines/weight";
+
 export type PrescriptionParseResult = {
-  plannedSets: number | null;
-  targetReps: string | null;
-  parsed: boolean;
+  sets: PlannedSet[];
+  /** True when at least one block like `3x12` was read. */
+  ok: boolean;
+  /** Free text kept for the exercise notes, e.g. `per leg`. */
+  notes: string[];
+  /** Blocks that looked like sets but could not be read. */
+  unreadable: string[];
+  convertedFromLb: boolean;
 };
-
-export type PrescriptionBlock = {
-  sets: number;
-  /** Raw reps token (may include text like "10 per leg"). */
-  reps: string;
-  repsNumber: number | null;
-  weight: string | null;
-};
-
-export type ExpandedSetTarget = {
-  setNumber: number;
-  targetReps: number;
-  targetWeight: string | null;
-};
-
-export type PrescriptionBlockSummary = {
-  sets: number;
-  reps: number | string;
-  weight: string | null;
-};
-
-export function getPrescriptionBlockSummaries(
-  prescription: string,
-  fallbackWeight?: string | null
-): PrescriptionBlockSummary[] {
-  return parsePrescriptionBlocks(prescription, fallbackWeight).map((block) => ({
-    sets: block.sets,
-    reps: block.repsNumber ?? block.reps,
-    weight: block.weight,
-  }));
-}
 
 /** Excel/Word often use × (U+00D7) instead of ASCII x — normalize before parsing. */
 export function normalizePrescriptionInput(prescription: string): string {
   return prescription
-    .replace(/\u00D7/g, "x")
-    .replace(/\u2715/g, "x")
-    .replace(/\u2716/g, "x")
-    .replace(/\u2A09/g, "x");
+    .replace(/[\u00D7\u2715\u2716\u2A09]/g, "x")
+    .replace(/[\u2013\u2014]/g, "-");
 }
 
-const BLOCK_PATTERN = /^(\d+)\s*x\s*(.+)$/i;
+const SEPARATORS = /^[\s\-+,;/|]+|[\s\-+,;/|]+$/g;
+const BLOCK_START = /(?<=^|[\s\-+,;/|])(?:w|d)?\s*\d+\s*x\s*\d/gi;
+const BLOCK =
+  /^(?:(w|d)\s*)?(\d+)\s*x\s*(\d+)(?:\s*(?:-|a|to)\s*(\d+)(?!\s*x))?\s*(.*)$/i;
 
-/** True when the token looks like a load (e.g. `15kg`, `7,5 kg`) — not `c/pierna`. */
-function looksLikeWeight(token: string): boolean {
-  const trimmed = token.trim();
-  if (!trimmed || !/\d/.test(trimmed)) return false;
-  return /kg/i.test(trimmed);
+const TIME_UNIT = /^(sec|secs|seconds?|s|min|mins|minutes?|seg|segundos?)\b(.*)$/i;
+const SET_COUNT_ONLY = /^(\d{1,2})$/;
+
+function formatRange(min: number, max: number): string {
+  return min === max ? String(min) : `${min}-${max}`;
 }
 
-function parseRepsAndWeight(repsPart: string): {
-  reps: string;
-  repsNumber: number | null;
-  weight: string | null;
-} {
-  const trimmed = repsPart.trim();
-  if (!trimmed) {
-    return { reps: "", repsNumber: null, weight: null };
+function splitBlocks(text: string): { lead: string; blocks: string[] } {
+  const starts = [...text.matchAll(BLOCK_START)].map((match) => match.index ?? 0);
+  if (starts.length === 0) return { lead: text.trim(), blocks: [] };
+
+  const lead = text.slice(0, starts[0]).replace(SEPARATORS, "");
+  const blocks = starts.map((start, index) =>
+    text
+      .slice(start, starts[index + 1] ?? text.length)
+      .replace(SEPARATORS, "")
+  );
+  return { lead, blocks };
+}
+
+type BlockParse =
+  | {
+      ok: true;
+      count: number;
+      setType: SetType;
+      repsMin: number | null;
+      repsMax: number | null;
+      weightKg: number | null;
+      note: string | null;
+      convertedFromLb: boolean;
+    }
+  | { ok: false };
+
+function parseBlock(block: string): BlockParse {
+  const match = block.match(BLOCK);
+  if (!match) return { ok: false };
+
+  const count = Number.parseInt(match[2], 10);
+  const repsMin = Number.parseInt(match[3], 10);
+  const repsMax = match[4] ? Number.parseInt(match[4], 10) : repsMin;
+  if (
+    count < 1 ||
+    count > MAX_SETS_PER_EXERCISE ||
+    repsMin < 1 ||
+    repsMax < repsMin ||
+    repsMax > MAX_REPS
+  ) {
+    return { ok: false };
   }
 
-  const atMatch = trimmed.match(/^(\d+)\s*(?:@|con)\s*(.+)$/i);
+  const prefix = match[1]?.toLowerCase();
+  const setType: SetType =
+    prefix === "w" ? "warmup" : prefix === "d" ? "drop" : "working";
+
+  const rest = match[5].trim();
+  let weightKg: number | null = null;
+  let note: string | null = null;
+  let convertedFromLb = false;
+
+  // `3x30 sec`, `2x20-30 sec per side`: timed sets, not reps.
+  const timed = rest.match(TIME_UNIT);
+  if (timed) {
+    const duration = `${formatRange(repsMin, repsMax)} ${timed[1].toLowerCase()}`;
+    const extra = timed[2].trim();
+    return {
+      ok: true,
+      count,
+      setType,
+      repsMin: null,
+      repsMax: null,
+      weightKg: null,
+      note: extra ? `${duration} ${extra}` : duration,
+      convertedFromLb: false,
+    };
+  }
+
+  const atMatch = rest.match(/^(?:@|con|at|with)\s*(.+)$/i);
   if (atMatch) {
-    const reps = atMatch[1];
-    return {
-      reps,
-      repsNumber: Number.parseInt(reps, 10),
-      weight: atMatch[2].trim() || null,
-    };
+    const load = parseLoad(atMatch[1]);
+    weightKg = load.kg;
+    note = load.rest;
+    convertedFromLb = load.convertedFromLb;
+  } else if (/\d/.test(rest) && /kg|kilo|lb|libra|pound/i.test(rest)) {
+    const load = parseLoad(rest);
+    weightKg = load.kg;
+    note = load.rest;
+    convertedFromLb = load.convertedFromLb;
+  } else if (rest) {
+    note = rest;
   }
-
-  const spaceMatch = trimmed.match(/^(\d+)\s+(.+)$/);
-  if (spaceMatch && looksLikeWeight(spaceMatch[2])) {
-    const reps = spaceMatch[1];
-    return {
-      reps,
-      repsNumber: Number.parseInt(reps, 10),
-      weight: spaceMatch[2].trim(),
-    };
-  }
-
-  const leadingNumber = trimmed.match(/^(\d+)/);
-  if (leadingNumber) {
-    return {
-      reps: leadingNumber[1],
-      repsNumber: Number.parseInt(leadingNumber[1], 10),
-      weight: null,
-    };
-  }
-
-  return { reps: trimmed, repsNumber: null, weight: null };
-}
-
-function parseBlock(block: string): PrescriptionBlock | null {
-  const trimmed = normalizePrescriptionInput(block).trim().replace(/^-/, "");
-  if (!trimmed) return null;
-
-  const match = trimmed.match(BLOCK_PATTERN);
-  if (!match) return null;
-
-  const sets = Number.parseInt(match[1], 10);
-  const { reps, repsNumber, weight } = parseRepsAndWeight(match[2].trim());
-  if (!Number.isFinite(sets) || sets < 1 || !reps) return null;
-
-  return { sets, reps, repsNumber, weight };
-}
-
-/** True when kg appears in the prescription text (not from the Weight column). */
-export function hasWeightInPrescriptionText(prescription: string): boolean {
-  const trimmed = normalizePrescriptionInput(prescription).trim();
-  if (!trimmed) return false;
-
-  const blockStrings = splitPrescriptionBlocks(trimmed);
-  const segments =
-    blockStrings.length > 0
-      ? blockStrings.map((block) => parseBlock(block))
-      : [parseBlock(trimmed)];
-
-  return segments.some((block) => block !== null && block.weight !== null);
-}
-
-export function isVariablePrescriptionStructure(prescription: string): boolean {
-  const trimmed = normalizePrescriptionInput(prescription).trim();
-  if (!trimmed) return false;
-  return splitPrescriptionBlocks(trimmed).length > 1;
-}
-
-export function splitPrescriptionBlocks(prescription: string): string[] {
-  const trimmed = normalizePrescriptionInput(prescription).trim();
-  if (!trimmed) return [];
-
-  return trimmed.split(/\s*-\s*|\s+(?=\d+\s*x\s*\d+)/i).flatMap((part) => {
-    const trimmedPart = part.trim();
-    return trimmedPart.length > 0 ? [trimmedPart] : [];
-  });
-}
-
-export function parsePrescriptionBlocks(
-  prescription: string,
-  fallbackWeight?: string | null
-): PrescriptionBlock[] {
-  const trimmed = normalizePrescriptionInput(prescription).trim();
-  if (!trimmed) return [];
-
-  const blockStrings = splitPrescriptionBlocks(trimmed);
-  const segments =
-    blockStrings.length > 0
-      ? blockStrings.flatMap((block) => {
-          const parsed = parseBlock(block);
-          return parsed ? [parsed] : [];
-        })
-      : [parseBlock(trimmed)];
-
-  const normalizedFallback =
-    fallbackWeight && fallbackWeight.trim() !== "" && fallbackWeight !== "—"
-      ? fallbackWeight.trim()
-      : null;
-
-  return segments.flatMap((segment) =>
-    segment
-      ? [{ ...segment, weight: segment.weight ?? normalizedFallback }]
-      : []
-  );
-}
-
-export function expandPrescriptionToSets(
-  prescription: string,
-  fallbackWeight?: string | null
-): ExpandedSetTarget[] {
-  const blocks = parsePrescriptionBlocks(prescription, fallbackWeight);
-  if (blocks.length === 0) return [];
-
-  const sets: ExpandedSetTarget[] = [];
-  let setNumber = 1;
-
-  for (const block of blocks) {
-    const reps = block.repsNumber ?? 0;
-    for (let i = 0; i < block.sets; i += 1) {
-      sets.push({
-        setNumber,
-        targetReps: reps,
-        targetWeight: block.weight,
-      });
-      setNumber += 1;
-    }
-  }
-
-  return sets;
-}
-
-export function formatPrescriptionBlockLines(
-  prescription: string,
-  fallbackWeight?: string | null
-): string[] {
-  return getPrescriptionBlockSummaries(prescription, fallbackWeight).map(
-    (block) => {
-      if (block.weight) {
-        return `${block.sets} × ${block.reps} · ${block.weight}`;
-      }
-      return `${block.sets} × ${block.reps}`;
-    }
-  );
-}
-
-export function parsePrescription(
-  prescription: string,
-  fallbackWeight?: string | null
-): PrescriptionParseResult {
-  const blocks = parsePrescriptionBlocks(prescription, fallbackWeight);
-
-  if (blocks.length === 0) {
-    return { plannedSets: null, targetReps: null, parsed: false };
-  }
-
-  const plannedSets = blocks.reduce((sum, block) => sum + block.sets, 0);
-  const repsValues = blocks.map((block) => block.reps);
-  const uniqueReps = [...new Set(repsValues)];
-  const targetReps =
-    uniqueReps.length === 1 ? uniqueReps[0] : repsValues[repsValues.length - 1];
 
   return {
-    plannedSets,
-    targetReps,
-    parsed: true,
+    ok: true,
+    count,
+    setType,
+    repsMin,
+    repsMax,
+    weightKg,
+    note,
+    convertedFromLb,
   };
+}
+
+/**
+ * Reads `SETS x REPS` text into one row per set.
+ *
+ * Accepted: `4x10`, `4x8-10`, `1x12 15kg-3x12 20kg`, `3x12 @ 60`, `3x12 con 60`,
+ * `7,5kg`, `W1x15 20kg` (warm-up), `D1x10 30kg` (drop set), `3x10 per leg`,
+ * `3` (3 sets, reps not set), `3x30 sec` (timed: no reps, duration in notes).
+ * `fallbackWeight` (the WEIGHT column) applies to blocks without their own load.
+ */
+export function parsePrescriptionToSets(
+  prescription: string | null | undefined,
+  fallbackWeight?: string | number | null
+): PrescriptionParseResult {
+  const result: PrescriptionParseResult = {
+    sets: [],
+    ok: false,
+    notes: [],
+    unreadable: [],
+    convertedFromLb: false,
+  };
+
+  const text = normalizePrescriptionInput(prescription ?? "").trim();
+  if (!text || text === "—") return result;
+
+  const fallback = parseLoad(fallbackWeight ?? null);
+
+  // Just a number: the set count without reps (`3` → 3 sets).
+  const countOnly = text.match(SET_COUNT_ONLY);
+  if (countOnly) {
+    const count = Number.parseInt(countOnly[1], 10);
+    if (count >= 1 && count <= MAX_SETS_PER_EXERCISE) {
+      result.sets = Array.from({ length: count }, () => ({
+        setType: "working" as const,
+        repsMin: null,
+        repsMax: null,
+        weightKg: fallback.kg,
+      }));
+      result.ok = true;
+      result.convertedFromLb = fallback.convertedFromLb;
+      if (fallback.rest) result.notes = [fallback.rest];
+      return result;
+    }
+  }
+
+  const { lead, blocks } = splitBlocks(text);
+  if (lead) result.unreadable.push(lead);
+
+  const notes = new Set<string>();
+  let usedFallback = false;
+  for (const block of blocks) {
+    const parsed = parseBlock(block);
+    if (!parsed.ok) {
+      result.unreadable.push(block);
+      continue;
+    }
+
+    if (parsed.weightKg === null) usedFallback = true;
+    const weightKg = parsed.weightKg ?? fallback.kg;
+    if (
+      parsed.convertedFromLb ||
+      (parsed.weightKg === null && fallback.convertedFromLb)
+    ) {
+      result.convertedFromLb = true;
+    }
+    if (parsed.note) notes.add(parsed.note);
+
+    for (let i = 0; i < parsed.count; i += 1) {
+      if (result.sets.length >= MAX_SETS_PER_EXERCISE) break;
+      result.sets.push({
+        setType: parsed.setType,
+        repsMin: parsed.repsMin,
+        repsMax: parsed.repsMax,
+        weightKg,
+      });
+    }
+  }
+
+  if (fallback.rest && usedFallback) notes.add(fallback.rest);
+
+  result.ok = result.sets.length > 0;
+  result.notes = [...notes];
+  return result;
 }

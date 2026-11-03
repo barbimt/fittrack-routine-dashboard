@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { mapRoutineToEditor } from "@/features/routines/editorTypes";
 import type { EditorRoutine } from "@/features/routines/editorTypes";
+import { ROUTINE_TREE_SELECT } from "@/features/routines/routineMapper";
 import type { RoutineWithDays } from "@/features/routines/types";
 import { RoutineEditorClient } from "@/components/fitness/routine-editor-client";
 
@@ -24,7 +25,7 @@ export default async function EditorPage() {
 
   const { data: routineData } = await supabase
     .from("routines")
-    .select("*, routine_days(*, routine_exercises(*))")
+    .select(ROUTINE_TREE_SELECT)
     .eq("user_id", user.id)
     .eq("is_active", true)
     .maybeSingle();

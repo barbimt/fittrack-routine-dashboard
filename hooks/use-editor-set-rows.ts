@@ -1,6 +1,9 @@
 "use client";
 
-import type { EditorExercise } from "@/features/routines/editorTypes";
+import type {
+  EditorExercise,
+  EditorSetInput,
+} from "@/features/routines/editorTypes";
 import {
   addEditorSetRow,
   exerciseToSetRows,
@@ -13,7 +16,7 @@ import {
 type SetRowsPatch = ReturnType<typeof setRowsToExercisePatch>;
 
 export function useEditorSetRows(
-  exercise: EditorExercise,
+  exercise: Pick<EditorExercise, "id" | "sets">,
   onPatch: (patch: SetRowsPatch) => void
 ) {
   const setRows = exerciseToSetRows(exercise);
@@ -24,7 +27,7 @@ export function useEditorSetRows(
 
   return {
     setRows,
-    updateSetRow: (index: number, patch: Partial<EditorSetRow>) => {
+    updateSetRow: (index: number, patch: Partial<EditorSetInput>) => {
       commit(updateEditorSetRow(setRows, index, patch));
     },
     addSet: () => {

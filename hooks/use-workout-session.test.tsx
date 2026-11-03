@@ -207,6 +207,33 @@ describe("useWorkoutSession handleSetToggle", () => {
     expect(updateSetLogProgress).toHaveBeenCalledWith(SET_ID, {
       completed: false,
       actualReps: null,
+      actualWeightKg: null,
+    });
+  });
+
+  it("logs kg optimistically and persists it without changing completion", () => {
+    const { result } = renderHook(
+      () =>
+        useWorkoutSession({
+          initialDays,
+          routineId: ROUTINE_ID,
+          initialDayId: DAY_ID,
+          initialSessionId: SESSION_ID,
+        }),
+      { wrapper }
+    );
+
+    const before = result.current.daysData[0].exercises[0].sets[0].completed;
+    act(() => {
+      result.current.handleWeightChange(SET_ID, 62.5);
+      result.current.handleWeightSave(SET_ID, 62.5);
+    });
+
+    const set = result.current.daysData[0].exercises[0].sets[0];
+    expect(set.actualWeightKg).toBe(62.5);
+    expect(set.completed).toBe(before);
+    expect(updateSetLogProgress).toHaveBeenCalledWith(SET_ID, {
+      actualWeightKg: 62.5,
     });
   });
 });
@@ -231,7 +258,7 @@ const mergedDayFromServer: TrainingDay = {
           id: "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
           setNumber: 1,
           targetReps: 10,
-          targetWeight: "40kg",
+          targetWeightKg: 40,
           actualReps: null,
           completed: false,
         },
@@ -255,6 +282,17 @@ const addedExercise: RoutineExercise = {
   sort_order: 2,
   created_at: "2026-01-01T00:00:00Z",
   updated_at: "2026-01-01T00:00:00Z",
+};
+
+const facePullInput = {
+  name: "Face pull",
+  sets: Array.from({ length: 3 }, () => ({
+    setType: "working" as const,
+    repsMin: 12,
+    repsMax: 12,
+    weightKg: 15,
+  })),
+  muscleGroup: "shoulders",
 };
 
 describe("useWorkoutSession day session sync", () => {
@@ -300,8 +338,8 @@ describe("useWorkoutSession day session sync", () => {
     ).toHaveLength(1);
     expect(
       result.current.daysData.find((d) => d.id === DAY_2_ID)?.exercises[0]
-        .sets[0].targetWeight
-    ).toBe("40kg");
+        .sets[0].targetWeightKg
+    ).toBe(40);
   });
 });
 
@@ -346,22 +384,14 @@ describe("useWorkoutSession handleAddExercise", () => {
     );
 
     await act(async () => {
-      await result.current.handleAddExercise({
-        name: "Face pull",
-        plannedSets: 3,
-        targetReps: "12",
-        weight: "15kg",
-        muscleGroup: "Shoulders",
-      });
+      await result.current.handleAddExercise(facePullInput);
     });
 
-    expect(addExerciseToDay).toHaveBeenCalledWith(DAY_ID, SESSION_ID, {
-      name: "Face pull",
-      plannedSets: 3,
-      targetReps: "12",
-      weight: "15kg",
-      muscleGroup: "Shoulders",
-    });
+    expect(addExerciseToDay).toHaveBeenCalledWith(
+      DAY_ID,
+      SESSION_ID,
+      facePullInput
+    );
     expect(result.current.daysData[0].exercises).toHaveLength(2);
     expect(result.current.daysData[0].exercises[1].name).toBe("Face pull");
     expect(result.current.daysData[0].exercises[1].sets[0].id).toBe(
@@ -388,11 +418,7 @@ describe("useWorkoutSession handleAddExercise", () => {
     );
 
     await act(async () => {
-      await result.current.handleAddExercise({
-        name: "Face pull",
-        plannedSets: 3,
-        targetReps: "12",
-      });
+      await result.current.handleAddExercise(facePullInput);
     });
 
     expect(result.current.daysData[0].exercises).toHaveLength(1);
@@ -542,11 +568,12 @@ describe("useWorkoutSession handleEditExercise", () => {
 
     const input = {
       name: "Squat heavy",
-      muscleGroup: "Legs",
-      prescription: "1x12 40kg-1x12 35kg",
-      plannedSets: 2,
-      targetReps: "12",
-      weight: null,
+      muscleGroup: "quads",
+      secondaryMuscles: ["glutes"],
+      sets: [
+        { setType: "working" as const, repsMin: 12, repsMax: 12, weightKg: 40 },
+        { setType: "working" as const, repsMin: 12, repsMax: 12, weightKg: 35 },
+      ],
       restTime: "90s",
       notes: "slow ecc",
     };
@@ -575,11 +602,11 @@ describe("useWorkoutSession handleEditExercise", () => {
     );
     expect(result.current.daysData[0].exercises[0].name).toBe("Squat heavy");
     expect(result.current.daysData[0].exercises[0].sets).toHaveLength(2);
-    expect(result.current.daysData[0].exercises[0].sets[0].targetWeight).toBe(
-      "40kg"
+    expect(result.current.daysData[0].exercises[0].sets[0].targetWeightKg).toBe(
+      40
     );
-    expect(result.current.daysData[0].exercises[0].sets[1].targetWeight).toBe(
-      "35kg"
+    expect(result.current.daysData[0].exercises[0].sets[1].targetWeightKg).toBe(
+      35
     );
     expect(result.current.setRowRevision["ex-1"]).toBe(1);
   });
@@ -605,11 +632,9 @@ describe("useWorkoutSession handleEditExercise", () => {
     await act(async () => {
       await result.current.handleEditExercise("ex-1", {
         name: "Nope",
-        muscleGroup: "Legs",
-        prescription: "3x10",
-        plannedSets: 3,
-        targetReps: "10",
-        weight: "60kg",
+        muscleGroup: "quads",
+        secondaryMuscles: [],
+        sets: [{ setType: "working", repsMin: 10, repsMax: 10, weightKg: 60 }],
         restTime: null,
         notes: null,
       });

@@ -63,6 +63,7 @@ export function DemoDashboardClient({
     handleSetToggle,
     handleRepsChange,
     handleRepsSave,
+    handleWeightChange,
     handleResetExercise,
     handleResetDay,
     handleSaveWorkout,
@@ -172,6 +173,7 @@ export function DemoDashboardClient({
               onSetToggle={handleSetToggle}
               onRepsChange={handleRepsChange}
               onRepsSave={handleRepsSave}
+              onWeightChange={handleWeightChange}
               onResetExercise={isReadOnly ? undefined : handleResetExercise}
               {...exerciseCardRestProps(restTimer, isReadOnly)}
               resetDisabled={isPending}

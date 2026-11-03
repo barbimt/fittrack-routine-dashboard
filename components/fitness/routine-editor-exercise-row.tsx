@@ -13,6 +13,7 @@ import {
   EditorTextField,
   MuscleSelect,
   RestDurationField,
+  SecondaryMusclesField,
 } from "./routine-editor-fields";
 
 interface RoutineEditorExerciseRowProps {
@@ -90,6 +91,14 @@ export function RoutineEditorExerciseRow({
             className="md:col-span-2"
           />
         </div>
+
+        <SecondaryMusclesField
+          id={`${exercise.id}-secondary`}
+          primary={exercise.muscleGroup}
+          value={exercise.secondaryMuscles}
+          onValueChange={(secondaryMuscles) => onChange({ secondaryMuscles })}
+          className="md:col-span-6"
+        />
 
         <div className="md:col-span-6">
           <EditorSetRowsField

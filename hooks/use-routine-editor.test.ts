@@ -40,11 +40,13 @@ function makeRoutine(): EditorRoutine {
           {
             id: EX_ID,
             name: "Hip Thrust",
-            muscleGroup: "Glutes",
-            prescription: "4x10",
-            plannedSets: 4,
-            targetReps: "10",
-            weight: "60kg",
+            muscleGroup: "glutes",
+            secondaryMuscles: [],
+            sets: Array.from({ length: 4 }, () => ({
+              setType: "working" as const,
+              reps: "10",
+              weightKg: "60",
+            })),
             restTime: null,
             notes: null,
             sortOrder: 0,
@@ -86,9 +88,11 @@ describe("useRoutineEditor", () => {
     const routine = makeRoutine();
     const { result } = renderHook(() => useRoutineEditor(routine));
 
-    act(() => result.current.updateExercise(DAY_ID, EX_ID, { plannedSets: 5 }));
+    act(() =>
+      result.current.updateExercise(DAY_ID, EX_ID, { secondaryMuscles: ["quads"] })
+    );
 
-    expect(result.current.days[0].exercises[0].plannedSets).toBe(5);
+    expect(result.current.days[0].exercises[0].secondaryMuscles).toEqual(["quads"]);
     expect(result.current.isDirty).toBe(true);
   });
 
@@ -113,7 +117,7 @@ describe("useRoutineEditor", () => {
     );
   });
 
-  it("defaults new exercises to a simple prescription", () => {
+  it("defaults new exercises to 3 sets of 12", () => {
     const { result } = renderHook(() => useRoutineEditor(makeRoutine()));
 
     act(() => result.current.addExercise(DAY_ID));
@@ -122,22 +126,24 @@ describe("useRoutineEditor", () => {
       (ex) => ex.id !== EX_ID
     );
     expect(added).toMatchObject({
-      prescription: "3x12",
-      plannedSets: 3,
-      targetReps: "12",
-      weight: null,
+      secondaryMuscles: [],
+      sets: Array.from({ length: 3 }, () => ({
+        setType: "working",
+        reps: "12",
+        weightKg: "",
+      })),
     });
   });
 
-  it("saves variable prescription changes in the patch", async () => {
+  it("saves per-set weights as numbers in the patch", async () => {
     const { result } = renderHook(() => useRoutineEditor(makeRoutine()));
 
     act(() =>
       result.current.updateExercise(DAY_ID, EX_ID, {
-        prescription: "1x12 15kg-3x12 20kg",
-        plannedSets: 4,
-        targetReps: "12",
-        weight: null,
+        sets: [
+          { setType: "working", reps: "12", weightKg: "15" },
+          { setType: "working", reps: "12", weightKg: "20" },
+        ],
       })
     );
 
@@ -149,9 +155,10 @@ describe("useRoutineEditor", () => {
     expect(updateRoutineMock.mock.calls[0][0].upsertExercises[0]).toMatchObject(
       {
         id: EX_ID,
-        prescription: "1x12 15kg-3x12 20kg",
-        plannedSets: 4,
-        weight: null,
+        sets: [
+          { setType: "working", repsMin: 12, repsMax: 12, weightKg: 15 },
+          { setType: "working", repsMin: 12, repsMax: 12, weightKg: 20 },
+        ],
       }
     );
   });
@@ -182,7 +189,11 @@ describe("useRoutineEditor", () => {
   it("saves only the changed exercise and refreshes on success", async () => {
     const { result } = renderHook(() => useRoutineEditor(makeRoutine()));
 
-    act(() => result.current.updateExercise(DAY_ID, EX_ID, { weight: "70kg" }));
+    act(() =>
+      result.current.updateExercise(DAY_ID, EX_ID, {
+        sets: [{ setType: "working", reps: "10", weightKg: "70" }],
+      })
+    );
     await act(async () => {
       await result.current.save();
     });
@@ -192,7 +203,7 @@ describe("useRoutineEditor", () => {
     expect(patch.upsertExercises).toHaveLength(1);
     expect(patch.upsertExercises[0]).toMatchObject({
       id: EX_ID,
-      weight: "70kg",
+      sets: [{ setType: "working", repsMin: 10, repsMax: 10, weightKg: 70 }],
     });
     expect(patch.upsertDays).toHaveLength(0);
     expect(result.current.saved).toBe(true);
@@ -203,7 +214,11 @@ describe("useRoutineEditor", () => {
     updateRoutineMock.mockResolvedValue({ ok: false, error: "boom" });
     const { result } = renderHook(() => useRoutineEditor(makeRoutine()));
 
-    act(() => result.current.updateExercise(DAY_ID, EX_ID, { weight: "70kg" }));
+    act(() =>
+      result.current.updateExercise(DAY_ID, EX_ID, {
+        sets: [{ setType: "working", reps: "10", weightKg: "70" }],
+      })
+    );
     await act(async () => {
       await result.current.save();
     });

@@ -1,5 +1,7 @@
 import { isUuid } from "@/lib/uuid";
-import type { EditorDay } from "./editorTypes";
+import { editorSetsToPlanned } from "./editorSetRows";
+import type { EditorDay, EditorExercise } from "./editorTypes";
+import type { PlannedSet } from "./sets";
 
 export interface RoutineDayUpsert {
   id: string;
@@ -14,10 +16,8 @@ export interface RoutineExerciseUpsert {
   dayId: string;
   name: string;
   muscleGroup: string | null;
-  prescription: string | null;
-  plannedSets: number | null;
-  targetReps: string | null;
-  weight: string | null;
+  secondaryMuscles: string[];
+  sets: PlannedSet[];
   restTime: string | null;
   notes: string | null;
   sortOrder: number;
@@ -40,6 +40,22 @@ export function isEmptyPatch(patch: RoutineEditPatch): boolean {
   );
 }
 
+function sameSetInputs(a: EditorExercise["sets"], b: EditorExercise["sets"]): boolean {
+  return (
+    a.length === b.length &&
+    a.every(
+      (set, index) =>
+        set.setType === b[index].setType &&
+        set.reps.trim() === b[index].reps.trim() &&
+        set.weightKg.trim() === b[index].weightKg.trim()
+    )
+  );
+}
+
+function sameList(a: string[], b: string[]): boolean {
+  return a.length === b.length && a.every((value, index) => value === b[index]);
+}
+
 /**
  * Diff the current editor state against the last-saved baseline and return only
  * the rows that need to be written. Position in the array is the effective
@@ -57,7 +73,7 @@ export function computeRoutinePatch(
 
   const baseExerciseById = new Map<
     string,
-    { exercise: EditorDay["exercises"][number]; dayId: string; index: number }
+    { exercise: EditorExercise; dayId: string; index: number }
   >();
   baseline.forEach((day) => {
     day.exercises.forEach((exercise, index) => {
@@ -98,27 +114,16 @@ export function computeRoutinePatch(
         baseExercise.index !== exerciseIndex ||
         baseExercise.exercise.name !== exercise.name ||
         baseExercise.exercise.muscleGroup !== exercise.muscleGroup ||
-        baseExercise.exercise.prescription !== exercise.prescription ||
-        baseExercise.exercise.plannedSets !== exercise.plannedSets ||
-        baseExercise.exercise.targetReps !== exercise.targetReps ||
-        baseExercise.exercise.weight !== exercise.weight ||
+        !sameList(
+          baseExercise.exercise.secondaryMuscles,
+          exercise.secondaryMuscles
+        ) ||
+        !sameSetInputs(baseExercise.exercise.sets, exercise.sets) ||
         baseExercise.exercise.restTime !== exercise.restTime ||
         baseExercise.exercise.notes !== exercise.notes;
 
       if (exerciseChanged) {
-        upsertExercises.push({
-          id: exercise.id,
-          dayId: day.id,
-          name: exercise.name,
-          muscleGroup: exercise.muscleGroup,
-          prescription: exercise.prescription,
-          plannedSets: exercise.plannedSets,
-          targetReps: exercise.targetReps,
-          weight: exercise.weight,
-          restTime: exercise.restTime,
-          notes: exercise.notes,
-          sortOrder: exerciseIndex,
-        });
+        upsertExercises.push(toExerciseUpsert(exercise, day.id, exerciseIndex));
       }
     });
   });
@@ -148,5 +153,23 @@ export function computeRoutinePatch(
     deleteDayIds,
     upsertExercises,
     deleteExerciseIds,
+  };
+}
+
+export function toExerciseUpsert(
+  exercise: EditorExercise,
+  dayId: string,
+  sortOrder: number
+): RoutineExerciseUpsert {
+  return {
+    id: exercise.id,
+    dayId,
+    name: exercise.name,
+    muscleGroup: exercise.muscleGroup,
+    secondaryMuscles: exercise.secondaryMuscles,
+    sets: editorSetsToPlanned(exercise.sets),
+    restTime: exercise.restTime,
+    notes: exercise.notes,
+    sortOrder,
   };
 }
