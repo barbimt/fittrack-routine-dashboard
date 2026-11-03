@@ -2,6 +2,17 @@ const countFormat = new Intl.NumberFormat("en");
 const kgFormat = new Intl.NumberFormat("en", {
   maximumFractionDigits: 1,
 });
+const isoDateFormat = new Intl.DateTimeFormat("en", {
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+  timeZone: "UTC",
+});
+const weekStartFormat = new Intl.DateTimeFormat("en", {
+  day: "numeric",
+  month: "short",
+  timeZone: "UTC",
+});
 
 export function formatCount(value: number): string {
   return countFormat.format(value);
@@ -15,22 +26,13 @@ export function formatKg(value: number | null | undefined): string {
 export function formatIsoDate(iso: string): string {
   const [year, month, day] = iso.slice(0, 10).split("-").map(Number);
   if (!year || !month || !day) return iso;
-  return new Intl.DateTimeFormat("en", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    timeZone: "UTC",
-  }).format(new Date(Date.UTC(year, month - 1, day)));
+  return isoDateFormat.format(new Date(Date.UTC(year, month - 1, day)));
 }
 
 export function formatWeekStart(iso: string): string {
   const [year, month, day] = iso.slice(0, 10).split("-").map(Number);
   if (!year || !month || !day) return iso;
-  return new Intl.DateTimeFormat("en", {
-    day: "numeric",
-    month: "short",
-    timeZone: "UTC",
-  }).format(new Date(Date.UTC(year, month - 1, day)));
+  return weekStartFormat.format(new Date(Date.UTC(year, month - 1, day)));
 }
 
 export function formatPercentRatio(value: number | null): string {
