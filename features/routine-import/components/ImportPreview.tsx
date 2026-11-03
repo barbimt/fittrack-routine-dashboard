@@ -1,84 +1,65 @@
-import { FileSpreadsheet } from "lucide-react";
 import type { ParsedRoutine } from "../types";
 import { ImportDayExercises } from "./ImportDayExercises";
 import { ImportWarnings } from "./ImportWarnings";
 
 interface ImportPreviewProps {
-  fileName: string;
-  fileSize: number;
   routine: ParsedRoutine;
 }
 
-function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+function plural(count: number, word: string): string {
+  return `${count} ${word}${count === 1 ? "" : "s"}`;
 }
 
-export function ImportPreview({
-  fileName,
-  fileSize,
-  routine,
-}: ImportPreviewProps) {
-  const totalExercises = routine.days.reduce(
-    (sum, day) => sum + day.exercises.length,
-    0
-  );
+export function ImportPreview({ routine }: ImportPreviewProps) {
+  const exercises = routine.days.flatMap((day) => day.exercises);
+  const setCount = exercises.reduce((sum, ex) => sum + ex.sets.length, 0);
+  const rowWarnings = routine.warnings.filter((w) => w.exerciseName);
+  const fileWarnings = routine.warnings.filter((w) => !w.exerciseName);
 
   return (
-    <section className="space-y-6" aria-labelledby="routine-preview-title">
-      <div className="border-border bg-card rounded-2xl border p-5 shadow-sm">
-        <div className="flex items-start gap-3">
-          <div className="bg-primary/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
-            <FileSpreadsheet className="text-primary h-5 w-5" aria-hidden />
-          </div>
-          <div className="min-w-0 flex-1">
-            <h2
-              id="routine-preview-title"
-              className="text-foreground text-lg font-semibold"
-            >
-              Routine preview
-            </h2>
-            <p className="text-foreground text-base font-medium">
-              {routine.name}
-            </p>
-            <p className="text-muted-foreground mt-1 truncate text-sm">
-              {fileName} · {formatFileSize(fileSize)}
-            </p>
-            <p className="text-foreground mt-3 text-sm">
-              <span className="font-medium">{routine.days.length}</span>{" "}
-              {routine.days.length === 1 ? "day" : "days"} found ·{" "}
-              <span className="font-medium">{totalExercises}</span>{" "}
-              {totalExercises === 1 ? "exercise" : "exercises"} found
-            </p>
-          </div>
-        </div>
+    <section className="space-y-4" aria-labelledby="routine-preview-title">
+      <div>
+        <h2
+          id="routine-preview-title"
+          className="text-foreground text-lg font-semibold"
+        >
+          Check your routine
+        </h2>
+        <p className="text-muted-foreground text-sm">
+          {plural(routine.days.length, "day")} ·{" "}
+          {plural(exercises.length, "exercise")} · {plural(setCount, "set")}.
+          Tap an exercise to see its sets.
+        </p>
+        {rowWarnings.length > 0 ? (
+          <p className="text-foreground mt-1 text-sm">
+            {plural(rowWarnings.length, "exercise")} need a quick check. You can
+            import now and fix them in the editor.
+          </p>
+        ) : null}
       </div>
 
-      <ul className="space-y-4" aria-label="Imported routine days">
+      <ul className="space-y-3" aria-label="Routine days">
         {routine.days.map((day) => (
           <li
             key={`${day.originalName}-${day.sortOrder}`}
             className="border-border bg-card rounded-2xl border p-4 shadow-sm"
           >
-            <div className="mb-3">
-              <p className="text-foreground font-medium">{day.originalName}</p>
-              <p className="text-muted-foreground text-sm">
-                {day.exercises.length}{" "}
-                {day.exercises.length === 1 ? "exercise" : "exercises"}
-                {day.focus ? ` · ${day.focus}` : ""}
+            <div className="mb-1 flex items-baseline justify-between gap-2">
+              <p className="text-foreground font-medium">{day.name}</p>
+              <p className="text-muted-foreground shrink-0 text-xs">
+                {plural(day.exercises.length, "exercise")}
               </p>
             </div>
-            <ImportDayExercises
-              exercises={day.exercises}
-              dayLabel={day.originalName}
-            />
+            {day.focus ? (
+              <p className="text-muted-foreground mb-1 text-sm">{day.focus}</p>
+            ) : null}
+            <ImportDayExercises exercises={day.exercises} />
           </li>
         ))}
       </ul>
 
-      {routine.warnings.length > 0 ? (
-        <ImportWarnings warnings={routine.warnings} />
+      {fileWarnings.length > 0 ? (
+        <ImportWarnings warnings={fileWarnings} title="Skipped" />
       ) : null}
     </section>
   );

@@ -18,7 +18,7 @@ const exercise: Exercise = {
       id: "s1",
       setNumber: 1,
       targetReps: 12,
-      targetWeight: "40kg",
+      targetWeightKg: 40,
       actualReps: null,
       completed: false,
     },

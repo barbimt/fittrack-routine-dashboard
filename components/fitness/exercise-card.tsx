@@ -6,7 +6,7 @@ import type { Exercise } from "@/lib/mock-data";
 import { getExerciseProgress } from "@/lib/mock-data";
 import type { UpdateExerciseInDayInput } from "@/features/routines/actions/sessionActions";
 import type { ExerciseRestTimerStatus } from "@/features/routines/restTimerUi";
-import { SetRow } from "./set-row";
+import { SetRow, SetRowHeader } from "./set-row";
 import { Badge } from "./badge";
 import { Button } from "./button";
 import { EditExerciseDialog } from "./edit-exercise-dialog";
@@ -20,6 +20,8 @@ interface ExerciseCardProps {
   onSetToggle?: (setId: string) => void;
   onRepsChange?: (setId: string, reps: number | null) => void;
   onRepsSave?: (setId: string, reps: number | null) => void;
+  onWeightChange?: (setId: string, kg: number | null) => void;
+  onWeightSave?: (setId: string, kg: number | null) => void;
   onResetExercise?: (exerciseId: string) => void;
   onEditExercise?: (
     exerciseId: string,
@@ -39,6 +41,8 @@ export function ExerciseCard({
   onSetToggle,
   onRepsChange,
   onRepsSave,
+  onWeightChange,
+  onWeightSave,
   onResetExercise,
   onEditExercise,
   onStartRest,
@@ -176,6 +180,7 @@ export function ExerciseCard({
           id={`exercise-${exercise.id}-content`}
           className="space-y-2 px-4 pb-4"
         >
+          <SetRowHeader />
           {exercise.sets.map((set) => (
             <SetRow
               key={`${set.id}-${setRowRevision}`}
@@ -184,6 +189,8 @@ export function ExerciseCard({
               onToggle={readOnly ? undefined : onSetToggle}
               onRepsChange={readOnly ? undefined : onRepsChange}
               onRepsSave={readOnly ? undefined : onRepsSave}
+              onWeightChange={readOnly ? undefined : onWeightChange}
+              onWeightSave={readOnly ? undefined : onWeightSave}
               readOnly={readOnly}
             />
           ))}

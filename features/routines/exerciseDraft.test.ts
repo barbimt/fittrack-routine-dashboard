@@ -13,7 +13,22 @@ function exercise(overrides: Partial<Exercise> = {}): Exercise {
     weight: "60kg",
     restTime: "90s",
     notes: "Brace",
-    sets: [],
+    sets: [
+      {
+        id: "s1",
+        setNumber: 1,
+        targetReps: 12,
+        actualReps: null,
+        completed: false,
+      },
+      {
+        id: "s2",
+        setNumber: 2,
+        targetReps: 12,
+        actualReps: null,
+        completed: false,
+      },
+    ],
     ...overrides,
   };
 }
@@ -23,31 +38,54 @@ describe("exerciseToEditorDraft", () => {
     expect(exerciseToEditorDraft(exercise())).toMatchObject({
       id: "ex-1",
       name: "Squat",
-      muscleGroup: "Quads",
-      prescription: "3x12",
-      plannedSets: 3,
-      targetReps: "12",
-      weight: "60kg",
+      muscleGroup: "quads",
+      secondaryMuscles: [],
+      sets: [
+        { setType: "working", reps: "12", weightKg: "60" },
+        { setType: "working", reps: "12", weightKg: "60" },
+      ],
       restTime: "90s",
       notes: "Brace",
     });
   });
 
-  it("normalizes placeholders and numeric targetReps", () => {
-    expect(
-      exerciseToEditorDraft(
-        exercise({
-          weight: "—",
-          restTime: "—",
-          targetReps: "8-10",
-          targetSets: 0,
-        })
-      )
-    ).toMatchObject({
-      weight: null,
+  it("prefers per-set targets and keeps ranges and set types", () => {
+    const draft = exerciseToEditorDraft(
+      exercise({
+        weight: "—",
+        restTime: "—",
+        muscleSlug: "glutes",
+        secondaryMuscles: ["hamstrings"],
+        sets: [
+          {
+            id: "s1",
+            setNumber: 1,
+            setType: "warmup",
+            targetReps: 15,
+            targetWeightKg: 20,
+            actualReps: null,
+            completed: false,
+          },
+          {
+            id: "s2",
+            setNumber: 2,
+            targetReps: 8,
+            targetRepsMax: 10,
+            targetWeightKg: null,
+            actualReps: null,
+            completed: false,
+          },
+        ],
+      })
+    );
+    expect(draft).toMatchObject({
+      muscleGroup: "glutes",
+      secondaryMuscles: ["hamstrings"],
       restTime: null,
-      targetReps: "8-10",
-      plannedSets: null,
+      sets: [
+        { setType: "warmup", reps: "15", weightKg: "20" },
+        { setType: "working", reps: "8-10", weightKg: "" },
+      ],
     });
   });
 });

@@ -2,14 +2,21 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { resolvePrescriptionForSave } from "../editorPrescription";
+import {
+  exercisePlanColumns,
+  replaceExerciseSets,
+} from "../exerciseSets.server";
 import {
   buildSetLogRowsForExercise,
   buildSetLogRowsForExercises,
+  EXERCISE_FOR_SET_LOGS_SELECT,
   planSetLogReconciliation,
-  type ExerciseForSetLogs,
+  toExerciseForSetLogs,
 } from "../materializeSetLogs";
 import { buildTrainingDayFromSession } from "../routineMapper";
+import { parsePlannedSets, sanitizeMuscles } from "../setSchema";
+import type { PlannedSet } from "../sets";
+import { MAX_WEIGHT_KG, roundKg } from "../weight";
 import type {
   RoutineExercise,
   WorkoutSetLog,
@@ -66,7 +73,7 @@ async function fetchDaySessionPayload(
 
   const { data: exercises, error: exercisesError } = await supabase
     .from("routine_exercises")
-    .select("*")
+    .select("*, routine_exercise_sets(*)")
     .eq("user_id", userId)
     .eq("routine_day_id", routineDayId)
     .order("sort_order");
@@ -136,7 +143,7 @@ export async function syncDaySessionWithRoutine(
 
   const { data: exercises, error: exercisesError } = await supabase
     .from("routine_exercises")
-    .select("id, name, prescription, planned_sets, target_reps, weight")
+    .select(EXERCISE_FOR_SET_LOGS_SELECT)
     .eq("user_id", user.id)
     .eq("routine_day_id", session.routine_day_id as string)
     .order("sort_order");
@@ -159,9 +166,9 @@ export async function syncDaySessionWithRoutine(
     (existingLogs ?? []).map((row) => row.routine_exercise_id as string)
   );
 
-  const missingExercises = (exercises ?? []).filter(
-    (exercise) => !loggedExerciseIds.has(exercise.id as string)
-  ) as ExerciseForSetLogs[];
+  const missingExercises = ((exercises ?? []) as unknown as RoutineExercise[])
+    .filter((exercise) => !loggedExerciseIds.has(exercise.id))
+    .map(toExerciseForSetLogs);
 
   if (missingExercises.length > 0) {
     const newRows = buildSetLogRowsForExercises(
@@ -244,7 +251,7 @@ export async function getOrCreateDaySession(
 
     const { data: exercises } = await supabase
       .from("routine_exercises")
-      .select("id, name, prescription, planned_sets, target_reps, weight")
+      .select(EXERCISE_FOR_SET_LOGS_SELECT)
       .eq("user_id", user.id)
       .eq("routine_day_id", routineDayId)
       .order("sort_order");
@@ -253,7 +260,7 @@ export async function getOrCreateDaySession(
       const setLogs = buildSetLogRowsForExercises(
         user.id,
         sessionId,
-        exercises as ExerciseForSetLogs[]
+        (exercises as unknown as RoutineExercise[]).map(toExerciseForSetLogs)
       );
 
       const { error: logsError } = await supabase
@@ -277,12 +284,24 @@ export async function getOrCreateDaySession(
 
 export type AddExerciseToDayInput = {
   name: string;
-  plannedSets: number;
-  targetReps: string;
-  weight?: string | null;
+  sets: PlannedSet[];
   muscleGroup?: string | null;
-  prescription?: string | null;
+  secondaryMuscles?: string[];
 };
+
+async function fetchExerciseWithSets(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+  exerciseId: string
+): Promise<RoutineExercise | null> {
+  const { data } = await supabase
+    .from("routine_exercises")
+    .select("*, routine_exercise_sets(*)")
+    .eq("id", exerciseId)
+    .eq("user_id", userId)
+    .maybeSingle();
+  return (data as RoutineExercise | null) ?? null;
+}
 
 export type AddExerciseToDayResult =
   | { ok: true; exercise: RoutineExercise; setLogs: WorkoutSetLog[] }
@@ -308,8 +327,9 @@ export async function addExerciseToDay(
     return { ok: false, error: "Exercise name is required." };
   }
 
-  if (!Number.isInteger(input.plannedSets) || input.plannedSets < 1) {
-    return { ok: false, error: "Sets must be at least 1." };
+  const plannedSets = parsePlannedSets(input.sets);
+  if (!plannedSets.ok) {
+    return { ok: false, error: plannedSets.error };
   }
 
   const { data: session, error: sessionError } = await supabase
@@ -348,51 +368,45 @@ export async function addExerciseToDay(
       ? lastExercise.sort_order + 1
       : 0;
 
-  const resolved = resolvePrescriptionForSave({
-    id: "new-exercise",
-    dayId: routineDayId,
-    name: trimmedName,
-    muscleGroup: input.muscleGroup ?? null,
-    prescription: input.prescription ?? null,
-    plannedSets: input.plannedSets,
-    targetReps: input.targetReps.trim() || null,
-    weight: input.weight ?? null,
-    restTime: null,
-    notes: null,
-    sortOrder,
-  });
-
   const { data: inserted, error: insertError } = await supabase
     .from("routine_exercises")
     .insert({
       user_id: user.id,
       routine_day_id: routineDayId,
       name: trimmedName,
-      prescription: resolved.prescription,
-      planned_sets: resolved.plannedSets,
-      target_reps: resolved.targetReps,
-      weight: input.weight ?? null,
-      rest_time: null,
       notes: null,
-      muscle_group: input.muscleGroup ?? null,
       sort_order: sortOrder,
+      ...exercisePlanColumns({
+        sets: plannedSets.sets,
+        restTime: null,
+        ...sanitizeMuscles(input.muscleGroup, input.secondaryMuscles),
+      }),
     })
-    .select("*")
+    .select("id")
     .single();
 
   if (insertError || !inserted) {
     return { ok: false, error: "Failed to add exercise to routine." };
   }
 
-  const exercise = inserted as RoutineExercise;
-  const newRows = buildSetLogRowsForExercise(user.id, sessionId, {
-    id: exercise.id,
-    name: exercise.name,
-    prescription: exercise.prescription,
-    planned_sets: exercise.planned_sets,
-    target_reps: exercise.target_reps,
-    weight: exercise.weight,
-  });
+  const setsResult = await replaceExerciseSets(
+    supabase,
+    user.id,
+    inserted.id as string,
+    plannedSets.sets
+  );
+  const exercise = setsResult.ok
+    ? await fetchExerciseWithSets(supabase, user.id, inserted.id as string)
+    : null;
+  if (!exercise) {
+    return { ok: false, error: "Failed to add exercise to routine." };
+  }
+
+  const newRows = buildSetLogRowsForExercise(
+    user.id,
+    sessionId,
+    toExerciseForSetLogs(exercise)
+  );
 
   const { error: logsError } = await supabase
     .from("workout_set_logs")
@@ -415,10 +429,8 @@ export async function addExerciseToDay(
 export type UpdateExerciseInDayInput = {
   name: string;
   muscleGroup: string | null;
-  prescription: string | null;
-  plannedSets: number | null;
-  targetReps: string | null;
-  weight: string | null;
+  secondaryMuscles: string[];
+  sets: PlannedSet[];
   restTime: string | null;
   notes: string | null;
 };
@@ -485,43 +497,41 @@ export async function updateExerciseInDay(
     return { ok: false, error: "Exercise does not belong to this day." };
   }
 
-  const resolved = resolvePrescriptionForSave({
-    id: exerciseId,
-    dayId: routineDayId,
-    name: trimmedName,
-    muscleGroup: input.muscleGroup,
-    prescription: input.prescription,
-    plannedSets: input.plannedSets,
-    targetReps: input.targetReps,
-    weight: input.weight,
-    restTime: input.restTime,
-    notes: input.notes,
-    sortOrder:
-      typeof existing.sort_order === "number" ? existing.sort_order : 0,
-  });
+  const plannedSets = parsePlannedSets(input.sets);
+  if (!plannedSets.ok) {
+    return { ok: false, error: plannedSets.error };
+  }
 
-  const { data: updated, error: updateError } = await supabase
+  const { error: updateError } = await supabase
     .from("routine_exercises")
     .update({
       name: trimmedName,
-      prescription: resolved.prescription,
-      planned_sets: resolved.plannedSets,
-      target_reps: resolved.targetReps,
-      weight: input.weight,
-      rest_time: input.restTime,
       notes: input.notes,
-      muscle_group: input.muscleGroup,
+      ...exercisePlanColumns({
+        sets: plannedSets.sets,
+        restTime: input.restTime,
+        ...sanitizeMuscles(input.muscleGroup, input.secondaryMuscles),
+      }),
     })
     .eq("id", exerciseId)
-    .eq("user_id", user.id)
-    .select("*")
-    .single();
+    .eq("user_id", user.id);
 
-  if (updateError || !updated) {
+  if (updateError) {
     return { ok: false, error: "Failed to update exercise." };
   }
 
-  const exercise = updated as RoutineExercise;
+  const setsResult = await replaceExerciseSets(
+    supabase,
+    user.id,
+    exerciseId,
+    plannedSets.sets
+  );
+  const exercise = setsResult.ok
+    ? await fetchExerciseWithSets(supabase, user.id, exerciseId)
+    : null;
+  if (!exercise) {
+    return { ok: false, error: "Failed to update exercise." };
+  }
 
   const { data: existingLogs, error: logsFetchError } = await supabase
     .from("workout_set_logs")
@@ -537,29 +547,18 @@ export async function updateExerciseInDay(
   const plan = planSetLogReconciliation(
     user.id,
     sessionId,
-    {
-      id: exercise.id,
-      name: exercise.name,
-      prescription: exercise.prescription,
-      planned_sets: exercise.planned_sets,
-      target_reps: exercise.target_reps,
-      weight: exercise.weight,
-    },
+    toExerciseForSetLogs(exercise),
     (existingLogs ?? []).map((log) => ({
       id: log.id as string,
       set_number: log.set_number as number,
     }))
   );
 
-  for (const patch of plan.updates) {
+  for (const { id, ...targets } of plan.updates) {
     const { error } = await supabase
       .from("workout_set_logs")
-      .update({
-        target_reps: patch.target_reps,
-        target_weight: patch.target_weight,
-        exercise_name: patch.exercise_name,
-      })
-      .eq("id", patch.id)
+      .update(targets)
+      .eq("id", id)
       .eq("user_id", user.id);
 
     if (error) {
@@ -601,6 +600,8 @@ export type UpdateSetLogProgressInput = {
   completed?: boolean;
   /** Pass `null` to clear; omit to leave unchanged. */
   actualReps?: number | null;
+  /** Kilograms lifted. Pass `null` to clear; omit to leave unchanged. */
+  actualWeightKg?: number | null;
 };
 
 export type UpdateSetLogProgressResult =
@@ -621,12 +622,30 @@ export async function updateSetLogProgress(
     return { ok: false, error: "Not authenticated." };
   }
 
-  const update: { completed?: boolean; actual_reps?: number | null } = {};
+  const update: {
+    completed?: boolean;
+    actual_reps?: number | null;
+    actual_weight_kg?: number | null;
+  } = {};
   if (patch.completed !== undefined) {
     update.completed = patch.completed;
   }
   if ("actualReps" in patch) {
-    update.actual_reps = patch.actualReps ?? null;
+    const reps = patch.actualReps ?? null;
+    if (reps !== null && (!Number.isInteger(reps) || reps < 0 || reps > 1000)) {
+      return { ok: false, error: "Reps must be a whole number." };
+    }
+    update.actual_reps = reps;
+  }
+  if ("actualWeightKg" in patch) {
+    const kg = patch.actualWeightKg ?? null;
+    if (kg !== null && (!Number.isFinite(kg) || kg < 0 || kg > MAX_WEIGHT_KG)) {
+      return {
+        ok: false,
+        error: `Weight must be between 0 and ${MAX_WEIGHT_KG} kg.`,
+      };
+    }
+    update.actual_weight_kg = kg === null ? null : roundKg(kg);
   }
 
   if (Object.keys(update).length === 0) {
@@ -684,7 +703,7 @@ export async function resetExerciseSets(
 
   const { error } = await supabase
     .from("workout_set_logs")
-    .update({ completed: false, actual_reps: null })
+    .update({ completed: false, actual_reps: null, actual_weight_kg: null })
     .eq("workout_session_id", sessionId)
     .eq("routine_exercise_id", exerciseId)
     .eq("user_id", user.id);
@@ -710,7 +729,7 @@ export async function resetDaySession(sessionId: string): Promise<ResetResult> {
 
   const { error: logsError } = await supabase
     .from("workout_set_logs")
-    .update({ completed: false, actual_reps: null })
+    .update({ completed: false, actual_reps: null, actual_weight_kg: null })
     .eq("workout_session_id", sessionId)
     .eq("user_id", user.id);
 

@@ -1,6 +1,9 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { mapRoutineToTrainingDays } from "@/features/routines/routineMapper";
+import {
+  mapRoutineToTrainingDays,
+  ROUTINE_TREE_SELECT,
+} from "@/features/routines/routineMapper";
 import { getOrCreateDaySession } from "@/features/routines/actions/sessionActions";
 import type { RoutineWithDays } from "@/features/routines/types";
 import { DashboardClient } from "@/components/fitness/dashboard-client";
@@ -19,7 +22,7 @@ export default async function HomePage() {
 
   const { data: routineData } = await supabase
     .from("routines")
-    .select("*, routine_days(*, routine_exercises(*))")
+    .select(ROUTINE_TREE_SELECT)
     .eq("user_id", user.id)
     .eq("is_active", true)
     .maybeSingle();

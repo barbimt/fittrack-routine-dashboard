@@ -13,6 +13,7 @@ import {
 import { notify } from "@/lib/notify";
 import {
   buildRepsChangePatch,
+  buildWeightChangePatch,
   buildSetTogglePatch,
   bumpRevisionMap,
 } from "@/features/routines/setProgress";
@@ -91,6 +92,16 @@ export function useDemoWorkoutSession({
     // Demo mode — reps live in local state only.
   };
 
+  const handleWeightChange = (setId: string, kg: number | null) => {
+    if (isReadOnly) return;
+    setDaysData((prev) =>
+      updateSetInDays(prev, setId, buildWeightChangePatch(kg))
+    );
+    if (isSessionSaved) {
+      setIsSessionSaved(false);
+    }
+  };
+
   const handleSelectDay = (dayId: string) => {
     setSelectedDayId(dayId);
     setIsSessionSaved(false);
@@ -153,6 +164,7 @@ export function useDemoWorkoutSession({
     handleSetToggle,
     handleRepsChange,
     handleRepsSave,
+    handleWeightChange,
     handleResetExercise,
     handleResetDay,
     handleSaveWorkout,

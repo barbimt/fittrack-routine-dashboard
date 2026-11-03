@@ -1,19 +1,40 @@
-import * as XLSX from "xlsx";
+import type { WorkBook, WorkSheet } from "xlsx";
 import type {
+  CanonicalColumn,
   ImportWarning,
   ParsedRoutine,
   ParsedRoutineDay,
   ParsedRoutineExercise,
   ParseWorkbookResult,
 } from "../types";
-import { COLUMN_LABELS, OPTIONAL_COLUMNS, REQUIRED_COLUMNS } from "../types";
+import {
+  COLUMN_LABELS,
+  MAX_IMPORT_FILE_BYTES,
+  OPTIONAL_COLUMNS,
+  REQUIRED_COLUMNS,
+} from "../types";
 import { getCell, isRowEmpty, mapHeaderRow } from "./normaliseExcelHeaders";
-import { parsePrescription } from "./parsePrescription";
+import { parseExerciseRow, type ExerciseRowCells } from "./parseExerciseRow";
 import { parseSheetName } from "./parseSheetName";
+
+type SheetUtils = typeof import("xlsx").utils;
 
 const REQUIRED_LABELS = REQUIRED_COLUMNS.map((col) => COLUMN_LABELS[col]).join(
   ", "
 );
+
+/** Template helper tabs, never routine days. */
+const IGNORED_SHEET =
+  /^(how to|instructions?|example|ejemplo|c[oó]mo|guide|gu[ií]a)\b/i;
+
+const ALL_COLUMNS: CanonicalColumn[] = [
+  ...REQUIRED_COLUMNS,
+  ...OPTIONAL_COLUMNS,
+];
+
+export function isIgnoredSheetName(sheetName: string): boolean {
+  return IGNORED_SHEET.test(sheetName.trim());
+}
 
 function routineNameFromFileName(fileName: string): string {
   const base = fileName.replace(/\.xlsx$/i, "").trim();
@@ -27,22 +48,25 @@ function routineNameFromFileName(fileName: string): string {
 }
 
 function parseSheet(
+  utils: SheetUtils,
   sheetName: string,
-  sheet: XLSX.WorkSheet,
+  sheet: WorkSheet,
   daySortOrder: number,
   warnings: ImportWarning[]
 ): ParsedRoutineDay | null {
-  const rows = XLSX.utils.sheet_to_json<unknown[]>(sheet, {
+  // raw: true keeps numbers as typed (7.5 stays 7.5, not a locale string "7,5").
+  const rows = utils.sheet_to_json<unknown[]>(sheet, {
     header: 1,
     defval: "",
-    raw: false,
+    raw: true,
+    blankrows: false,
   });
 
   if (rows.length === 0) {
     warnings.push({
       type: "empty_sheet",
       sheetName,
-      message: `Sheet "${sheetName}" is empty.`,
+      message: `Tab "${sheetName}" is empty, so we skipped it.`,
     });
     return null;
   }
@@ -56,85 +80,62 @@ function parseSheet(
     warnings.push({
       type: "missing_column",
       sheetName,
-      message: `Sheet "${sheetName}" is missing required columns: ${REQUIRED_LABELS}.`,
+      message: `Tab "${sheetName}" was skipped: add the columns ${REQUIRED_LABELS} in the first row.`,
     });
     return null;
   }
 
   const { map: headerMap } = mapHeaderRow(rows[headerRowIndex]);
-
-  for (const column of OPTIONAL_COLUMNS) {
-    if (headerMap[column] === undefined) {
-      warnings.push({
-        type: "missing_column",
-        sheetName,
-        message: `Sheet "${sheetName}": optional column ${COLUMN_LABELS[column]} not found.`,
-      });
-    }
-  }
-
   const { name, focus } = parseSheetName(sheetName);
   const exercises: ParsedRoutineExercise[] = [];
-  let exerciseSortOrder = 0;
 
   for (let rowIndex = headerRowIndex + 1; rowIndex < rows.length; rowIndex++) {
     const row = rows[rowIndex];
-    const excelRowNumber = rowIndex + 1;
-
+    const rowNumber = rowIndex + 1;
     if (isRowEmpty(row)) continue;
 
-    const exerciseName = getCell(row, headerMap.EXERCISE);
-    if (!exerciseName) {
+    const cells: ExerciseRowCells = {};
+    for (const column of ALL_COLUMNS) {
+      cells[column] = getCell(row, headerMap[column]);
+    }
+
+    if (!cells.EXERCISE) {
       warnings.push({
         type: "skipped_row",
         sheetName,
-        rowNumber: excelRowNumber,
-        message: `Row ${excelRowNumber} in "${sheetName}" skipped: missing ${COLUMN_LABELS.EXERCISE}.`,
+        rowNumber,
+        column: COLUMN_LABELS.EXERCISE,
+        message: `Row ${rowNumber} in "${sheetName}" was skipped: the exercise name is empty.`,
       });
       continue;
     }
 
-    const prescription = getCell(row, headerMap.SETS_X_REPS);
-    if (!prescription) {
+    if (!cells.SETS_X_REPS) {
       warnings.push({
         type: "skipped_row",
         sheetName,
-        rowNumber: excelRowNumber,
-        message: `Row ${excelRowNumber} in "${sheetName}" skipped: missing ${COLUMN_LABELS.SETS_X_REPS}.`,
+        rowNumber,
+        column: COLUMN_LABELS.SETS_X_REPS,
+        exerciseName: cells.EXERCISE,
+        message: `${cells.EXERCISE} (row ${rowNumber}) was skipped: write the sets, like 3x12.`,
       });
       continue;
     }
 
-    const parsedPrescription = parsePrescription(
-      prescription,
-      getCell(row, headerMap.WEIGHT) || null
-    );
-    if (!parsedPrescription.parsed) {
-      warnings.push({
-        type: "unparsed_prescription",
-        sheetName,
-        rowNumber: excelRowNumber,
-        message: `Row ${excelRowNumber} in "${sheetName}" (${exerciseName}): could not read sets/reps from "${prescription}". Use a format like 3x12 or 4x10. The exercise was still imported.`,
-      });
-    }
-
-    exerciseSortOrder += 1;
-    exercises.push({
-      name: exerciseName,
-      prescription,
-      plannedSets: parsedPrescription.plannedSets,
-      targetReps: parsedPrescription.targetReps,
-      weight: getCell(row, headerMap.WEIGHT) || null,
-      notes: getCell(row, headerMap.NOTES) || null,
-      sortOrder: exerciseSortOrder,
+    const parsed = parseExerciseRow(cells, {
+      sheetName,
+      rowNumber,
+      sortOrder: exercises.length + 1,
     });
+    exercises.push(parsed.exercise);
+    warnings.push(...parsed.warnings);
   }
 
   if (exercises.length === 0) {
     warnings.push({
       type: "empty_sheet",
       sheetName,
-      message: `Sheet "${sheetName}" has no valid exercises.`,
+      message: `Tab "${sheetName}" has no exercises, so we skipped it.`,
     });
     return null;
   }
@@ -156,46 +157,61 @@ export async function parseRoutineWorkbook(
   if (!file.name.toLowerCase().endsWith(".xlsx")) {
     return {
       ok: false,
-      error: "Invalid file format. Please upload a .xlsx file.",
+      error: "This is not an Excel file. Upload a .xlsx file.",
       warnings,
     };
   }
 
-  let workbook: XLSX.WorkBook;
-  try {
-    const buffer = await file.arrayBuffer();
-    workbook = XLSX.read(buffer, { type: "array" });
-  } catch {
+  if (file.size > MAX_IMPORT_FILE_BYTES) {
     return {
       ok: false,
       error:
-        "Could not read the Excel file. Check that it is a valid .xlsx workbook.",
+        "The file is too big (max 2 MB). Remove extra tabs or images and try again.",
       warnings,
     };
   }
 
-  if (workbook.SheetNames.length === 0) {
+  let workbook: WorkBook;
+  let utils: SheetUtils;
+  try {
+    const XLSX = await import("xlsx");
+    utils = XLSX.utils;
+    const buffer = await file.arrayBuffer();
+    workbook = XLSX.read(buffer, { type: "array", dense: true });
+  } catch {
     return {
       ok: false,
-      error: "The workbook has no sheets.",
+      error: "We could not open this file. Save it again as .xlsx and retry.",
+      warnings,
+    };
+  }
+
+  const sheetProps = workbook.Workbook?.Sheets ?? [];
+  const dayNames = workbook.SheetNames.filter(
+    (sheetName, index) =>
+      !isIgnoredSheetName(sheetName) && !sheetProps[index]?.Hidden
+  );
+
+  if (dayNames.length === 0) {
+    return {
+      ok: false,
+      error: "The file has no day tabs. Add one tab per training day.",
       warnings,
     };
   }
 
   const days: ParsedRoutineDay[] = [];
-
-  workbook.SheetNames.forEach((sheetName, index) => {
+  for (const sheetName of dayNames) {
     const sheet = workbook.Sheets[sheetName];
-    if (!sheet) return;
-
-    const day = parseSheet(sheetName, sheet, index + 1, warnings);
+    if (!sheet) continue;
+    const day = parseSheet(utils, sheetName, sheet, days.length + 1, warnings);
     if (day) days.push(day);
-  });
+  }
 
   if (days.length === 0) {
     return {
       ok: false,
-      error: `No routine days could be imported. Check sheet names, headers (${REQUIRED_LABELS}), and exercise rows.`,
+      error: `We found no exercises. Each day tab needs the columns ${REQUIRED_LABELS}.`,
       warnings,
     };
   }

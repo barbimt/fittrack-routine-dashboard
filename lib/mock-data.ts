@@ -1,20 +1,31 @@
+import type { SetType } from "@/features/routines/sets";
+
 export interface ExerciseSet {
   id: string;
   setNumber: number;
+  setType?: SetType;
+  /** Lower bound of the rep target (equal to `targetRepsMax` for a fixed target). */
   targetReps: number;
-  targetWeight?: string | null;
+  targetRepsMax?: number | null;
+  targetWeightKg?: number | null;
   actualReps: number | null;
+  actualWeightKg?: number | null;
   completed: boolean;
 }
 
 export interface Exercise {
   id: string;
   name: string;
+  /** Display label of the primary muscle (or the day focus when unset). */
   muscleGroup: string;
+  /** Primary muscle slug; null when the exercise has none. */
+  muscleSlug?: string | null;
+  secondaryMuscles?: string[];
   targetSets: number;
   targetReps: number | string;
-  /** Raw prescription from import/DB — source of truth for per-set targets. */
+  /** Display summary generated from the planned sets. */
   prescription?: string;
+  /** Display weight, e.g. `60kg` or `15–20 kg`; per-set loads live on `sets`. */
   weight: string;
   restTime: string;
   notes?: string;

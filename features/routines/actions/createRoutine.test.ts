@@ -34,11 +34,12 @@ function validDay(): EditorDay {
       {
         id: "new-ex",
         name: "Squat",
-        muscleGroup: null,
-        prescription: "3x8",
-        plannedSets: 3,
-        targetReps: "8",
-        weight: null,
+        muscleGroup: "quads",
+        secondaryMuscles: ["glutes"],
+        sets: [
+          { setType: "working", reps: "8", weightKg: "60" },
+          { setType: "working", reps: "8", weightKg: "60" },
+        ],
         restTime: null,
         notes: null,
         sortOrder: 0,
@@ -73,6 +74,16 @@ describe("createRoutine", () => {
         source: "manual",
       })
     );
+    const [, input] = insertTreeMock.mock.calls[0];
+    expect(input.days[0].exercises[0]).toMatchObject({
+      name: "Squat",
+      muscleGroup: "quads",
+      secondaryMuscles: ["glutes"],
+      sets: [
+        { setType: "working", repsMin: 8, repsMax: 8, weightKg: 60 },
+        { setType: "working", repsMin: 8, repsMax: 8, weightKg: 60 },
+      ],
+    });
     expect(revalidatePathMock).toHaveBeenCalledWith("/", "layout");
     expect(revalidatePathMock).toHaveBeenCalledWith("/editor");
   });

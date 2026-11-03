@@ -1,65 +1,96 @@
-import { expandPrescriptionToSets } from "@/features/routine-import/utils/parsePrescription";
+import { exercisePlannedSets } from "./exercisePlan";
+import { formatReps, type PlannedSet, type SetType } from "./sets";
+import type { RoutineExercise } from "./types";
+import { formatKgNumber } from "./weight";
 
 export type ExerciseForSetLogs = {
   id: string;
   name: string;
-  prescription: string;
-  planned_sets: number | null;
-  target_reps: string | null;
-  weight: string | null;
+  muscle_group: string | null;
+  muscle_groups_secondary: string[];
+  sets: PlannedSet[];
 };
 
-export type SetLogInsertRow = {
+/** Columns needed from `routine_exercises` (with nested sets) to build logs. */
+export const EXERCISE_FOR_SET_LOGS_SELECT =
+  "id, name, prescription, planned_sets, target_reps, weight, muscle_group, muscle_groups_secondary, routine_exercise_sets(*)";
+
+export function toExerciseForSetLogs(
+  exercise: Pick<
+    RoutineExercise,
+    | "id"
+    | "name"
+    | "prescription"
+    | "planned_sets"
+    | "target_reps"
+    | "weight"
+    | "muscle_group"
+    | "muscle_groups_secondary"
+    | "routine_exercise_sets"
+  >
+): ExerciseForSetLogs {
+  return {
+    id: exercise.id,
+    name: exercise.name,
+    muscle_group: exercise.muscle_group,
+    muscle_groups_secondary: exercise.muscle_groups_secondary ?? [],
+    sets: exercisePlannedSets(exercise),
+  };
+}
+
+export type SetLogTargets = {
+  set_type: SetType;
+  target_reps: string | null;
+  target_reps_min: number | null;
+  target_reps_max: number | null;
+  target_weight: string | null;
+  target_weight_kg: number | null;
+  exercise_name: string;
+  muscle_group: string | null;
+  muscle_groups_secondary: string[];
+};
+
+export type SetLogInsertRow = SetLogTargets & {
   user_id: string;
   workout_session_id: string;
   routine_exercise_id: string;
   set_number: number;
-  target_reps: string | null;
-  target_weight: string | null;
-  exercise_name: string;
   actual_reps: null;
+  actual_weight_kg: null;
   completed: false;
 };
+
+function targetsForSet(
+  exercise: ExerciseForSetLogs,
+  set: PlannedSet
+): SetLogTargets {
+  return {
+    set_type: set.setType,
+    target_reps: formatReps(set.repsMin, set.repsMax),
+    target_reps_min: set.repsMin,
+    target_reps_max: set.repsMax,
+    target_weight:
+      set.weightKg !== null ? `${formatKgNumber(set.weightKg)}kg` : null,
+    target_weight_kg: set.weightKg,
+    exercise_name: exercise.name,
+    muscle_group: exercise.muscle_group,
+    muscle_groups_secondary: exercise.muscle_groups_secondary,
+  };
+}
 
 export function buildSetLogRowsForExercise(
   userId: string,
   sessionId: string,
   exercise: ExerciseForSetLogs
 ): SetLogInsertRow[] {
-  const fallbackWeight = exercise.weight ?? null;
-  const expanded = expandPrescriptionToSets(
-    exercise.prescription,
-    fallbackWeight
-  );
-
-  if (expanded.length > 0) {
-    return expanded.map((target) => ({
-      user_id: userId,
-      workout_session_id: sessionId,
-      routine_exercise_id: exercise.id,
-      set_number: target.setNumber,
-      target_reps: String(target.targetReps),
-      target_weight: target.targetWeight,
-      exercise_name: exercise.name,
-      actual_reps: null,
-      completed: false,
-    }));
-  }
-
-  const count =
-    typeof exercise.planned_sets === "number" && exercise.planned_sets > 0
-      ? exercise.planned_sets
-      : 3;
-
-  return Array.from({ length: count }, (_, i) => ({
+  return exercise.sets.map((set, index) => ({
     user_id: userId,
     workout_session_id: sessionId,
     routine_exercise_id: exercise.id,
-    set_number: i + 1,
-    target_reps: exercise.target_reps,
-    target_weight: fallbackWeight,
-    exercise_name: exercise.name,
+    set_number: index + 1,
+    ...targetsForSet(exercise, set),
     actual_reps: null,
+    actual_weight_kg: null,
     completed: false,
   }));
 }
@@ -79,16 +110,11 @@ export type ExistingSetLogRef = {
   set_number: number;
 };
 
-export type SetLogTargetUpdate = {
-  id: string;
-  target_reps: string | null;
-  target_weight: string | null;
-  exercise_name: string;
-};
+export type SetLogTargetUpdate = SetLogTargets & { id: string };
 
 /**
- * Align session set logs with the current exercise prescription.
- * Preserves log ids (and thus completed / actual_reps) for matching set numbers.
+ * Align session set logs with the current exercise plan.
+ * Preserves log ids (and thus completed / actual values) for matching set numbers.
  */
 export function planSetLogReconciliation(
   userId: string,
@@ -109,19 +135,17 @@ export function planSetLogReconciliation(
   const updates: SetLogTargetUpdate[] = [];
   const inserts: SetLogInsertRow[] = [];
 
-  for (const row of desired) {
+  desired.forEach((row, index) => {
     const existing = byNumber.get(row.set_number);
     if (existing) {
       updates.push({
         id: existing.id,
-        target_reps: row.target_reps,
-        target_weight: row.target_weight,
-        exercise_name: row.exercise_name,
+        ...targetsForSet(exercise, exercise.sets[index]),
       });
     } else {
       inserts.push(row);
     }
-  }
+  });
 
   const deleteIds = existingLogs.flatMap((log) =>
     !desiredNumbers.has(log.set_number) ? [log.id] : []

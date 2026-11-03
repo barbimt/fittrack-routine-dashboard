@@ -82,11 +82,11 @@ describe("mergeSetLogsIntoDay", () => {
           sets: [
             {
               ...baseDay.exercises[0].sets[0],
-              targetWeight: "40kg",
+              targetWeightKg: 40,
             },
             {
               ...baseDay.exercises[0].sets[1],
-              targetWeight: "35kg",
+              targetWeightKg: 35,
             },
           ],
         },
@@ -125,8 +125,8 @@ describe("mergeSetLogsIntoDay", () => {
     ];
 
     const merged = mergeSetLogsIntoDay(dayWithTargets, logs);
-    expect(merged.exercises[0].sets[0].targetWeight).toBe("40kg");
-    expect(merged.exercises[0].sets[1].targetWeight).toBe("35kg");
+    expect(merged.exercises[0].sets[0].targetWeightKg).toBe(40);
+    expect(merged.exercises[0].sets[1].targetWeightKg).toBe(35);
   });
 });
 
@@ -194,7 +194,7 @@ describe("buildTrainingDayFromSession", () => {
       id: "log-1",
       completed: true,
       actualReps: 11,
-      targetWeight: "60kg",
+      targetWeightKg: 60,
     });
     expect(day.exercises[0].sets[1].completed).toBe(false);
   });
@@ -225,7 +225,7 @@ describe("appendExerciseToDay", () => {
     expect(next.exercises[1].name).toBe("Face pull");
     expect(next.exercises[1].sets[0]).toMatchObject({
       id: "log-new-1",
-      targetWeight: "15kg",
+      targetWeightKg: 15,
       completed: false,
     });
   });
@@ -282,11 +282,11 @@ describe("replaceExerciseInDay", () => {
     expect(next.exercises[0].sets).toHaveLength(2);
     expect(next.exercises[0].sets[0]).toMatchObject({
       id: "log-1",
-      targetWeight: "40kg",
+      targetWeightKg: 40,
       completed: true,
       actualReps: 12,
     });
-    expect(next.exercises[0].sets[1].targetWeight).toBe("35kg");
+    expect(next.exercises[0].sets[1].targetWeightKg).toBe(35);
   });
 });
 
@@ -388,22 +388,84 @@ describe("mapRoutineToTrainingDays", () => {
     expect(exercise.sets[0]).toMatchObject({
       setNumber: 1,
       targetReps: 12,
-      targetWeight: "15kg",
+      targetWeightKg: 15,
     });
     expect(exercise.sets[3]).toMatchObject({
       setNumber: 4,
       targetReps: 12,
-      targetWeight: "20kg",
+      targetWeightKg: 20,
     });
   });
 
   it("applies column weight to simple prescriptions", () => {
     const exercise = mapRoutineToTrainingDays(routine)[0].exercises[0];
     expect(exercise.sets).toHaveLength(3);
-    expect(exercise.sets.every((set) => set.targetWeight === "40kg")).toBe(
-      true
-    );
-    expect(exercise.prescription).toBe("3x10");
+    expect(exercise.sets.every((set) => set.targetWeightKg === 40)).toBe(true);
+    expect(exercise.prescription).toBe("3x10 40kg");
+  });
+
+  it("reads stored set rows before the legacy text", () => {
+    const withRows: RoutineWithDays = {
+      ...routine,
+      routine_days: [
+        {
+          ...routine.routine_days[0],
+          routine_exercises: [
+            {
+              ...routine.routine_days[0].routine_exercises[0],
+              muscle_group: "chest",
+              muscle_groups_secondary: ["triceps"],
+              routine_exercise_sets: [
+                {
+                  id: "s1",
+                  user_id: "user-1",
+                  routine_exercise_id: "ex-1",
+                  set_number: 1,
+                  set_type: "warmup",
+                  reps_min: 15,
+                  reps_max: 15,
+                  target_weight_kg: 20,
+                  created_at: "",
+                  updated_at: "",
+                },
+                {
+                  id: "s2",
+                  user_id: "user-1",
+                  routine_exercise_id: "ex-1",
+                  set_number: 2,
+                  set_type: "working",
+                  reps_min: 8,
+                  reps_max: 10,
+                  target_weight_kg: 50,
+                  created_at: "",
+                  updated_at: "",
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+
+    const exercise = mapRoutineToTrainingDays(withRows)[0].exercises[0];
+    expect(exercise.sets).toHaveLength(2);
+    expect(exercise.sets[0]).toMatchObject({
+      setType: "warmup",
+      targetReps: 15,
+      targetWeightKg: 20,
+    });
+    expect(exercise.sets[1]).toMatchObject({
+      targetReps: 8,
+      targetRepsMax: 10,
+      targetWeightKg: 50,
+    });
+    expect(exercise).toMatchObject({
+      muscleGroup: "Chest",
+      muscleSlug: "chest",
+      secondaryMuscles: ["triceps"],
+      prescription: "W1x15 20kg-1x8-10 50kg",
+      weight: "20–50 kg",
+    });
   });
 
   it("matches column weight when load is embedded in prescription", () => {
@@ -448,7 +510,9 @@ describe("mapRoutineToTrainingDays", () => {
     };
 
     const exercise = mapRoutineToTrainingDays(noWeight)[0].exercises[0];
-    expect(exercise.sets.every((set) => set.targetWeight === null)).toBe(true);
+    expect(exercise.sets.every((set) => set.targetWeightKg === null)).toBe(
+      true
+    );
     expect(exercise.weight).toBe("—");
   });
 });

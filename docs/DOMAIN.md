@@ -65,10 +65,11 @@ Parsed from Excel on `/upload`. Saved to Supabase via `saveRoutineAction`. Mappe
 | Field | Type | Notes |
 |-------|------|-------|
 | `name` | string | From EXERCISE column |
-| `prescription` | string | Raw SETS x REPS cell |
-| `plannedSets` | number \| null | From `parsePrescription` |
-| `targetReps` | string \| null | From `parsePrescription` |
-| `weight` | string \| null | |
+| `prescription` | string | Display string built from `sets` |
+| `sets` | PlannedSet[] | One entry per set: `setType`, `repsMin`, `repsMax`, `weightKg` (number) |
+| `muscleGroup` | string \| null | Primary muscle slug |
+| `secondaryMuscles` | string[] | Secondary muscle slugs |
+| `restTime` | number \| null | Seconds |
 | `notes` | string \| null | |
 | `sortOrder` | number | Row order in sheet |
 

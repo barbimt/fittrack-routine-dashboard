@@ -14,10 +14,6 @@ interface UploadDropzoneProps {
   className?: string;
 }
 
-function isXlsx(file: File) {
-  return file.name.toLowerCase().endsWith(".xlsx");
-}
-
 function formatFileSize(bytes: number) {
   if (bytes < 1024) return bytes + " B";
   if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
@@ -36,9 +32,7 @@ export function UploadDropzone({
     (e: React.DragEvent) => {
       e.preventDefault();
       const file = e.dataTransfer.files[0];
-      if (file && isXlsx(file)) {
-        onFileSelect?.(file);
-      }
+      if (file) onFileSelect?.(file);
     },
     [onFileSelect]
   );
@@ -46,9 +40,7 @@ export function UploadDropzone({
   const handleFileInput = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
-      if (file && isXlsx(file)) {
-        onFileSelect?.(file);
-      }
+      if (file) onFileSelect?.(file);
       e.target.value = "";
     },
     [onFileSelect]
@@ -100,10 +92,11 @@ export function UploadDropzone({
     >
       <input
         type="file"
-        accept=".xlsx"
+        accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         onChange={handleFileInput}
+        disabled={isUploading}
         className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
-        aria-label="Upload Excel file"
+        aria-label="Choose your routine Excel file"
       />
 
       <div className="flex flex-col items-center text-center">
@@ -121,10 +114,10 @@ export function UploadDropzone({
         </div>
 
         <h3 className="text-card-foreground mb-1 text-lg font-semibold">
-          {isUploading ? "Reading file…" : "Drop your FitTrack .xlsx here"}
+          {isUploading ? "Reading your file…" : "Upload your filled template"}
         </h3>
         <p className="text-muted-foreground mb-4 text-sm">
-          or click to browse — use the filled template, not any spreadsheet
+          Drop the file here or tap to choose it
         </p>
 
         {error ? (
@@ -132,7 +125,7 @@ export function UploadDropzone({
         ) : (
           <div className="text-muted-foreground flex items-center gap-2 text-sm">
             <FileSpreadsheet className="h-4 w-4" />
-            <span>FitTrack template · .xlsx only</span>
+            <span>.xlsx · max 2 MB · nothing is saved yet</span>
           </div>
         )}
       </div>

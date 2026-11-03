@@ -18,6 +18,10 @@ import {
   MuscleSelect,
 } from "./routine-editor-fields";
 import { MUSCLE_GROUP_NONE } from "@/features/routines/muscleGroups";
+import {
+  editorSetsToPlanned,
+  validateEditorSets,
+} from "@/features/routines/editorSetRows";
 import type { AddExerciseToDayInput } from "@/features/routines/actions/sessionActions";
 
 export interface AddExerciseDialogProps {
@@ -56,14 +60,20 @@ export function AddExerciseDialog({
     onOpenChange(nextOpen);
   };
 
+  const setInputs = Array.from({ length: plannedSets ?? 0 }, () => ({
+    setType: "working" as const,
+    reps: targetReps,
+    weightKg: weight ?? "",
+  }));
+  const setIssue = validateEditorSets(setInputs.slice(0, 1))[0];
+  const canSubmit = Boolean(name.trim()) && Boolean(plannedSets) && !setIssue;
+
   const handleSubmit = () => {
-    if (!name.trim() || !plannedSets || plannedSets < 1) return;
+    if (!canSubmit) return;
 
     onSubmit({
       name: name.trim(),
-      plannedSets,
-      targetReps: targetReps.trim() || "12",
-      weight,
+      sets: editorSetsToPlanned(setInputs),
       muscleGroup:
         muscleGroup && muscleGroup !== MUSCLE_GROUP_NONE ? muscleGroup : null,
     });
@@ -96,18 +106,24 @@ export function AddExerciseDialog({
             />
             <EditorPlainTextField
               id="add-exercise-reps"
-              label="Reps"
+              label="Reps (12 or 8-10)"
               value={targetReps}
               onValueChange={setTargetReps}
             />
           </div>
           <EditorTextField
             id="add-exercise-weight"
-            label="Weight"
+            label="Weight (kg)"
             value={weight}
             onValueChange={setWeight}
-            placeholder="e.g. 10kg"
+            placeholder="e.g. 10"
+            hint="Same weight for every set. You can change single sets later."
           />
+          {setIssue ? (
+            <p className="text-destructive text-xs" role="alert">
+              {setIssue.message.replace(/^Set 1: /, "")}
+            </p>
+          ) : null}
           <MuscleSelect
             id="add-exercise-muscle"
             value={muscleGroup}
@@ -126,7 +142,7 @@ export function AddExerciseDialog({
           </Button>
           <Button
             type="button"
-            disabled={isSubmitting || !name.trim() || !plannedSets}
+            disabled={isSubmitting || !canSubmit}
             onClick={handleSubmit}
           >
             {isSubmitting ? "Adding…" : "Add exercise"}

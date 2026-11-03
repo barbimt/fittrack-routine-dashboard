@@ -13,8 +13,8 @@ describe("EditorSetRowsField", () => {
       <EditorSetRowsField
         idPrefix="ex-1"
         rows={[
-          { id: "r1", reps: "12", weightKg: "40" },
-          { id: "r2", reps: "10", weightKg: "35" },
+          { id: "r1", setType: "warmup", reps: "12", weightKg: "40" },
+          { id: "r2", setType: "working", reps: "8-10", weightKg: "35" },
         ]}
         onUpdateRow={vi.fn()}
         onAddRow={vi.fn()}
@@ -24,8 +24,40 @@ describe("EditorSetRowsField", () => {
 
     expect(screen.getByLabelText("Set 1 reps")).toHaveValue("12");
     expect(screen.getByLabelText("Set 1 weight in kg")).toHaveValue("40");
-    expect(screen.getByLabelText("Set 2 reps")).toHaveValue("10");
+    expect(screen.getByLabelText("Set 2 reps")).toHaveValue("8-10");
     expect(screen.getByLabelText("Set 2 weight in kg")).toHaveValue("35");
+    expect(
+      screen.getByRole("button", { name: /Set 1: Warm-up/i })
+    ).toHaveTextContent("W");
+    expect(
+      screen.getByRole("button", { name: /Set 2: Working/i })
+    ).toHaveTextContent("1");
+  });
+
+  it("cycles the set type and shows how to fix a bad value", async () => {
+    const onUpdateRow = vi.fn();
+    render(
+      <EditorSetRowsField
+        idPrefix="ex-1"
+        rows={[{ id: "r1", setType: "working", reps: "12", weightKg: "heavy" }]}
+        onUpdateRow={onUpdateRow}
+        onAddRow={vi.fn()}
+        onRemoveRow={vi.fn()}
+      />
+    );
+
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Set 1: enter kg as a number, like 20 or 7.5"
+    );
+    expect(screen.getByLabelText("Set 1 weight in kg")).toHaveAttribute(
+      "aria-invalid",
+      "true"
+    );
+
+    await userEvent.click(
+      screen.getByRole("button", { name: /Change set type/i })
+    );
+    expect(onUpdateRow).toHaveBeenCalledWith(0, { setType: "warmup" });
   });
 
   it("notifies when a set field changes, a set is added, or removed", async () => {
@@ -36,7 +68,7 @@ describe("EditorSetRowsField", () => {
     render(
       <EditorSetRowsField
         idPrefix="ex-1"
-        rows={[{ id: "r1", reps: "12", weightKg: "40" }]}
+        rows={[{ id: "r1", setType: "working", reps: "12", weightKg: "40" }]}
         onUpdateRow={onUpdateRow}
         onAddRow={onAddRow}
         onRemoveRow={onRemoveRow}

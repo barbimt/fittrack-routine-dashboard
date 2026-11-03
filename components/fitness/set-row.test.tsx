@@ -20,7 +20,7 @@ describe("SetRow", () => {
   it("syncs actual reps from props when not focused", () => {
     const { rerender } = render(<SetRow set={baseSet} readOnly />);
 
-    expect(screen.getByLabelText(/Actual reps/i)).toHaveValue(8);
+    expect(screen.getByLabelText(/Actual reps/i)).toHaveValue("8");
 
     rerender(
       <SetRow
@@ -29,7 +29,7 @@ describe("SetRow", () => {
       />
     );
 
-    expect(screen.getByLabelText(/Actual reps/i)).toHaveValue(null);
+    expect(screen.getByLabelText(/Actual reps/i)).toHaveValue("");
   });
 
   it("disables editing when readOnly", async () => {
@@ -73,23 +73,63 @@ describe("SetRow", () => {
     expect(onToggle).toHaveBeenCalledWith("set-1");
   });
 
-  it("falls back to exercise weight when the set has no targetWeight", () => {
+  it("falls back to exercise weight when the set has no target kg", () => {
     render(<SetRow set={baseSet} fallbackWeight="60kg" readOnly />);
 
-    expect(screen.getByText("60kg")).toBeInTheDocument();
+    expect(screen.getByText("60 kg")).toBeInTheDocument();
   });
 
-  it("prefers per-set targetWeight over the exercise fallback", () => {
+  it("prefers the per-set target kg over the exercise fallback", () => {
     render(
       <SetRow
-        set={{ ...baseSet, targetWeight: "40kg" }}
+        set={{ ...baseSet, targetWeightKg: 42.5 }}
         fallbackWeight="60kg"
         readOnly
       />
     );
 
-    expect(screen.getByText("40kg")).toBeInTheDocument();
-    expect(screen.queryByText("60kg")).not.toBeInTheDocument();
+    expect(screen.getByText("42.5 kg")).toBeInTheDocument();
+    expect(screen.queryByText("60 kg")).not.toBeInTheDocument();
+  });
+
+  it("shows a rep range and a warm-up badge", () => {
+    render(
+      <SetRow
+        set={{
+          ...baseSet,
+          setType: "warmup",
+          targetReps: 8,
+          targetRepsMax: 10,
+        }}
+        readOnly
+      />
+    );
+
+    expect(screen.getByText("Warm-up")).toBeInTheDocument();
+    expect(screen.getByText("8-10")).toBeInTheDocument();
+  });
+
+  it("logs kg with a comma decimal without toggling the set", async () => {
+    const onToggle = vi.fn();
+    const onWeightChange = vi.fn();
+    const onWeightSave = vi.fn();
+
+    render(
+      <SetRow
+        set={{ ...baseSet, completed: false, targetWeightKg: 20 }}
+        onToggle={onToggle}
+        onWeightChange={onWeightChange}
+        onWeightSave={onWeightSave}
+      />
+    );
+
+    const input = screen.getByLabelText(/Kg lifted in set 1/i);
+    await userEvent.type(input, "22,5");
+    await userEvent.tab();
+
+    expect(onWeightChange).toHaveBeenLastCalledWith("set-1", 22.5);
+    expect(onWeightSave).toHaveBeenLastCalledWith("set-1", 22.5);
+    expect(onToggle).not.toHaveBeenCalled();
   });
 
   it("does not toggle when clicking the actual reps input", async () => {

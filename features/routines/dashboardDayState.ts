@@ -1,7 +1,7 @@
 import type { Exercise, ExerciseSet, TrainingDay } from "@/lib/mock-data";
 
 export type SetFieldPatch = Partial<
-  Pick<ExerciseSet, "completed" | "actualReps">
+  Pick<ExerciseSet, "completed" | "actualReps" | "actualWeightKg">
 >;
 
 export function findSetInDays(
@@ -59,6 +59,7 @@ export function resetExerciseInDays(
                     ...set,
                     completed: false,
                     actualReps: null,
+                    actualWeightKg: null,
                   })),
                 }
           ),
@@ -81,6 +82,7 @@ export function resetDayInDays(
               ...set,
               completed: false,
               actualReps: null,
+              actualWeightKg: null,
             })),
           })),
         }

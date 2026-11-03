@@ -3,11 +3,20 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { isUuid } from "@/lib/uuid";
-import { resolvePrescriptionForSave } from "../editorPrescription";
 import type { EditorDay } from "../editorTypes";
 import { validateRoutineDays } from "../editorSchema";
+import {
+  exercisePlanColumns,
+  replaceExerciseSets,
+} from "../exerciseSets.server";
 import { insertActiveRoutineTree } from "../insertActiveRoutineTree.server";
-import type { RoutineEditPatch, RoutineExerciseUpsert } from "../routinePatch";
+import {
+  toExerciseUpsert,
+  type RoutineEditPatch,
+  type RoutineExerciseUpsert,
+} from "../routinePatch";
+import { parsePlannedSets, sanitizeMuscles } from "../setSchema";
+import type { PlannedSet } from "../sets";
 
 export type UpdateRoutineResult = { ok: true } | { ok: false; error: string };
 
@@ -20,22 +29,42 @@ export type CreateRoutineInput = {
   days: EditorDay[];
 };
 
-function exerciseFields(exercise: RoutineExerciseUpsert) {
-  const resolved = resolvePrescriptionForSave(exercise);
+type ValidatedExercise = {
+  sets: PlannedSet[];
+  fields: ReturnType<typeof exercisePlanColumns> & {
+    name: string;
+    notes: string | null;
+    sort_order: number;
+  };
+};
+
+function validateExerciseUpsert(
+  exercise: RoutineExerciseUpsert
+): { ok: true; value: ValidatedExercise } | { ok: false; error: string } {
+  const sets = parsePlannedSets(exercise.sets);
+  if (!sets.ok) {
+    return { ok: false, error: `"${exercise.name}": ${sets.error}` };
+  }
+  const muscles = sanitizeMuscles(
+    exercise.muscleGroup,
+    exercise.secondaryMuscles
+  );
 
   return {
-    name: exercise.name,
-    prescription: resolved.prescription,
-    planned_sets:
-      resolved.plannedSets && resolved.plannedSets > 0
-        ? resolved.plannedSets
-        : null,
-    target_reps: resolved.targetReps,
-    weight: exercise.weight,
-    rest_time: exercise.restTime,
-    notes: exercise.notes,
-    muscle_group: exercise.muscleGroup,
-    sort_order: exercise.sortOrder,
+    ok: true,
+    value: {
+      sets: sets.sets,
+      fields: {
+        name: exercise.name.trim(),
+        notes: exercise.notes,
+        sort_order: exercise.sortOrder,
+        ...exercisePlanColumns({
+          sets: sets.sets,
+          restTime: exercise.restTime,
+          ...muscles,
+        }),
+      },
+    },
   };
 }
 
@@ -65,44 +94,38 @@ export async function createRoutine(
     };
   }
 
-  const result = await insertActiveRoutineTree(supabase, {
-    name,
-    source: "manual",
-    days: input.days.map((day, dayIndex) => ({
+  const days = [];
+  for (const [dayIndex, day] of input.days.entries()) {
+    const exercises = [];
+    for (const [exerciseIndex, exercise] of day.exercises.entries()) {
+      const validated = validateExerciseUpsert(
+        toExerciseUpsert(exercise, day.id, exercise.sortOrder ?? exerciseIndex)
+      );
+      if (!validated.ok) return validated;
+      const { fields, sets } = validated.value;
+      exercises.push({
+        name: fields.name,
+        sets,
+        restTime: fields.rest_time,
+        notes: fields.notes,
+        muscleGroup: fields.muscle_group,
+        secondaryMuscles: fields.muscle_groups_secondary,
+        sortOrder: fields.sort_order,
+      });
+    }
+    days.push({
       name: day.name.trim(),
       focus: day.focus,
       originalName: day.originalName ?? day.name.trim(),
       sortOrder: day.sortOrder ?? dayIndex,
-      exercises: day.exercises.map((exercise, exerciseIndex) => {
-        const resolved = resolvePrescriptionForSave({
-          id: exercise.id,
-          dayId: day.id,
-          name: exercise.name,
-          muscleGroup: exercise.muscleGroup,
-          prescription: exercise.prescription,
-          plannedSets: exercise.plannedSets,
-          targetReps: exercise.targetReps,
-          weight: exercise.weight,
-          restTime: exercise.restTime,
-          notes: exercise.notes,
-          sortOrder: exercise.sortOrder,
-        });
-        return {
-          name: exercise.name.trim(),
-          prescription: resolved.prescription,
-          plannedSets:
-            resolved.plannedSets && resolved.plannedSets > 0
-              ? resolved.plannedSets
-              : null,
-          targetReps: resolved.targetReps,
-          weight: exercise.weight,
-          restTime: exercise.restTime,
-          notes: exercise.notes,
-          muscleGroup: exercise.muscleGroup,
-          sortOrder: exercise.sortOrder ?? exerciseIndex,
-        };
-      }),
-    })),
+      exercises,
+    });
+  }
+
+  const result = await insertActiveRoutineTree(supabase, {
+    name,
+    source: "manual",
+    days,
   });
 
   if (!result.ok) {
@@ -228,8 +251,11 @@ export async function updateRoutine(
       };
     }
 
-    const fields = exerciseFields(exercise);
+    const validated = validateExerciseUpsert(exercise);
+    if (!validated.ok) return validated;
+    const { fields, sets } = validated.value;
 
+    let exerciseId: string;
     if (isUuid(exercise.id)) {
       const { error } = await supabase
         .from("routine_exercises")
@@ -243,17 +269,34 @@ export async function updateRoutine(
           error: `Failed to update exercise "${exercise.name}". ${error.message}`,
         };
       }
+      exerciseId = exercise.id;
     } else {
-      const { error } = await supabase
+      const { data: inserted, error } = await supabase
         .from("routine_exercises")
-        .insert({ user_id: userId, routine_day_id: dayId, ...fields });
+        .insert({ user_id: userId, routine_day_id: dayId, ...fields })
+        .select("id")
+        .single();
 
-      if (error) {
+      if (error || !inserted) {
         return {
           ok: false,
-          error: `Failed to create exercise "${exercise.name}". ${error.message}`,
+          error: `Failed to create exercise "${exercise.name}".${error ? ` ${error.message}` : ""}`,
         };
       }
+      exerciseId = inserted.id as string;
+    }
+
+    const setsResult = await replaceExerciseSets(
+      supabase,
+      userId,
+      exerciseId,
+      sets
+    );
+    if (!setsResult.ok) {
+      return {
+        ok: false,
+        error: `${setsResult.error} ("${exercise.name}")`,
+      };
     }
   }
 

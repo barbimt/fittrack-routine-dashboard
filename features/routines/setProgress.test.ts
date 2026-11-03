@@ -31,7 +31,17 @@ describe("buildSetTogglePatch", () => {
     ).toEqual({
       completed: false,
       actualReps: null,
+      actualWeightKg: null,
     });
+  });
+
+  it("fills empty kg with the target when completing", () => {
+    expect(
+      buildSetTogglePatch(set({ targetWeightKg: 40, actualWeightKg: null }))
+    ).toMatchObject({ completed: true, actualWeightKg: 40 });
+    expect(
+      buildSetTogglePatch(set({ targetWeightKg: 40, actualWeightKg: 42.5 }))
+    ).not.toHaveProperty("actualWeightKg");
   });
 
   it("keeps existing reps when completing a logged set", () => {

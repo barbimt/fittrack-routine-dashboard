@@ -1,24 +1,31 @@
 import type { Exercise } from "@/lib/mock-data";
+import { plannedToEditorSets } from "./editorSetRows";
 import type { EditorExercise } from "./editorTypes";
+import { toMuscleGroup } from "./muscleGroups";
+import type { PlannedSet } from "./sets";
+import { parseKg } from "./weight";
+
+export function exercisePlannedSetsFromView(exercise: Exercise): PlannedSet[] {
+  const fallbackKg = parseKg(exercise.weight);
+  return exercise.sets.map((set) => ({
+    setType: set.setType ?? "working",
+    repsMin: set.targetReps > 0 ? set.targetReps : null,
+    repsMax: set.targetRepsMax ?? (set.targetReps > 0 ? set.targetReps : null),
+    weightKg:
+      set.targetWeightKg !== undefined ? set.targetWeightKg : fallbackKg,
+  }));
+}
 
 export function exerciseToEditorDraft(exercise: Exercise): EditorExercise {
-  const weight =
-    exercise.weight && exercise.weight !== "—" ? exercise.weight : null;
   const restTime =
     exercise.restTime && exercise.restTime !== "—" ? exercise.restTime : null;
-  const targetReps =
-    typeof exercise.targetReps === "number"
-      ? String(exercise.targetReps)
-      : exercise.targetReps;
 
   return {
     id: exercise.id,
     name: exercise.name,
-    muscleGroup: exercise.muscleGroup || null,
-    prescription: exercise.prescription ?? null,
-    plannedSets: exercise.targetSets > 0 ? exercise.targetSets : null,
-    targetReps: targetReps || null,
-    weight,
+    muscleGroup: exercise.muscleSlug ?? toMuscleGroup(exercise.muscleGroup),
+    secondaryMuscles: exercise.secondaryMuscles ?? [],
+    sets: plannedToEditorSets(exercisePlannedSetsFromView(exercise)),
     restTime,
     notes: exercise.notes ?? null,
     sortOrder: 0,

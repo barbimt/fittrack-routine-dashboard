@@ -78,6 +78,8 @@ export function DashboardClient({
     handleSetToggle,
     handleRepsChange,
     handleRepsSave,
+    handleWeightChange,
+    handleWeightSave,
     handleResetExercise,
     handleResetDay,
     handleSaveWorkout,
@@ -165,6 +167,8 @@ export function DashboardClient({
               onSetToggle={handleSetToggle}
               onRepsChange={handleRepsChange}
               onRepsSave={handleRepsSave}
+              onWeightChange={handleWeightChange}
+              onWeightSave={handleWeightSave}
               onResetExercise={isReadOnly ? undefined : handleResetExercise}
               onEditExercise={isReadOnly ? undefined : handleEditExercise}
               {...exerciseCardRestProps(restTimer, isReadOnly)}

@@ -1,10 +1,9 @@
 "use client";
 
-import { useCallback, useId, useReducer } from "react";
+import { useCallback, useReducer } from "react";
 import { UploadDropzone } from "@/components/fitness/upload-dropzone";
-import { EmptyState } from "@/components/fitness/empty-state";
 import { Button } from "@/components/fitness/button";
-import { FileSpreadsheet, AlertTriangle } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 import { parseRoutineWorkbook } from "../utils/parseRoutineWorkbook";
 import type { ParsedRoutine } from "../types";
 import { ImportPreview } from "./ImportPreview";
@@ -53,7 +52,7 @@ function importReducer(state: ImportState, action: ImportAction): ImportState {
         ...initialState,
         phase: "error",
         selectedFile: action.file,
-        fatalError: "Invalid file format. Please upload a .xlsx file.",
+        fatalError: "This is not an Excel file. Upload a .xlsx file.",
       };
     case "parse_start":
       return {
@@ -87,7 +86,6 @@ function importReducer(state: ImportState, action: ImportAction): ImportState {
 }
 
 export function RoutineImportForm() {
-  const inputId = useId();
   const [state, dispatch] = useReducer(importReducer, initialState);
   const { phase, selectedFile, routine, fatalError, parseWarnings, saveError } =
     state;
@@ -128,54 +126,20 @@ export function RoutineImportForm() {
   }, []);
 
   const uploadedMeta =
-    selectedFile &&
-    (phase === "preview" || phase === "parsing" || phase === "saving")
+    selectedFile && (phase === "preview" || phase === "saving")
       ? { name: selectedFile.name, size: selectedFile.size }
       : null;
 
   return (
     <div className="space-y-8">
       <section aria-label="File upload">
-        {phase === "idle" && !selectedFile ? (
-          <div className="border-border bg-card rounded-2xl border border-dashed p-2">
-            <EmptyState
-              icon={
-                <FileSpreadsheet
-                  className="text-muted-foreground h-8 w-8"
-                  aria-hidden
-                />
-              }
-              title="Upload your FitTrack template"
-              description="Choose the .xlsx you filled from the FitTrack template — not a random gym spreadsheet."
-              primaryAction={{
-                label: "Choose .xlsx file",
-                onClick: () => {
-                  document.getElementById(inputId)?.click();
-                },
-              }}
-            />
-            <input
-              id={inputId}
-              type="file"
-              accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-              className="sr-only"
-              aria-label="Choose FitTrack routine Excel file"
-              onChange={(event) => {
-                const file = event.target.files?.[0];
-                if (file) void handleFileSelect(file);
-                event.target.value = "";
-              }}
-            />
-          </div>
-        ) : (
-          <UploadDropzone
-            onFileSelect={(file) => void handleFileSelect(file)}
-            uploadedFile={uploadedMeta}
-            error={phase === "error" ? fatalError : null}
-            isUploading={phase === "parsing"}
-            onChangeFile={resetImport}
-          />
-        )}
+        <UploadDropzone
+          onFileSelect={(file) => void handleFileSelect(file)}
+          uploadedFile={uploadedMeta}
+          error={phase === "error" ? fatalError : null}
+          isUploading={phase === "parsing"}
+          onChangeFile={resetImport}
+        />
       </section>
 
       {phase === "error" && fatalError ? (
@@ -196,11 +160,7 @@ export function RoutineImportForm() {
       selectedFile &&
       routine ? (
         <>
-          <ImportPreview
-            fileName={selectedFile.name}
-            fileSize={selectedFile.size}
-            routine={routine}
-          />
+          <ImportPreview routine={routine} />
 
           {saveError ? (
             <div
@@ -212,10 +172,11 @@ export function RoutineImportForm() {
             </div>
           ) : null}
 
-          <div className="flex flex-col items-stretch gap-2 sm:items-end">
+          <div className="bg-background/95 border-border sticky bottom-0 z-10 -mx-4 border-t px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur sm:static sm:mx-0 sm:flex sm:justify-end sm:border-0 sm:bg-transparent sm:p-0">
             <Button
               size="lg"
               type="button"
+              className="w-full sm:w-auto"
               disabled={phase === "saving"}
               onClick={() => void handleSave()}
             >

@@ -1,48 +1,38 @@
 import type { RoutineWithDays, WorkoutSetLog } from "./types";
 import type { TrainingDay, Exercise, ExerciseSet } from "@/lib/mock-data";
+import { exercisePlannedSets } from "./exercisePlan";
+import { muscleGroupLabel, toMuscleGroup } from "./muscleGroups";
 import {
-  expandPrescriptionToSets,
-  parsePrescription,
-} from "@/features/routine-import/utils/parsePrescription";
+  formatReps,
+  formatWeightRange,
+  setsToPrescription,
+  type PlannedSet,
+} from "./sets";
 import type { RoutineExercise } from "./types";
 
-function parseRepsToNumber(reps: string | null): number {
-  if (!reps) return 0;
-  const n = parseInt(reps, 10);
-  return Number.isFinite(n) && n > 0 ? n : 0;
+/** Nested select used wherever a routine tree is loaded. */
+export const ROUTINE_TREE_SELECT =
+  "*, routine_days(*, routine_exercises(*, routine_exercise_sets(*)))";
+
+function toNumberOrNull(value: unknown): number | null {
+  if (value === null || value === undefined) return null;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
 }
 
 function generateSets(
   exerciseId: string,
-  prescription: string,
-  plannedSets: number | null,
-  targetReps: string | null,
-  fallbackWeight: string | null
+  planned: PlannedSet[]
 ): ExerciseSet[] {
-  const expanded = expandPrescriptionToSets(prescription, fallbackWeight);
-
-  if (expanded.length > 0) {
-    return expanded.map((target) => ({
-      id: `${exerciseId}-set-${target.setNumber}`,
-      setNumber: target.setNumber,
-      targetReps: target.targetReps,
-      targetWeight: target.targetWeight,
-      actualReps: null,
-      completed: false,
-    }));
-  }
-
-  const count = plannedSets && plannedSets > 0 ? plannedSets : 3;
-  const repsNum = parseRepsToNumber(targetReps);
-  const weight =
-    fallbackWeight && fallbackWeight !== "—" ? fallbackWeight : null;
-
-  return Array.from({ length: count }, (_, i) => ({
-    id: `${exerciseId}-set-${i + 1}`,
-    setNumber: i + 1,
-    targetReps: repsNum,
-    targetWeight: weight,
+  return planned.map((set, index) => ({
+    id: `${exerciseId}-set-${index + 1}`,
+    setNumber: index + 1,
+    setType: set.setType,
+    targetReps: set.repsMin ?? set.repsMax ?? 0,
+    targetRepsMax: set.repsMax,
+    targetWeightKg: set.weightKg,
     actualReps: null,
+    actualWeightKg: null,
     completed: false,
   }));
 }
@@ -63,14 +53,15 @@ export function mergeSetLogsIntoDay(
         const log = logMap.get(`${exercise.id}-${set.setNumber}`);
         if (!log) return set;
 
-        // Planned targets always come from the current routine prescription.
-        // Logs only carry session progress (completed / actual reps) so editor
-        // weight changes show up immediately on Today.
+        // Planned targets always come from the current routine plan.
+        // Logs only carry session progress (completed / actual values) so
+        // editor changes show up immediately on Today.
         return {
           ...set,
           id: log.id,
           completed: log.completed,
           actualReps: log.actual_reps,
+          actualWeightKg: toNumberOrNull(log.actual_weight_kg),
         };
       }),
     })),
@@ -81,26 +72,31 @@ export function mapRoutineExerciseToTrainingExercise(
   ex: RoutineExercise,
   dayFocus: string
 ): Exercise {
-  const weight = ex.weight ?? "—";
-  const parsed = parsePrescription(ex.prescription, weight);
+  const planned = exercisePlannedSets(ex);
+  const repsValues = [
+    ...new Set(planned.map((set) => formatReps(set.repsMin, set.repsMax))),
+  ];
+  const muscleSlug = toMuscleGroup(ex.muscle_group);
 
   return {
     id: ex.id,
     name: ex.name,
-    muscleGroup: ex.muscle_group ?? dayFocus,
-    targetSets: parsed.plannedSets ?? ex.planned_sets ?? 0,
-    targetReps: parsed.targetReps ?? ex.target_reps ?? ex.prescription,
-    prescription: ex.prescription,
-    weight,
+    muscleGroup: muscleGroupLabel(muscleSlug) ?? dayFocus,
+    muscleSlug,
+    secondaryMuscles: (ex.muscle_groups_secondary ?? []).flatMap((value) => {
+      const slug = toMuscleGroup(value);
+      return slug ? [slug] : [];
+    }),
+    targetSets: planned.length,
+    targetReps:
+      repsValues.length === 1 && repsValues[0]
+        ? repsValues[0]
+        : (repsValues[repsValues.length - 1] ?? ""),
+    prescription: setsToPrescription(planned),
+    weight: formatWeightRange(planned) ?? "—",
     restTime: ex.rest_time ?? "—",
     notes: ex.notes ?? undefined,
-    sets: generateSets(
-      ex.id,
-      ex.prescription,
-      parsed.plannedSets ?? ex.planned_sets,
-      parsed.targetReps ?? ex.target_reps,
-      weight !== "—" ? weight : null
-    ),
+    sets: generateSets(ex.id, planned),
   };
 }
 
@@ -169,37 +165,14 @@ export function mapRoutineToTrainingDays(
   return [...routine.routine_days]
     .sort((a, b) => a.sort_order - b.sort_order)
     .map((day) => {
-      const exercises: Exercise[] = [...day.routine_exercises]
-        .sort((a, b) => a.sort_order - b.sort_order)
-        .map((ex) => {
-          const weight = ex.weight ?? "—";
-          const parsed = parsePrescription(ex.prescription, weight);
-
-          return {
-            id: ex.id,
-            name: ex.name,
-            muscleGroup: ex.muscle_group ?? day.focus ?? day.name,
-            targetSets: parsed.plannedSets ?? ex.planned_sets ?? 0,
-            targetReps: parsed.targetReps ?? ex.target_reps ?? ex.prescription,
-            prescription: ex.prescription,
-            weight,
-            restTime: ex.rest_time ?? "—",
-            notes: ex.notes ?? undefined,
-            sets: generateSets(
-              ex.id,
-              ex.prescription,
-              parsed.plannedSets ?? ex.planned_sets,
-              parsed.targetReps ?? ex.target_reps,
-              weight !== "—" ? weight : null
-            ),
-          };
-        });
-
+      const focus = day.focus ?? day.name;
       return {
         id: day.id,
         dayName: day.original_name ?? day.name,
-        focus: day.focus ?? day.name,
-        exercises,
+        focus,
+        exercises: [...day.routine_exercises]
+          .sort((a, b) => a.sort_order - b.sort_order)
+          .map((ex) => mapRoutineExerciseToTrainingExercise(ex, focus)),
       };
     });
 }

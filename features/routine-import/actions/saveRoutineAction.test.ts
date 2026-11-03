@@ -52,12 +52,19 @@ function makeRoutine(): ParsedRoutine {
         exercises: [
           {
             name: "Squat",
-            prescription: "3x8",
-            plannedSets: 3,
-            targetReps: "8",
-            weight: null,
+            prescription: "3x8 60kg",
+            sets: Array.from({ length: 3 }, () => ({
+              setType: "working" as const,
+              repsMin: 8,
+              repsMax: 8,
+              weightKg: 60,
+            })),
+            muscleGroup: "quads",
+            secondaryMuscles: ["glutes", "quads"],
+            restTime: "120s",
             notes: null,
             sortOrder: 0,
+            warnings: [],
           },
         ],
       },
@@ -100,7 +107,16 @@ describe("saveRoutine", () => {
 
     await expect(saveRoutine(makeRoutine())).rejects.toThrow("NEXT_REDIRECT");
 
-    expect(insertTreeMock).toHaveBeenCalled();
+    const [, input] = insertTreeMock.mock.calls[0];
+    expect(input.days[0].exercises[0]).toEqual({
+      name: "Squat",
+      sets: makeRoutine().days[0].exercises[0].sets,
+      restTime: "120s",
+      notes: null,
+      muscleGroup: "quads",
+      secondaryMuscles: ["glutes"],
+      sortOrder: 0,
+    });
     expect(revalidatePathMock).toHaveBeenCalledWith("/", "layout");
     expect(redirectMock).toHaveBeenCalledWith("/");
   });
@@ -115,6 +131,17 @@ describe("saveRoutine", () => {
 
     expect(result).toEqual({ ok: false, error: "Failed to save routine." });
     expect(redirectMock).not.toHaveBeenCalled();
+  });
+
+  it("rejects an invalid payload before touching the database", async () => {
+    const routine = makeRoutine();
+    routine.days[0].exercises[0].sets = [];
+
+    const result = await saveRoutine(routine);
+
+    expect(result.ok).toBe(false);
+    expect(fromMock).not.toHaveBeenCalled();
+    expect(insertTreeMock).not.toHaveBeenCalled();
   });
 
   it("requires authentication", async () => {

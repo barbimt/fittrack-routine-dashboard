@@ -19,7 +19,7 @@ const baseExercise: Exercise = {
       id: "s1",
       setNumber: 1,
       targetReps: 12,
-      targetWeight: "40kg",
+      targetWeightKg: 40,
       actualReps: null,
       completed: false,
     },
@@ -27,7 +27,7 @@ const baseExercise: Exercise = {
       id: "s2",
       setNumber: 2,
       targetReps: 12,
-      targetWeight: "35kg",
+      targetWeightKg: 35,
       actualReps: null,
       completed: false,
     },
@@ -76,12 +76,34 @@ describe("EditExerciseDialog", () => {
     await userEvent.click(screen.getByRole("button", { name: /^Save$/i }));
 
     expect(onSubmit).toHaveBeenCalledTimes(1);
-    expect(onSubmit.mock.calls[0][0]).toMatchObject({
+    expect(onSubmit.mock.calls[0][0]).toEqual({
       name: "Standing calf",
-      muscleGroup: "Calves",
+      muscleGroup: "calves",
+      secondaryMuscles: [],
+      restTime: "60s",
       notes: "pause",
-      prescription: expect.stringContaining("40kg"),
+      sets: [
+        { setType: "working", repsMin: 12, repsMax: 12, weightKg: 40 },
+        { setType: "working", repsMin: 12, repsMax: 12, weightKg: 35 },
+      ],
     });
+  });
+
+  it("blocks saving while a set has an unreadable kg", async () => {
+    const onSubmit = vi.fn();
+    render(
+      <EditExerciseDialog
+        open
+        onOpenChange={vi.fn()}
+        exercise={baseExercise}
+        isSubmitting={false}
+        onSubmit={onSubmit}
+      />
+    );
+
+    await userEvent.clear(screen.getByLabelText("Set 1 weight in kg"));
+    await userEvent.type(screen.getByLabelText("Set 1 weight in kg"), "abc");
+    expect(screen.getByRole("button", { name: /^Save$/i })).toBeDisabled();
   });
 
   it("does not submit an empty name", async () => {

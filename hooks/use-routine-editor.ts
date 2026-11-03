@@ -22,6 +22,8 @@ import {
   createRoutine,
   updateRoutine,
 } from "@/features/routines/actions/routineActions";
+import { plannedToEditorSets } from "@/features/routines/editorSetRows";
+import { defaultPlannedSets } from "@/features/routines/sets";
 import { useDirtyState } from "./use-dirty-state";
 
 function reorder<T extends { id: string }>(
@@ -152,10 +154,8 @@ export function useRoutineEditor(
             id: createNewId(),
             name: "New exercise",
             muscleGroup: null,
-            prescription: "3x12",
-            plannedSets: 3,
-            targetReps: "12",
-            weight: null,
+            secondaryMuscles: [],
+            sets: plannedToEditorSets(defaultPlannedSets()),
             restTime: null,
             notes: null,
             sortOrder: day.exercises.length,

@@ -176,12 +176,103 @@ export function MuscleSelect({ id, value, onValueChange }: MuscleSelectProps) {
       </SelectTrigger>
       <SelectContent>
         {MUSCLE_GROUPS.map((muscle) => (
-          <SelectItem key={muscle} value={muscle}>
-            {muscle}
+          <SelectItem key={muscle.slug} value={muscle.slug}>
+            {muscle.label}
           </SelectItem>
         ))}
       </SelectContent>
     </Select>
+  );
+}
+
+interface SecondaryMusclesFieldProps {
+  id: string;
+  primary: string | null;
+  value: string[];
+  onValueChange: (value: string[]) => void;
+  className?: string;
+}
+
+/** Toggle chips for secondary muscles (count as half a set in weekly volume). */
+export function SecondaryMusclesField({
+  id,
+  primary,
+  value,
+  onValueChange,
+  className,
+}: SecondaryMusclesFieldProps) {
+  const [open, setOpen] = useState(value.length > 0);
+  const selectedSlugs = new Set(value);
+  const options = MUSCLE_GROUPS.filter(
+    (muscle) => muscle.slug !== primary && muscle.slug !== "other"
+  );
+  const selectedLabels = MUSCLE_GROUPS.filter((muscle) =>
+    selectedSlugs.has(muscle.slug)
+  ).map((muscle) => muscle.label);
+
+  const toggle = (slug: string) => {
+    onValueChange(
+      selectedSlugs.has(slug)
+        ? value.filter((item) => item !== slug)
+        : [...value, slug]
+    );
+  };
+
+  return (
+    <div className={cn("min-w-0", className)}>
+      <button
+        type="button"
+        id={id}
+        aria-expanded={open}
+        aria-controls={`${id}-options`}
+        onClick={() => setOpen((current) => !current)}
+        className="text-muted-foreground hover:text-foreground flex min-h-9 items-center gap-1 text-xs"
+      >
+        <ChevronDown
+          className={cn(
+            "h-3.5 w-3.5 transition-transform",
+            open && "rotate-180"
+          )}
+          aria-hidden
+        />
+        Also works
+        {selectedLabels.length > 0 ? (
+          <span className="text-foreground truncate">
+            : {selectedLabels.join(", ")}
+          </span>
+        ) : (
+          <span>(optional)</span>
+        )}
+      </button>
+      {open ? (
+        <div
+          id={`${id}-options`}
+          role="group"
+          aria-label="Secondary muscles"
+          className="mt-1 flex flex-wrap gap-1.5"
+        >
+          {options.map((muscle) => {
+            const selected = selectedSlugs.has(muscle.slug);
+            return (
+              <button
+                key={muscle.slug}
+                type="button"
+                aria-pressed={selected}
+                onClick={() => toggle(muscle.slug)}
+                className={cn(
+                  "min-h-8 rounded-full border px-2.5 text-xs transition-colors",
+                  selected
+                    ? "border-primary bg-primary/10 text-foreground"
+                    : "border-border text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {muscle.label}
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
+    </div>
   );
 }
 

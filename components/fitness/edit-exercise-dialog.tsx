@@ -13,6 +13,10 @@ import type { Exercise } from "@/lib/mock-data";
 import type { EditorExercise } from "@/features/routines/editorTypes";
 import { exerciseToEditorDraft } from "@/features/routines/exerciseDraft";
 import type { UpdateExerciseInDayInput } from "@/features/routines/actions/sessionActions";
+import {
+  editorSetsToPlanned,
+  validateEditorSets,
+} from "@/features/routines/editorSetRows";
 import { useEditorSetRows } from "@/hooks/use-editor-set-rows";
 import { Button } from "./button";
 import { EditorSetRowsField } from "./editor-set-rows-field";
@@ -22,6 +26,7 @@ import {
   EditorTextField,
   MuscleSelect,
   RestDurationField,
+  SecondaryMusclesField,
 } from "./routine-editor-fields";
 
 export interface EditExerciseDialogProps {
@@ -52,16 +57,16 @@ export function EditExerciseDialog({
     patchDraft
   );
 
+  const hasSetErrors = validateEditorSets(draft.sets).length > 0;
+
   const handleSubmit = () => {
-    if (!draft.name.trim()) return;
+    if (!draft.name.trim() || hasSetErrors) return;
 
     onSubmit({
       name: draft.name.trim(),
       muscleGroup: draft.muscleGroup,
-      prescription: draft.prescription,
-      plannedSets: draft.plannedSets,
-      targetReps: draft.targetReps,
-      weight: draft.weight,
+      secondaryMuscles: draft.secondaryMuscles,
+      sets: editorSetsToPlanned(draft.sets),
       restTime: draft.restTime,
       notes: draft.notes,
     });
@@ -104,6 +109,14 @@ export function EditExerciseDialog({
               onValueChange={(restTime) => patchDraft({ restTime })}
             />
           </div>
+          <SecondaryMusclesField
+            id={`${exercise.id}-edit-secondary`}
+            primary={draft.muscleGroup}
+            value={draft.secondaryMuscles}
+            onValueChange={(secondaryMuscles) =>
+              patchDraft({ secondaryMuscles })
+            }
+          />
 
           <EditorSetRowsField
             idPrefix={`${exercise.id}-edit`}
@@ -132,7 +145,7 @@ export function EditExerciseDialog({
           </Button>
           <Button
             type="button"
-            disabled={isSubmitting || !draft.name.trim()}
+            disabled={isSubmitting || !draft.name.trim() || hasSetErrors}
             onClick={handleSubmit}
           >
             {isSubmitting ? "Saving…" : "Save"}

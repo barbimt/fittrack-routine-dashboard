@@ -6,11 +6,13 @@ function exercise(overrides: Partial<EditorExercise> = {}): EditorExercise {
   return {
     id: "11111111-1111-4111-8111-111111111111",
     name: "Hip Thrust",
-    muscleGroup: "Glutes",
-    prescription: "4x10",
-    plannedSets: 4,
-    targetReps: "10",
-    weight: "60kg",
+    muscleGroup: "glutes",
+    secondaryMuscles: [],
+    sets: Array.from({ length: 4 }, () => ({
+      setType: "working" as const,
+      reps: "10",
+      weightKg: "60",
+    })),
     restTime: null,
     notes: null,
     sortOrder: 0,
@@ -41,7 +43,11 @@ describe("computeRoutinePatch", () => {
   it("upserts only the exercise whose field changed", () => {
     const baseline = [day()];
     const current = structuredClone(baseline);
-    current[0].exercises[0].plannedSets = 5;
+    current[0].exercises[0].sets.push({
+      setType: "working",
+      reps: "10",
+      weightKg: "60",
+    });
 
     const patch = computeRoutinePatch("routine-1", baseline, current);
 
@@ -49,28 +55,45 @@ describe("computeRoutinePatch", () => {
     expect(patch.upsertExercises[0]).toMatchObject({
       id: baseline[0].exercises[0].id,
       dayId: baseline[0].id,
-      plannedSets: 5,
       sortOrder: 0,
     });
+    expect(patch.upsertExercises[0].sets).toHaveLength(5);
     expect(patch.upsertDays).toHaveLength(0);
     expect(patch.deleteDayIds).toHaveLength(0);
     expect(patch.deleteExerciseIds).toHaveLength(0);
   });
 
-  it("detects prescription text changes", () => {
+  it("sends parsed sets when a single set changes", () => {
     const baseline = [day()];
     const current = structuredClone(baseline);
-    current[0].exercises[0].prescription = "1x12 15kg-3x12 20kg";
-    current[0].exercises[0].plannedSets = 4;
-    current[0].exercises[0].weight = null;
+    current[0].exercises[0].sets[0] = {
+      setType: "warmup",
+      reps: "8-10",
+      weightKg: "7,5",
+    };
 
     const patch = computeRoutinePatch("routine-1", baseline, current);
 
     expect(patch.upsertExercises).toHaveLength(1);
+    expect(patch.upsertExercises[0].sets[0]).toEqual({
+      setType: "warmup",
+      repsMin: 8,
+      repsMax: 10,
+      weightKg: 7.5,
+    });
+    expect(patch.upsertExercises[0].sets[1].weightKg).toBe(60);
+  });
+
+  it("detects secondary muscle changes", () => {
+    const baseline = [day()];
+    const current = structuredClone(baseline);
+    current[0].exercises[0].secondaryMuscles = ["hamstrings"];
+
+    const patch = computeRoutinePatch("routine-1", baseline, current);
+
     expect(patch.upsertExercises[0]).toMatchObject({
-      prescription: "1x12 15kg-3x12 20kg",
-      plannedSets: 4,
-      weight: null,
+      muscleGroup: "glutes",
+      secondaryMuscles: ["hamstrings"],
     });
   });
 

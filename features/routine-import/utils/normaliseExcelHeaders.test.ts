@@ -36,8 +36,8 @@ describe("mapHeaderRow", () => {
   });
 
   it("collects unknown headers", () => {
-    const { unknownHeaders } = mapHeaderRow(["Exercise", "Rest Time"]);
-    expect(unknownHeaders).toEqual(["REST TIME"]);
+    const { unknownHeaders } = mapHeaderRow(["Exercise", "Tempo"]);
+    expect(unknownHeaders).toEqual(["TEMPO"]);
   });
 
   it("keeps first occurrence when duplicate canonical columns appear", () => {

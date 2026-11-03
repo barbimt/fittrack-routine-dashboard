@@ -18,7 +18,9 @@
     "supabase:stop": "supabase stop",
     "supabase:status": "supabase status",
     "supabase:reset": "supabase db reset",
-    "doctor": "npx react-doctor@latest"
+    "doctor": "npx react-doctor@latest",
+    "template:generate": "tsx tools/generate-routine-template.ts",
+    "db:backfill-sets": "tsx --env-file=.env.local tools/backfill-exercise-sets.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -70,7 +72,7 @@
     "recharts": "2.15.0",
     "tailwind-merge": "^3.3.1",
     "vaul": "^1.1.2",
-    "xlsx": "^0.18.5",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
     "zod": "^3.24.1"
   },
   "devDependencies": {
@@ -86,11 +88,13 @@
     "eslint": "^9.39.4",
     "eslint-config-next": "^16.2.7",
     "eslint-config-prettier": "^10.1.8",
+    "exceljs": "^4.4.0",
     "happy-dom": "^20.10.1",
     "postcss": "^8.5",
     "prettier": "^3.8.3",
     "prettier-plugin-tailwindcss": "^0.8.0",
     "tailwindcss": "^4.2.0",
+    "tsx": "^4.23.15",
     "tw-animate-css": "1.3.3",
     "typescript": "5.7.3",
     "vitest": "^4.1.8"
