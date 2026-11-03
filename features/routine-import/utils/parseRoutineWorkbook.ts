@@ -25,7 +25,7 @@ const REQUIRED_LABELS = REQUIRED_COLUMNS.map((col) => COLUMN_LABELS[col]).join(
 
 /** Template helper tabs, never routine days. */
 const IGNORED_SHEET =
-  /^(how to|instructions?|example|ejemplo|c[oó]mo|guide|gu[ií]a)\b/i;
+  /^(how to|instructions?|example|ejemplo|c[oó]mo|guide|gu[ií]a|lists?)\b/i;
 
 const ALL_COLUMNS: CanonicalColumn[] = [
   ...REQUIRED_COLUMNS,

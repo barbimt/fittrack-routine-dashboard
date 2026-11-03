@@ -13,13 +13,13 @@ describe("feature catalog", () => {
     vi.unstubAllEnvs();
   });
 
-  it("documents week and progress as WIP by default", () => {
+  it("keeps week overview off and releases progress by default", () => {
     expect(FEATURE_CATALOG.weekOverview.defaultRelease).toBe("off");
-    expect(FEATURE_CATALOG.progress.defaultRelease).toBe("off");
+    expect(FEATURE_CATALOG.progress.defaultRelease).toBe("on");
     expect(FEATURE_CATALOG.weekOverview.audience).toBe("authenticated");
     expect(FEATURE_CATALOG.progress.audience).toBe("authenticated");
     expect(isFeatureReleased("weekOverview")).toBe(false);
-    expect(isFeatureReleased("progress")).toBe(false);
+    expect(isFeatureReleased("progress")).toBe(true);
   });
 
   it("honours NEXT_PUBLIC_FEATURE_* env overrides", () => {
@@ -53,7 +53,11 @@ describe("feature catalog", () => {
       ],
       { isAuthenticated: true }
     );
-    expect(items.map((item) => item.href)).toEqual(["/", "/editor"]);
+    expect(items.map((item) => item.href)).toEqual([
+      "/",
+      "/progress",
+      "/editor",
+    ]);
   });
 
   it("keeps authenticated features out of the public nav even if released", () => {

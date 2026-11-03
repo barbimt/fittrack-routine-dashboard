@@ -58,9 +58,10 @@ Phases for growing the app. Update checkboxes when work ships.
 
 ## Phase 5 — Analytics
 
-- [ ] Weekly volume / muscle group stats from real completion data
-- [ ] Wire `/week` and `/progress` to `workout_sessions` / set logs
-- [ ] Charts on `/progress` (recharts in package.json — use only if needed)
+- [x] Weekly volume, muscle groups, strength, and an exportable report from real set logs
+- [x] Wire `/progress` to `workout_sessions` / set logs
+- [ ] Wire `/week` to `workout_sessions` / set logs
+- [x] Charts on `/progress` (Recharts)
 
 ## Phase 6 — Product polish
 

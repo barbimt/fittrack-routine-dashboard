@@ -24,6 +24,11 @@ import type {
 } from "../types";
 import type { TrainingDay } from "@/lib/mock-data";
 
+function revalidateWorkoutViews() {
+  revalidatePath("/");
+  revalidatePath("/progress");
+}
+
 export type DaySessionResult =
   | {
       ok: true;
@@ -420,7 +425,7 @@ export async function addExerciseToDay(
     await fetchSetLogsForSession(supabase, user.id, sessionId)
   ).filter((log) => log.routine_exercise_id === exercise.id);
 
-  revalidatePath("/");
+  revalidateWorkoutViews();
   revalidatePath("/editor");
 
   return { ok: true, exercise, setLogs };
@@ -590,7 +595,7 @@ export async function updateExerciseInDay(
     await fetchSetLogsForSession(supabase, user.id, sessionId)
   ).filter((log) => log.routine_exercise_id === exercise.id);
 
-  revalidatePath("/");
+  revalidateWorkoutViews();
   revalidatePath("/editor");
 
   return { ok: true, exercise, setLogs };
@@ -663,7 +668,7 @@ export async function updateSetLogProgress(
   }
 
   // Keep Today fresh when navigating away and back (client router cache).
-  revalidatePath("/");
+  revalidateWorkoutViews();
   return { ok: true };
 }
 
@@ -712,7 +717,7 @@ export async function resetExerciseSets(
     return { ok: false, error: error.message };
   }
 
-  revalidatePath("/");
+  revalidateWorkoutViews();
   return { ok: true };
 }
 
@@ -747,7 +752,7 @@ export async function resetDaySession(sessionId: string): Promise<ResetResult> {
     return { ok: false, error: sessionError.message };
   }
 
-  revalidatePath("/");
+  revalidateWorkoutViews();
   return { ok: true };
 }
 
@@ -776,7 +781,7 @@ export async function completeDaySession(
     return { ok: false, error: error.message };
   }
 
-  revalidatePath("/");
+  revalidateWorkoutViews();
   return { ok: true };
 }
 
@@ -803,6 +808,6 @@ export async function reopenDaySession(
     return { ok: false, error: error.message };
   }
 
-  revalidatePath("/");
+  revalidateWorkoutViews();
   return { ok: true };
 }
