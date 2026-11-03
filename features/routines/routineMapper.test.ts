@@ -400,9 +400,7 @@ describe("mapRoutineToTrainingDays", () => {
   it("applies column weight to simple prescriptions", () => {
     const exercise = mapRoutineToTrainingDays(routine)[0].exercises[0];
     expect(exercise.sets).toHaveLength(3);
-    expect(exercise.sets.every((set) => set.targetWeightKg === 40)).toBe(
-      true
-    );
+    expect(exercise.sets.every((set) => set.targetWeightKg === 40)).toBe(true);
     expect(exercise.prescription).toBe("3x10 40kg");
   });
 
@@ -512,7 +510,9 @@ describe("mapRoutineToTrainingDays", () => {
     };
 
     const exercise = mapRoutineToTrainingDays(noWeight)[0].exercises[0];
-    expect(exercise.sets.every((set) => set.targetWeightKg === null)).toBe(true);
+    expect(exercise.sets.every((set) => set.targetWeightKg === null)).toBe(
+      true
+    );
     expect(exercise.weight).toBe("—");
   });
 });

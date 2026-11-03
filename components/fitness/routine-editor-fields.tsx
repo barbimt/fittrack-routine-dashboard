@@ -229,7 +229,10 @@ export function SecondaryMusclesField({
         className="text-muted-foreground hover:text-foreground flex min-h-9 items-center gap-1 text-xs"
       >
         <ChevronDown
-          className={cn("h-3.5 w-3.5 transition-transform", open && "rotate-180")}
+          className={cn(
+            "h-3.5 w-3.5 transition-transform",
+            open && "rotate-180"
+          )}
           aria-hidden
         />
         Also works

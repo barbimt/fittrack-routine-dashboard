@@ -19,7 +19,9 @@ export function roundKg(value: number): number {
  * `45 lb`. Text without a number (`Bodyweight`, `TBD`) returns `kg: null` and
  * keeps the text in `rest`.
  */
-export function parseLoad(input: string | number | null | undefined): ParsedLoad {
+export function parseLoad(
+  input: string | number | null | undefined
+): ParsedLoad {
   if (typeof input === "number") {
     return {
       kg: Number.isFinite(input) && input >= 0 ? roundKg(input) : null,
@@ -47,7 +49,9 @@ export function parseLoad(input: string | number | null | undefined): ParsedLoad
     ? roundKg(isLb ? amount * LB_TO_KG : amount)
     : null;
 
-  const before = trimmed.slice(0, match.index).replace(/[~≈]|\bapprox\.?|\bup to\b|\bhasta\b/gi, "");
+  const before = trimmed
+    .slice(0, match.index)
+    .replace(/[~≈]|\bapprox\.?|\bup to\b|\bhasta\b/gi, "");
   const after = trimmed.slice(match.index + match[0].length);
   const rest = `${before} ${after}`.replace(/\s+/g, " ").trim();
 
@@ -58,7 +62,9 @@ export function parseLoad(input: string | number | null | undefined): ParsedLoad
   };
 }
 
-export function parseKg(input: string | number | null | undefined): number | null {
+export function parseKg(
+  input: string | number | null | undefined
+): number | null {
   return parseLoad(input).kg;
 }
 

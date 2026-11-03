@@ -10,8 +10,7 @@ export function exercisePlannedSetsFromView(exercise: Exercise): PlannedSet[] {
   return exercise.sets.map((set) => ({
     setType: set.setType ?? "working",
     repsMin: set.targetReps > 0 ? set.targetReps : null,
-    repsMax:
-      set.targetRepsMax ?? (set.targetReps > 0 ? set.targetReps : null),
+    repsMax: set.targetRepsMax ?? (set.targetReps > 0 ? set.targetReps : null),
     weightKg:
       set.targetWeightKg !== undefined ? set.targetWeightKg : fallbackKg,
   }));

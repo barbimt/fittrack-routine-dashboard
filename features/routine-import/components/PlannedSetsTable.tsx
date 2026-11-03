@@ -57,7 +57,8 @@ export function PlannedSetsTable({
               <span
                 className={cn(
                   "inline-flex h-6 min-w-6 items-center justify-center rounded-md px-1 text-xs font-semibold tabular-nums",
-                  row.set.setType === "warmup" && "bg-warning/20 text-foreground",
+                  row.set.setType === "warmup" &&
+                    "bg-warning/20 text-foreground",
                   row.set.setType === "drop" && "bg-primary/10 text-primary",
                   row.set.setType === "working" && "text-muted-foreground"
                 )}
@@ -69,7 +70,9 @@ export function PlannedSetsTable({
               {formatReps(row.set.repsMin, row.set.repsMax) ?? "—"}
             </td>
             <td className="text-foreground py-1.5 text-right tabular-nums">
-              {row.set.weightKg !== null ? formatKgNumber(row.set.weightKg) : "—"}
+              {row.set.weightKg !== null
+                ? formatKgNumber(row.set.weightKg)
+                : "—"}
             </td>
           </tr>
         ))}

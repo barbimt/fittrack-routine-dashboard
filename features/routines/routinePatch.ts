@@ -40,7 +40,10 @@ export function isEmptyPatch(patch: RoutineEditPatch): boolean {
   );
 }
 
-function sameSetInputs(a: EditorExercise["sets"], b: EditorExercise["sets"]): boolean {
+function sameSetInputs(
+  a: EditorExercise["sets"],
+  b: EditorExercise["sets"]
+): boolean {
   return (
     a.length === b.length &&
     a.every(

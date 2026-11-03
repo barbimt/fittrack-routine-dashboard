@@ -33,7 +33,10 @@ describe("weight", () => {
   });
 
   it("converts lb and keeps leftover words", () => {
-    expect(parseLoad("45 lb")).toMatchObject({ kg: 20.41, convertedFromLb: true });
+    expect(parseLoad("45 lb")).toMatchObject({
+      kg: 20.41,
+      convertedFromLb: true,
+    });
     expect(parseLoad("8kg each")).toMatchObject({ kg: 8, rest: "each" });
   });
 

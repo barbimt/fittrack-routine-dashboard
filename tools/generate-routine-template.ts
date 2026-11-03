@@ -9,7 +9,11 @@ import { MUSCLE_GROUPS } from "../features/routines/muscleGroups";
 import { COLUMN_LABELS } from "../features/routine-import/types";
 import { ROUTINE_TEMPLATE_FILENAME } from "../features/routine-import/template";
 
-const OUTPUT = resolve(process.cwd(), "public/templates", ROUTINE_TEMPLATE_FILENAME);
+const OUTPUT = resolve(
+  process.cwd(),
+  "public/templates",
+  ROUTINE_TEMPLATE_FILENAME
+);
 const MAX_ROWS = 60;
 const BRAND = "FF4F46E5";
 
@@ -26,12 +30,32 @@ const HEADERS = [
     note: "Kg, numbers only (20 or 7.5). Used for every set. Leave empty if SETS x REPS has the kg or for bodyweight.",
   },
   { key: "MUSCLE", width: 16, note: "Main muscle. Pick from the list." },
-  { key: "SECONDARY", width: 16, note: "Optional. Another muscle this exercise works." },
-  { key: "REST", width: 11, note: "Rest between sets, in seconds. Example: 90." },
-  { key: "NOTES", width: 34, note: "Anything else: tempo, per leg, machine number…" },
+  {
+    key: "SECONDARY",
+    width: 16,
+    note: "Optional. Another muscle this exercise works.",
+  },
+  {
+    key: "REST",
+    width: 11,
+    note: "Rest between sets, in seconds. Example: 90.",
+  },
+  {
+    key: "NOTES",
+    width: 34,
+    note: "Anything else: tempo, per leg, machine number…",
+  },
 ] as const;
 
-type Row = [string, string, number | string, string, string, number | string, string];
+type Row = [
+  string,
+  string,
+  number | string,
+  string,
+  string,
+  number | string,
+  string,
+];
 
 const DAYS: { name: string; rows: Row[] }[] = [
   {
@@ -78,7 +102,11 @@ function addDaySheet(
 
   const headerRow = sheet.getRow(1);
   headerRow.font = { bold: true, color: { argb: "FFFFFFFF" } };
-  headerRow.fill = { type: "pattern", pattern: "solid", fgColor: { argb: BRAND } };
+  headerRow.fill = {
+    type: "pattern",
+    pattern: "solid",
+    fgColor: { argb: BRAND },
+  };
   headerRow.height = 22;
   HEADERS.forEach((header, index) => {
     headerRow.getCell(index + 1).note = header.note;
@@ -126,15 +154,30 @@ function addHowToSheet(workbook: ExcelJS.Workbook) {
   sheet.getColumn(1).width = 90;
   const lines: [string, boolean][] = [
     ["How to fill this template", true],
-    ["1. One tab = one training day. Rename tabs like “Day 1 - Legs”. Copy a tab to add a day.", false],
-    ["2. One row = one exercise. Only EXERCISE and SETS x REPS are required.", false],
-    ["3. Save as .xlsx and upload it in FitTrack. You can check everything before saving.", false],
+    [
+      "1. One tab = one training day. Rename tabs like “Day 1 - Legs”. Copy a tab to add a day.",
+      false,
+    ],
+    [
+      "2. One row = one exercise. Only EXERCISE and SETS x REPS are required.",
+      false,
+    ],
+    [
+      "3. Save as .xlsx and upload it in FitTrack. You can check everything before saving.",
+      false,
+    ],
     ["", false],
     ["How to write SETS x REPS", true],
     ["3x12  →  3 sets of 12 reps", false],
     ["3x8-10  →  3 sets of 8 to 10 reps", false],
-    ["1x12 15kg-3x12 20kg  →  1 set with 15 kg, then 3 sets with 20 kg (leave WEIGHT empty)", false],
-    ["W1x15 20kg-3x8 60kg  →  1 warm-up set, then 3 working sets. D = drop set", false],
+    [
+      "1x12 15kg-3x12 20kg  →  1 set with 15 kg, then 3 sets with 20 kg (leave WEIGHT empty)",
+      false,
+    ],
+    [
+      "W1x15 20kg-3x8 60kg  →  1 warm-up set, then 3 working sets. D = drop set",
+      false,
+    ],
     ["", false],
     ["This tab is not imported.", false],
   ];
@@ -153,7 +196,17 @@ async function main() {
   for (const day of DAYS) {
     addDaySheet(workbook, day.name, day.rows, muscleRange);
   }
-  workbook.views = [{ x: 0, y: 0, width: 20000, height: 12000, firstSheet: 0, activeTab: 2, visibility: "visible" }];
+  workbook.views = [
+    {
+      x: 0,
+      y: 0,
+      width: 20000,
+      height: 12000,
+      firstSheet: 0,
+      activeTab: 2,
+      visibility: "visible",
+    },
+  ];
 
   mkdirSync(dirname(OUTPUT), { recursive: true });
   await workbook.xlsx.writeFile(OUTPUT);

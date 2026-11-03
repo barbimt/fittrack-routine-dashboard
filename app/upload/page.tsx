@@ -77,7 +77,10 @@ export default function UploadPage() {
           </ol>
           <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <Button asChild className="w-full gap-2 sm:w-auto">
-              <a href={ROUTINE_TEMPLATE_URL} download={ROUTINE_TEMPLATE_FILENAME}>
+              <a
+                href={ROUTINE_TEMPLATE_URL}
+                download={ROUTINE_TEMPLATE_FILENAME}
+              >
                 <Download className="h-4 w-4" aria-hidden />
                 Download template
               </a>

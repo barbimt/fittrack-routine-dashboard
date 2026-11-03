@@ -32,8 +32,8 @@ export function ImportPreview({ routine }: ImportPreviewProps) {
         </p>
         {rowWarnings.length > 0 ? (
           <p className="text-foreground mt-1 text-sm">
-            {plural(rowWarnings.length, "exercise")} need a quick check. You
-            can import now and fix them in the editor.
+            {plural(rowWarnings.length, "exercise")} need a quick check. You can
+            import now and fix them in the editor.
           </p>
         ) : null}
       </div>

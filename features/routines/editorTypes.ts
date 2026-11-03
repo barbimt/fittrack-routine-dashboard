@@ -1,5 +1,10 @@
 import type { RoutineWithDays } from "./types";
-import { hasSetRows, legacyExercisePlan, mergeNotes, exercisePlannedSets } from "./exercisePlan";
+import {
+  hasSetRows,
+  legacyExercisePlan,
+  mergeNotes,
+  exercisePlannedSets,
+} from "./exercisePlan";
 import { toMuscleGroup } from "./muscleGroups";
 import type { SetType } from "./sets";
 import { plannedToEditorSets } from "./editorSetRows";

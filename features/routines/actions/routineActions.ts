@@ -99,11 +99,7 @@ export async function createRoutine(
     const exercises = [];
     for (const [exerciseIndex, exercise] of day.exercises.entries()) {
       const validated = validateExerciseUpsert(
-        toExerciseUpsert(
-          exercise,
-          day.id,
-          exercise.sortOrder ?? exerciseIndex
-        )
+        toExerciseUpsert(exercise, day.id, exercise.sortOrder ?? exerciseIndex)
       );
       if (!validated.ok) return validated;
       const { fields, sets } = validated.value;

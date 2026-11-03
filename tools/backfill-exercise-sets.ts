@@ -9,7 +9,10 @@
  * Safe to re-run: exercises that already have set rows are skipped.
  */
 import { createClient } from "@supabase/supabase-js";
-import { legacyExercisePlan, mergeNotes } from "../features/routines/exercisePlan";
+import {
+  legacyExercisePlan,
+  mergeNotes,
+} from "../features/routines/exercisePlan";
 import { buildExerciseSetRows } from "../features/routines/exerciseSets.server";
 import { setsToPrescription } from "../features/routines/sets";
 
@@ -96,7 +99,9 @@ async function main() {
           .update({ notes })
           .eq("id", exercise.id);
         if (updateError) {
-          console.error(`  ! notes not updated for ${exercise.id}: ${updateError.message}`);
+          console.error(
+            `  ! notes not updated for ${exercise.id}: ${updateError.message}`
+          );
         }
       }
       converted += 1;

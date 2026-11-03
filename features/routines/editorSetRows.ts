@@ -17,7 +17,11 @@ export function plannedToEditorSets(sets: PlannedSet[]): EditorSetInput[] {
   }));
 }
 
-export type EditorSetIssue = { index: number; field: "reps" | "weightKg"; message: string };
+export type EditorSetIssue = {
+  index: number;
+  field: "reps" | "weightKg";
+  message: string;
+};
 
 function parseWeightInput(raw: string): number | null | "invalid" {
   const trimmed = raw.trim();
@@ -63,7 +67,9 @@ export function editorSetsToPlanned(sets: EditorSetInput[]): PlannedSet[] {
   });
 }
 
-export function exerciseToSetRows(exercise: Pick<EditorExercise, "id" | "sets">): EditorSetRow[] {
+export function exerciseToSetRows(
+  exercise: Pick<EditorExercise, "id" | "sets">
+): EditorSetRow[] {
   return exercise.sets.map((set, index) => ({
     ...set,
     id: stableSetRowId(exercise.id, index),
@@ -82,7 +88,8 @@ export function setRowsToExercisePatch(
 
 export function defaultSetRow(from?: EditorSetInput): EditorSetInput {
   return {
-    setType: from?.setType === "warmup" ? "working" : (from?.setType ?? "working"),
+    setType:
+      from?.setType === "warmup" ? "working" : (from?.setType ?? "working"),
     reps: from?.reps?.trim() ? from.reps : "12",
     weightKg: from?.weightKg ?? "",
   };
@@ -97,7 +104,10 @@ export function updateEditorSetRow(
 }
 
 export function addEditorSetRow(rows: EditorSetRow[]): EditorSetRow[] {
-  return [...rows, { ...defaultSetRow(rows[rows.length - 1]), id: `new-${rows.length}` }];
+  return [
+    ...rows,
+    { ...defaultSetRow(rows[rows.length - 1]), id: `new-${rows.length}` },
+  ];
 }
 
 export function removeEditorSetRow(

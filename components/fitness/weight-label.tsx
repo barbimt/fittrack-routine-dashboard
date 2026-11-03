@@ -35,7 +35,9 @@ export function SetTargetLabel({
         <span
           className={cn(
             "rounded px-1 text-[10px] font-semibold tracking-wide uppercase",
-            setType === "warmup" ? "bg-warning/20 text-foreground" : "bg-primary/10 text-primary"
+            setType === "warmup"
+              ? "bg-warning/20 text-foreground"
+              : "bg-primary/10 text-primary"
           )}
         >
           {setType === "warmup" ? "Warm-up" : "Drop"}

@@ -27,7 +27,10 @@ export type PlannedSet = {
 };
 
 export function isSetType(value: unknown): value is SetType {
-  return typeof value === "string" && (SET_TYPES as readonly string[]).includes(value);
+  return (
+    typeof value === "string" &&
+    (SET_TYPES as readonly string[]).includes(value)
+  );
 }
 
 export function formatReps(
@@ -64,7 +67,9 @@ function sameSet(a: PlannedSet, b: PlannedSet): boolean {
 }
 
 /** Display labels: warm-ups are "W", working sets count 1, 2, 3 and drops add "D" (e.g. "3D"). */
-export function setLabels(sets: readonly Pick<PlannedSet, "setType">[]): string[] {
+export function setLabels(
+  sets: readonly Pick<PlannedSet, "setType">[]
+): string[] {
   let working = 0;
   return sets.map((set) => {
     if (set.setType === "warmup") return "W";
@@ -111,7 +116,8 @@ export function formatSetBlockLines(sets: PlannedSet[]): string[] {
   return groupSets(sets).map((block) => {
     const reps = formatReps(block.repsMin, block.repsMax) ?? "?";
     const weight = formatKg(block.weightKg);
-    const type = block.setType === "working" ? "" : ` (${SET_TYPE_LABELS[block.setType]})`;
+    const type =
+      block.setType === "working" ? "" : ` (${SET_TYPE_LABELS[block.setType]})`;
     return `${block.count} × ${reps}${weight ? ` · ${weight}` : ""}${type}`;
   });
 }
@@ -141,12 +147,18 @@ export function formatSetsSummary(allSets: PlannedSet[]): string {
       : count,
   ];
 
-  const repsValues = [...new Set(sets.map((set) => formatReps(set.repsMin, set.repsMax)))];
+  const repsValues = [
+    ...new Set(sets.map((set) => formatReps(set.repsMin, set.repsMax))),
+  ];
   if (repsValues.length === 1 && repsValues[0]) {
     parts.push(`${repsValues[0]} reps`);
   } else if (repsValues.length > 1) {
-    const mins = sets.flatMap((set) => (set.repsMin !== null ? [set.repsMin] : []));
-    const maxs = sets.flatMap((set) => (set.repsMax !== null ? [set.repsMax] : []));
+    const mins = sets.flatMap((set) =>
+      set.repsMin !== null ? [set.repsMin] : []
+    );
+    const maxs = sets.flatMap((set) =>
+      set.repsMax !== null ? [set.repsMax] : []
+    );
     if (mins.length > 0 && maxs.length > 0) {
       parts.push(`${Math.min(...mins)}–${Math.max(...maxs)} reps`);
     }

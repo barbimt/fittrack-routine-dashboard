@@ -31,7 +31,12 @@ describe("plannedToEditorSets / editorSetsToPlanned", () => {
     const planned = [
       { setType: "warmup" as const, repsMin: 15, repsMax: 15, weightKg: 20 },
       { setType: "working" as const, repsMin: 8, repsMax: 10, weightKg: 7.5 },
-      { setType: "working" as const, repsMin: null, repsMax: null, weightKg: null },
+      {
+        setType: "working" as const,
+        repsMin: null,
+        repsMax: null,
+        weightKg: null,
+      },
     ];
     const editor = plannedToEditorSets(planned);
     expect(editor).toEqual([
@@ -49,14 +54,23 @@ describe("plannedToEditorSets / editorSetsToPlanned", () => {
 
 describe("validateEditorSets", () => {
   it("returns no issues for valid rows", () => {
-    expect(validateEditorSets([input("12", "20"), input("8-10", ""), input("", "")])).toEqual([]);
+    expect(
+      validateEditorSets([input("12", "20"), input("8-10", ""), input("", "")])
+    ).toEqual([]);
   });
 
   it("explains how to fix reps and kg", () => {
-    const issues = validateEditorSets([input("twelve", "20"), input("12", "20kg heavy")]);
+    const issues = validateEditorSets([
+      input("twelve", "20"),
+      input("12", "20kg heavy"),
+    ]);
     expect(issues).toEqual([
       { index: 0, field: "reps", message: expect.stringContaining("Set 1") },
-      { index: 1, field: "weightKg", message: expect.stringContaining("kg as a number") },
+      {
+        index: 1,
+        field: "weightKg",
+        message: expect.stringContaining("kg as a number"),
+      },
     ]);
   });
 
@@ -67,8 +81,12 @@ describe("validateEditorSets", () => {
 
 describe("exerciseToSetRows", () => {
   it("keeps stable row ids across re-hydrates so weight inputs keep focus", () => {
-    const first = exerciseToSetRows(exercise([input("12", "60"), input("12", "60")]));
-    const second = exerciseToSetRows(exercise([input("12", "55"), input("12", "60")]));
+    const first = exerciseToSetRows(
+      exercise([input("12", "60"), input("12", "60")])
+    );
+    const second = exerciseToSetRows(
+      exercise([input("12", "55"), input("12", "60")])
+    );
     expect(first.map((item) => item.id)).toEqual(["ex-1-set-0", "ex-1-set-1"]);
     expect(second.map((item) => item.id)).toEqual(first.map((item) => item.id));
   });
@@ -90,9 +108,15 @@ describe("update / add / remove editor set rows", () => {
   });
 
   it("appends a copy of the last row as a working set", () => {
-    const result = addEditorSetRow([{ id: "a", ...input("15", "20", "warmup") }]);
+    const result = addEditorSetRow([
+      { id: "a", ...input("15", "20", "warmup") },
+    ]);
     expect(result).toHaveLength(2);
-    expect(result[1]).toMatchObject({ setType: "working", reps: "15", weightKg: "20" });
+    expect(result[1]).toMatchObject({
+      setType: "working",
+      reps: "15",
+      weightKg: "20",
+    });
   });
 
   it("keeps one empty row when removing the last set", () => {

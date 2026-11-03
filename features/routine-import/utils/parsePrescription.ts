@@ -29,7 +29,8 @@ const BLOCK_START = /(?<=^|[\s\-+,;/|])(?:w|d)?\s*\d+\s*x\s*\d/gi;
 const BLOCK =
   /^(?:(w|d)\s*)?(\d+)\s*x\s*(\d+)(?:\s*(?:-|a|to)\s*(\d+)(?!\s*x))?\s*(.*)$/i;
 
-const TIME_UNIT = /^(sec|secs|seconds?|s|min|mins|minutes?|seg|segundos?)\b(.*)$/i;
+const TIME_UNIT =
+  /^(sec|secs|seconds?|s|min|mins|minutes?|seg|segundos?)\b(.*)$/i;
 const SET_COUNT_ONLY = /^(\d{1,2})$/;
 
 function formatRange(min: number, max: number): string {
@@ -37,14 +38,14 @@ function formatRange(min: number, max: number): string {
 }
 
 function splitBlocks(text: string): { lead: string; blocks: string[] } {
-  const starts = [...text.matchAll(BLOCK_START)].map((match) => match.index ?? 0);
+  const starts = [...text.matchAll(BLOCK_START)].map(
+    (match) => match.index ?? 0
+  );
   if (starts.length === 0) return { lead: text.trim(), blocks: [] };
 
   const lead = text.slice(0, starts[0]).replace(SEPARATORS, "");
   const blocks = starts.map((start, index) =>
-    text
-      .slice(start, starts[index + 1] ?? text.length)
-      .replace(SEPARATORS, "")
+    text.slice(start, starts[index + 1] ?? text.length).replace(SEPARATORS, "")
   );
   return { lead, blocks };
 }

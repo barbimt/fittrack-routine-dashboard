@@ -28,11 +28,18 @@ describe("parsePrescriptionToSets", () => {
       working(10, 60),
       working(10, 60),
     ]);
-    expect(parsePrescriptionToSets("1x10", 7.5).sets).toEqual([working(10, 7.5)]);
+    expect(parsePrescriptionToSets("1x10", 7.5).sets).toEqual([
+      working(10, 7.5),
+    ]);
   });
 
   it("reads rep ranges", () => {
-    const range = { setType: "working", repsMin: 8, repsMax: 10, weightKg: null };
+    const range = {
+      setType: "working",
+      repsMin: 8,
+      repsMax: 10,
+      weightKg: null,
+    };
     expect(parsePrescriptionToSets("2x8-10").sets).toEqual([range, range]);
   });
 

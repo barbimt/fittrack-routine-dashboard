@@ -95,7 +95,12 @@ describe("SetRow", () => {
   it("shows a rep range and a warm-up badge", () => {
     render(
       <SetRow
-        set={{ ...baseSet, setType: "warmup", targetReps: 8, targetRepsMax: 10 }}
+        set={{
+          ...baseSet,
+          setType: "warmup",
+          targetReps: 8,
+          targetRepsMax: 10,
+        }}
         readOnly
       />
     );

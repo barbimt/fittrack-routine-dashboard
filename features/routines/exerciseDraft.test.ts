@@ -14,8 +14,20 @@ function exercise(overrides: Partial<Exercise> = {}): Exercise {
     restTime: "90s",
     notes: "Brace",
     sets: [
-      { id: "s1", setNumber: 1, targetReps: 12, actualReps: null, completed: false },
-      { id: "s2", setNumber: 2, targetReps: 12, actualReps: null, completed: false },
+      {
+        id: "s1",
+        setNumber: 1,
+        targetReps: 12,
+        actualReps: null,
+        completed: false,
+      },
+      {
+        id: "s2",
+        setNumber: 2,
+        targetReps: 12,
+        actualReps: null,
+        completed: false,
+      },
     ],
     ...overrides,
   };

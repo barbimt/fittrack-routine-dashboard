@@ -42,9 +42,15 @@ export function legacyExercisePlan(exercise: LegacyExerciseFields): {
   sets: PlannedSet[];
   extraNotes: string[];
 } {
-  const parsed = parsePrescriptionToSets(exercise.prescription, exercise.weight);
+  const parsed = parsePrescriptionToSets(
+    exercise.prescription,
+    exercise.weight
+  );
   if (parsed.ok) {
-    return { sets: parsed.sets, extraNotes: [...parsed.notes, ...parsed.unreadable] };
+    return {
+      sets: parsed.sets,
+      extraNotes: [...parsed.notes, ...parsed.unreadable],
+    };
   }
 
   const count =
@@ -73,15 +79,21 @@ export function legacyExercisePlan(exercise: LegacyExerciseFields): {
   };
 }
 
-export function hasSetRows(exercise: Pick<RoutineExercise, "routine_exercise_sets">): boolean {
+export function hasSetRows(
+  exercise: Pick<RoutineExercise, "routine_exercise_sets">
+): boolean {
   return (exercise.routine_exercise_sets?.length ?? 0) > 0;
 }
 
 /** Planned sets for an exercise: stored rows when present, else parsed legacy columns. */
 export function exercisePlannedSets(
-  exercise: LegacyExerciseFields & Pick<RoutineExercise, "routine_exercise_sets">
+  exercise: LegacyExerciseFields &
+    Pick<RoutineExercise, "routine_exercise_sets">
 ): PlannedSet[] {
-  if (exercise.routine_exercise_sets && exercise.routine_exercise_sets.length > 0) {
+  if (
+    exercise.routine_exercise_sets &&
+    exercise.routine_exercise_sets.length > 0
+  ) {
     return plannedSetsFromRows(exercise.routine_exercise_sets);
   }
   return legacyExercisePlan(exercise).sets;
@@ -95,7 +107,10 @@ export function mergeNotes(
   const existing = notes?.trim() ?? "";
   const additions = extra
     .map((item) => item.trim())
-    .filter((item) => item.length > 0 && !existing.toLowerCase().includes(item.toLowerCase()));
+    .filter(
+      (item) =>
+        item.length > 0 && !existing.toLowerCase().includes(item.toLowerCase())
+    );
   const merged = [existing, ...additions].filter(Boolean).join(" · ");
   return merged.length > 0 ? merged : null;
 }

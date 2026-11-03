@@ -66,7 +66,10 @@ function SpreadsheetRow({
 
   return (
     <div className="border-border overflow-hidden rounded-lg border text-xs">
-      <table className="w-full table-fixed border-collapse" aria-label="Spreadsheet row">
+      <table
+        className="w-full table-fixed border-collapse"
+        aria-label="Spreadsheet row"
+      >
         <thead>
           <tr>
             {cells.map((cell) => (
@@ -86,7 +89,9 @@ function SpreadsheetRow({
               <td
                 key={cell.label}
                 className={`border-border min-h-7 truncate border-r px-2 py-1.5 font-mono last:border-r-0 ${
-                  cell.highlight ? "text-foreground font-semibold" : "text-foreground"
+                  cell.highlight
+                    ? "text-foreground font-semibold"
+                    : "text-foreground"
                 }`}
               >
                 {cell.value || (
@@ -175,7 +180,11 @@ function TryYourOwn() {
         </div>
       </div>
       <div aria-live="polite">
-        <AppPreview exercise="Your exercise" setsText={setsText} weight={weight} />
+        <AppPreview
+          exercise="Your exercise"
+          setsText={setsText}
+          weight={weight}
+        />
       </div>
     </div>
   );
@@ -195,7 +204,11 @@ export function FormatExample() {
       <Tabs defaultValue={EXAMPLES[0].id}>
         <TabsList className="h-auto w-full flex-wrap justify-start">
           {EXAMPLES.map((example) => (
-            <TabsTrigger key={example.id} value={example.id} className="text-xs">
+            <TabsTrigger
+              key={example.id}
+              value={example.id}
+              className="text-xs"
+            >
               {example.tab}
             </TabsTrigger>
           ))}
@@ -204,7 +217,11 @@ export function FormatExample() {
           </TabsTrigger>
         </TabsList>
         {EXAMPLES.map((example) => (
-          <TabsContent key={example.id} value={example.id} className="mt-3 space-y-2">
+          <TabsContent
+            key={example.id}
+            value={example.id}
+            className="mt-3 space-y-2"
+          >
             <p className="text-foreground text-sm">{example.tip}</p>
             <RowToApp {...example} />
           </TabsContent>

@@ -67,11 +67,17 @@ describe("buildSetLogRowsForExercise", () => {
   it("builds rows for multiple exercises", () => {
     const rows = buildSetLogRowsForExercises("user-1", "session-1", [
       exercise(),
-      exercise({ id: "ex-2", name: "Lunge", sets: [working(12, 10), working(12, 10), working(12, 10)] }),
+      exercise({
+        id: "ex-2",
+        name: "Lunge",
+        sets: [working(12, 10), working(12, 10), working(12, 10)],
+      }),
     ]);
 
     expect(rows).toHaveLength(5);
-    expect(rows.filter((row) => row.routine_exercise_id === "ex-2")).toHaveLength(3);
+    expect(
+      rows.filter((row) => row.routine_exercise_id === "ex-2")
+    ).toHaveLength(3);
   });
 });
 
@@ -149,12 +155,17 @@ describe("planSetLogReconciliation", () => {
       ]
     );
 
-    expect(plan.updates.map((update) => [update.id, update.target_weight_kg])).toEqual([
+    expect(
+      plan.updates.map((update) => [update.id, update.target_weight_kg])
+    ).toEqual([
       ["log-1", 40],
       ["log-2", 35],
     ]);
     expect(plan.inserts).toHaveLength(1);
-    expect(plan.inserts[0]).toMatchObject({ set_number: 3, target_weight_kg: 40 });
+    expect(plan.inserts[0]).toMatchObject({
+      set_number: 3,
+      target_weight_kg: 40,
+    });
     expect(plan.deleteIds).toEqual(["log-extra"]);
   });
 });

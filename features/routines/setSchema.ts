@@ -24,7 +24,9 @@ export const plannedSetSchema = z
   })
   .refine(
     (set) =>
-      set.repsMin === null || set.repsMax === null || set.repsMax >= set.repsMin,
+      set.repsMin === null ||
+      set.repsMax === null ||
+      set.repsMax >= set.repsMin,
     { message: "Max reps must be greater than or equal to min reps" }
   );
 

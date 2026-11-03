@@ -1,5 +1,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { buildExerciseSetRows, exercisePlanColumns } from "./exerciseSets.server";
+import {
+  buildExerciseSetRows,
+  exercisePlanColumns,
+} from "./exerciseSets.server";
 import type { PlannedSet } from "./sets";
 import type { RoutineSource } from "./types";
 

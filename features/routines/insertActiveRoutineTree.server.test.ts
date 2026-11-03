@@ -129,7 +129,11 @@ describe("insertActiveRoutineTree", () => {
         set_type: "warmup",
         target_weight_kg: 20,
       }),
-      expect.objectContaining({ set_number: 2, reps_min: 10, target_weight_kg: 40 }),
+      expect.objectContaining({
+        set_number: 2,
+        reps_min: 10,
+        target_weight_kg: 40,
+      }),
       expect.objectContaining({ set_number: 3 }),
     ]);
   });

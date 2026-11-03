@@ -640,7 +640,10 @@ export async function updateSetLogProgress(
   if ("actualWeightKg" in patch) {
     const kg = patch.actualWeightKg ?? null;
     if (kg !== null && (!Number.isFinite(kg) || kg < 0 || kg > MAX_WEIGHT_KG)) {
-      return { ok: false, error: `Weight must be between 0 and ${MAX_WEIGHT_KG} kg.` };
+      return {
+        ok: false,
+        error: `Weight must be between 0 and ${MAX_WEIGHT_KG} kg.`,
+      };
     }
     update.actual_weight_kg = kg === null ? null : roundKg(kg);
   }

@@ -69,7 +69,14 @@ export function parseExerciseRow(
 
   if (!parsed.ok) {
     const fallbackKg = parseLoad(weightCell || null).kg;
-    sets = [{ setType: "working", repsMin: null, repsMax: null, weightKg: fallbackKg }];
+    sets = [
+      {
+        setType: "working",
+        repsMin: null,
+        repsMax: null,
+        weightKg: fallbackKg,
+      },
+    ];
     extraNotes.unshift(prescription);
     warn(
       "unparsed_prescription",
@@ -87,7 +94,11 @@ export function parseExerciseRow(
     );
   }
 
-  if (weightCell && parseLoad(weightCell).kg === null && !/^(—|-|bw|bodyweight|peso corporal)$/i.test(weightCell)) {
+  if (
+    weightCell &&
+    parseLoad(weightCell).kg === null &&
+    !/^(—|-|bw|bodyweight|peso corporal)$/i.test(weightCell)
+  ) {
     warn(
       "unparsed_value",
       "WEIGHT",

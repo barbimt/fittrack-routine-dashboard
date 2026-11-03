@@ -89,10 +89,14 @@ describe("useRoutineEditor", () => {
     const { result } = renderHook(() => useRoutineEditor(routine));
 
     act(() =>
-      result.current.updateExercise(DAY_ID, EX_ID, { secondaryMuscles: ["quads"] })
+      result.current.updateExercise(DAY_ID, EX_ID, {
+        secondaryMuscles: ["quads"],
+      })
     );
 
-    expect(result.current.days[0].exercises[0].secondaryMuscles).toEqual(["quads"]);
+    expect(result.current.days[0].exercises[0].secondaryMuscles).toEqual([
+      "quads",
+    ]);
     expect(result.current.isDirty).toBe(true);
   });
 

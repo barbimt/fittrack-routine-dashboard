@@ -54,7 +54,9 @@ describe("EditorSetRowsField", () => {
       "true"
     );
 
-    await userEvent.click(screen.getByRole("button", { name: /Change set type/i }));
+    await userEvent.click(
+      screen.getByRole("button", { name: /Change set type/i })
+    );
     expect(onUpdateRow).toHaveBeenCalledWith(0, { setType: "warmup" });
   });
 

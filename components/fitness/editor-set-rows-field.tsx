@@ -7,7 +7,11 @@ import {
   type EditorSetRow,
 } from "@/features/routines/editorSetRows";
 import type { EditorSetInput } from "@/features/routines/editorTypes";
-import { SET_TYPE_LABELS, setLabels, type SetType } from "@/features/routines/sets";
+import {
+  SET_TYPE_LABELS,
+  setLabels,
+  type SetType,
+} from "@/features/routines/sets";
 import { Button } from "./button";
 import { Input } from "./input";
 
@@ -36,7 +40,9 @@ export function EditorSetRowsField({
   onRemoveRow,
 }: EditorSetRowsFieldProps) {
   const issues = validateEditorSets(rows);
-  const invalid = new Set(issues.map((issue) => `${issue.index}-${issue.field}`));
+  const invalid = new Set(
+    issues.map((issue) => `${issue.index}-${issue.field}`)
+  );
   const labels = setLabels(rows);
 
   return (
@@ -74,8 +80,7 @@ export function EditorSetRowsField({
                   "flex h-10 items-center justify-center rounded-md text-sm font-semibold tabular-nums transition-colors",
                   row.setType === "working" &&
                     "text-muted-foreground hover:bg-muted",
-                  row.setType === "warmup" &&
-                    "bg-warning/20 text-foreground",
+                  row.setType === "warmup" && "bg-warning/20 text-foreground",
                   row.setType === "drop" && "bg-primary/10 text-primary"
                 )}
               >

@@ -24,9 +24,13 @@ const REQUIRED_LABELS = REQUIRED_COLUMNS.map((col) => COLUMN_LABELS[col]).join(
 );
 
 /** Template helper tabs, never routine days. */
-const IGNORED_SHEET = /^(how to|instructions?|example|ejemplo|c[oó]mo|guide|gu[ií]a)\b/i;
+const IGNORED_SHEET =
+  /^(how to|instructions?|example|ejemplo|c[oó]mo|guide|gu[ií]a)\b/i;
 
-const ALL_COLUMNS: CanonicalColumn[] = [...REQUIRED_COLUMNS, ...OPTIONAL_COLUMNS];
+const ALL_COLUMNS: CanonicalColumn[] = [
+  ...REQUIRED_COLUMNS,
+  ...OPTIONAL_COLUMNS,
+];
 
 export function isIgnoredSheetName(sheetName: string): boolean {
   return IGNORED_SHEET.test(sheetName.trim());
@@ -161,7 +165,8 @@ export async function parseRoutineWorkbook(
   if (file.size > MAX_IMPORT_FILE_BYTES) {
     return {
       ok: false,
-      error: "The file is too big (max 2 MB). Remove extra tabs or images and try again.",
+      error:
+        "The file is too big (max 2 MB). Remove extra tabs or images and try again.",
       warnings,
     };
   }

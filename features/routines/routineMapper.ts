@@ -20,7 +20,10 @@ function toNumberOrNull(value: unknown): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
-function generateSets(exerciseId: string, planned: PlannedSet[]): ExerciseSet[] {
+function generateSets(
+  exerciseId: string,
+  planned: PlannedSet[]
+): ExerciseSet[] {
   return planned.map((set, index) => ({
     id: `${exerciseId}-set-${index + 1}`,
     setNumber: index + 1,
