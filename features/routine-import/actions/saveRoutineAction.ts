@@ -15,18 +15,7 @@ export type SaveRoutineResult =
 export async function saveRoutine(
   routine: ParsedRoutine
 ): Promise<SaveRoutineResult> {
-  const parsed = importedRoutineSchema.safeParse(routine);
-  if (!parsed.success) {
-    const issue = parsed.error.issues[0];
-    return {
-      ok: false,
-      error: `The routine has invalid data${issue ? ` (${issue.message})` : ""}. Fix the file and upload it again.`,
-    };
-  }
-  const input = parsed.data;
-
   const supabase = await createClient();
-
   const {
     data: { user },
     error: userError,
@@ -36,6 +25,15 @@ export async function saveRoutine(
     return { ok: false, error: "You must be signed in to save a routine." };
   }
 
+  const parsed = importedRoutineSchema.safeParse(routine);
+  if (!parsed.success) {
+    const issue = parsed.error.issues[0];
+    return {
+      ok: false,
+      error: `The routine has invalid data${issue ? ` (${issue.message})` : ""}. Fix the file and upload it again.`,
+    };
+  }
+  const input = parsed.data;
   const userId = user.id;
 
   const { error: deleteExistingError } = await supabase

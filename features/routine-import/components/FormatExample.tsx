@@ -65,35 +65,38 @@ function SpreadsheetRow({
   ];
 
   return (
-    <div
-      className="border-border grid grid-cols-[1.2fr_1.5fr_0.8fr] overflow-hidden rounded-lg border text-xs"
-      role="table"
-      aria-label="Spreadsheet row"
-    >
-      <div role="row" className="contents">
-        {cells.map((cell) => (
-          <span
-            key={cell.label}
-            role="columnheader"
-            className="bg-muted/60 text-muted-foreground border-border truncate border-r border-b px-2 py-1 font-semibold last:border-r-0"
-          >
-            {cell.label}
-          </span>
-        ))}
-      </div>
-      <div role="row" className="contents">
-        {cells.map((cell) => (
-          <span
-            key={cell.label}
-            role="cell"
-            className={`border-border min-h-7 truncate border-r px-2 py-1.5 font-mono last:border-r-0 ${
-              cell.highlight ? "text-foreground font-semibold" : "text-foreground"
-            }`}
-          >
-            {cell.value || <span className="text-muted-foreground">empty</span>}
-          </span>
-        ))}
-      </div>
+    <div className="border-border overflow-hidden rounded-lg border text-xs">
+      <table className="w-full table-fixed border-collapse" aria-label="Spreadsheet row">
+        <thead>
+          <tr>
+            {cells.map((cell) => (
+              <th
+                key={cell.label}
+                scope="col"
+                className="bg-muted/60 text-muted-foreground border-border truncate border-r border-b px-2 py-1 text-left font-semibold last:border-r-0"
+              >
+                {cell.label}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            {cells.map((cell) => (
+              <td
+                key={cell.label}
+                className={`border-border min-h-7 truncate border-r px-2 py-1.5 font-mono last:border-r-0 ${
+                  cell.highlight ? "text-foreground font-semibold" : "text-foreground"
+                }`}
+              >
+                {cell.value || (
+                  <span className="text-muted-foreground">empty</span>
+                )}
+              </td>
+            ))}
+          </tr>
+        </tbody>
+      </table>
     </div>
   );
 }

@@ -202,16 +202,17 @@ export function SecondaryMusclesField({
   className,
 }: SecondaryMusclesFieldProps) {
   const [open, setOpen] = useState(value.length > 0);
+  const selectedSlugs = new Set(value);
   const options = MUSCLE_GROUPS.filter(
     (muscle) => muscle.slug !== primary && muscle.slug !== "other"
   );
   const selectedLabels = MUSCLE_GROUPS.filter((muscle) =>
-    value.includes(muscle.slug)
+    selectedSlugs.has(muscle.slug)
   ).map((muscle) => muscle.label);
 
   const toggle = (slug: string) => {
     onValueChange(
-      value.includes(slug)
+      selectedSlugs.has(slug)
         ? value.filter((item) => item !== slug)
         : [...value, slug]
     );
@@ -248,7 +249,7 @@ export function SecondaryMusclesField({
           className="mt-1 flex flex-wrap gap-1.5"
         >
           {options.map((muscle) => {
-            const selected = value.includes(muscle.slug);
+            const selected = selectedSlugs.has(muscle.slug);
             return (
               <button
                 key={muscle.slug}

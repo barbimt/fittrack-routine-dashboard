@@ -35,7 +35,7 @@ export function PlannedSetsTable({
       <tbody>
         {sets.map((set, index) => (
           <tr
-            key={index}
+            key={`${index}-${set.setType}-${set.repsMin}-${set.repsMax}-${set.weightKg}`}
             className="border-border/50 border-t"
           >
             <td className="py-1.5">

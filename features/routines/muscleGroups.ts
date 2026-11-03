@@ -116,6 +116,7 @@ export function parseMuscleList(value: string | null | undefined): {
   unknown: string[];
 } {
   const muscles: MuscleGroup[] = [];
+  const seen = new Set<MuscleGroup>();
   const unknown: string[] = [];
   for (const part of (value ?? "").split(/[,;/+]|\by\b|\band\b/i)) {
     const trimmed = part.trim();
@@ -123,7 +124,8 @@ export function parseMuscleList(value: string | null | undefined): {
     const slug = toMuscleGroup(trimmed);
     if (!slug) {
       unknown.push(trimmed);
-    } else if (!muscles.includes(slug)) {
+    } else if (!seen.has(slug)) {
+      seen.add(slug);
       muscles.push(slug);
     }
   }
