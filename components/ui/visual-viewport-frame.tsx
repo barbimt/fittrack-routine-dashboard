@@ -5,15 +5,18 @@ export const visualViewportBoxClass =
 
 export function VisualViewportFrame({
   children,
+  className,
 }: {
   children: React.ReactNode;
+  className?: string;
 }) {
   return (
     <div
       data-slot="visual-viewport-frame"
       className={cn(
         "pointer-events-none fixed inset-x-0 z-50 flex flex-col items-center overflow-hidden px-4 py-3",
-        visualViewportBoxClass
+        visualViewportBoxClass,
+        className
       )}
     >
       {children}
@@ -22,4 +25,7 @@ export function VisualViewportFrame({
 }
 
 export const viewportPanelClassName =
-  "pointer-events-auto relative my-auto w-full min-h-0 max-h-[calc(var(--vv-height,100dvh)-1.5rem)] max-w-lg";
+  "pointer-events-auto relative w-full min-h-0 max-w-lg";
+
+export const viewportPanelCenterClass =
+  "my-auto max-h-[calc(var(--vv-height,100dvh)-1.5rem)]";
