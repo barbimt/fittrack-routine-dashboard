@@ -1,5 +1,10 @@
 import { cn } from "@/lib/utils";
-import { formatReps, setLabels, type PlannedSet } from "@/features/routines/sets";
+import {
+  formatReps,
+  setLabels,
+  type PlannedSet,
+  type SetType,
+} from "@/features/routines/sets";
 import { formatKgNumber } from "@/features/routines/weight";
 
 interface PlannedSetsTableProps {
@@ -8,13 +13,26 @@ interface PlannedSetsTableProps {
   className?: string;
 }
 
+function plannedSetRows(sets: PlannedSet[]) {
+  const labels = setLabels(sets);
+  const seen: Record<SetType, number> = { warmup: 0, working: 0, drop: 0 };
+  return sets.map((set, position) => {
+    seen[set.setType] += 1;
+    return {
+      set,
+      label: labels[position],
+      key: `${set.setType}-${seen[set.setType]}`,
+    };
+  });
+}
+
 /** Read-only set list styled like the workout screen. */
 export function PlannedSetsTable({
   sets,
   caption,
   className,
 }: PlannedSetsTableProps) {
-  const labels = setLabels(sets);
+  const rows = plannedSetRows(sets);
 
   return (
     <table className={cn("w-full text-sm", className)}>
@@ -33,28 +51,25 @@ export function PlannedSetsTable({
         </tr>
       </thead>
       <tbody>
-        {sets.map((set, index) => (
-          <tr
-            key={`${index}-${set.setType}-${set.repsMin}-${set.repsMax}-${set.weightKg}`}
-            className="border-border/50 border-t"
-          >
+        {rows.map((row) => (
+          <tr key={row.key} className="border-border/50 border-t">
             <td className="py-1.5">
               <span
                 className={cn(
                   "inline-flex h-6 min-w-6 items-center justify-center rounded-md px-1 text-xs font-semibold tabular-nums",
-                  set.setType === "warmup" && "bg-warning/20 text-foreground",
-                  set.setType === "drop" && "bg-primary/10 text-primary",
-                  set.setType === "working" && "text-muted-foreground"
+                  row.set.setType === "warmup" && "bg-warning/20 text-foreground",
+                  row.set.setType === "drop" && "bg-primary/10 text-primary",
+                  row.set.setType === "working" && "text-muted-foreground"
                 )}
               >
-                {labels[index]}
+                {row.label}
               </span>
             </td>
             <td className="text-foreground py-1.5 tabular-nums">
-              {formatReps(set.repsMin, set.repsMax) ?? "—"}
+              {formatReps(row.set.repsMin, row.set.repsMax) ?? "—"}
             </td>
             <td className="text-foreground py-1.5 text-right tabular-nums">
-              {set.weightKg !== null ? formatKgNumber(set.weightKg) : "—"}
+              {row.set.weightKg !== null ? formatKgNumber(row.set.weightKg) : "—"}
             </td>
           </tr>
         ))}
