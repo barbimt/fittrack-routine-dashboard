@@ -7,6 +7,7 @@ import { XIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   VisualViewportFrame,
+  viewportPanelCenterClass,
   viewportPanelClassName,
   visualViewportBoxClass,
 } from "@/components/ui/visual-viewport-frame";
@@ -56,20 +57,32 @@ function DialogContent({
   className,
   children,
   showCloseButton = true,
+  fullscreen = false,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean;
+  /** Fill the visible viewport and slide up from the bottom on every screen size. */
+  fullscreen?: boolean;
 }) {
   return (
     <DialogPortal data-slot="dialog-portal">
       <DialogOverlay />
-      <VisualViewportFrame>
+      <VisualViewportFrame
+        className={fullscreen ? "items-stretch justify-end p-0" : undefined}
+      >
         <DialogPrimitive.Content
           data-slot="dialog-content"
           data-scroll-region=""
+          data-fullscreen={fullscreen ? "true" : undefined}
           className={cn(
-            "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 z-50 grid gap-4 overflow-y-auto overscroll-contain rounded-lg border p-6 shadow-lg duration-200",
+            "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 z-50 grid gap-4 overflow-y-auto overscroll-contain rounded-lg border p-6 shadow-lg duration-200",
+            fullscreen
+              ? "data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom"
+              : "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
             viewportPanelClassName,
+            fullscreen
+              ? "m-0 h-full max-h-full max-w-none rounded-none border-0 shadow-none"
+              : viewportPanelCenterClass,
             className
           )}
           {...props}
@@ -78,7 +91,12 @@ function DialogContent({
           {showCloseButton && (
             <DialogPrimitive.Close
               data-slot="dialog-close"
-              className="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+              className={cn(
+                "ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+                fullscreen
+                  ? "top-[max(1rem,env(safe-area-inset-top))]"
+                  : "top-4"
+              )}
             >
               <XIcon />
               <span className="sr-only">Close</span>

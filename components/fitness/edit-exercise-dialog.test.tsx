@@ -55,7 +55,13 @@ describe("EditExerciseDialog", () => {
 
     expect(
       document.querySelector("[data-slot='visual-viewport-frame']")
-    ).toBeTruthy();
+    ).toHaveClass("justify-end", "p-0");
+    const panel = document.querySelector("[data-slot='dialog-content']");
+    expect(panel).toHaveAttribute("data-fullscreen", "true");
+    expect(panel).toHaveClass("h-full", "max-w-none", "rounded-none");
+    expect(
+      screen.getByRole("button", { name: /^Save$/i }).parentElement
+    ).toHaveClass("flex-row");
     expect(
       screen.getByLabelText("Exercise").closest("[data-scroll-region]")
     ).toHaveClass("overflow-y-auto");

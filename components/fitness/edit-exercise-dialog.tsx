@@ -69,8 +69,11 @@ export function EditExerciseDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex max-w-md flex-col gap-0 overflow-hidden p-0">
-        <DialogHeader className="border-border shrink-0 border-b px-5 py-3">
+      <DialogContent
+        fullscreen
+        className="flex flex-col gap-0 overflow-hidden p-0"
+      >
+        <DialogHeader className="border-border shrink-0 border-b px-5 pt-[max(0.75rem,env(safe-area-inset-top))] pb-3">
           <DialogTitle>Edit exercise</DialogTitle>
           <DialogDescription>
             Updates this exercise in your routine and today&apos;s targets.
@@ -118,7 +121,7 @@ export function EditExerciseDialog({
           />
         </div>
 
-        <DialogFooter className="border-border shrink-0 border-t px-5 py-3">
+        <DialogFooter className="border-border shrink-0 flex-row border-t px-5 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] *:flex-1 sm:*:flex-none">
           <Button
             type="button"
             variant="outline"
