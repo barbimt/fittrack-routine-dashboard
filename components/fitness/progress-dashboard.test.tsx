@@ -7,9 +7,18 @@ import { buildProgressBrief } from "@/features/progress/brief";
 import type { ProgressMonth } from "@/features/progress/range";
 
 const months: ProgressMonth[] = [
-  { id: "2026-11", label: "Nov", from: "2026-11-01" },
-  { id: "2026-10", label: "Oct", from: "2026-10-01" },
-  { id: "2026-08", label: "Aug", from: "2026-08-01" },
+  {
+    id: "2026-11",
+    label: "November 2026",
+    from: "2026-11-01",
+    to: "2026-11-04",
+  },
+  {
+    id: "2026-10",
+    label: "October 2026",
+    from: "2026-10-01",
+    to: "2026-10-31",
+  },
 ];
 
 afterEach(() => {
@@ -24,15 +33,11 @@ describe("ProgressDashboardView", () => {
       value: { writeText },
     });
 
-    const data = {
-      ...progressFixture,
-      window: { ...progressFixture.window, from: "2026-11-01" },
-    };
     render(
       <ProgressDashboardView
-        result={{ ok: true, data }}
+        result={{ ok: true, data: progressFixture }}
         months={months}
-        selectedFrom="2026-11-01"
+        selectedRangeId="12w"
       />
     );
 
@@ -40,13 +45,16 @@ describe("ProgressDashboardView", () => {
       screen.getByRole("heading", { name: "Progress" })
     ).toBeInTheDocument();
     expect(screen.getByText("52")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Nov" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "12 weeks" })).toHaveAttribute(
       "aria-current",
       "page"
     );
-    expect(screen.getByRole("link", { name: "Oct" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "4 weeks" })).toHaveAttribute(
       "href",
-      "/progress?from=2026-10"
+      "/progress?range=4w"
+    );
+    expect(screen.getByRole("combobox", { name: "Month" })).toHaveTextContent(
+      "Month"
     );
     expect(
       screen.getByRole("heading", { name: "One exercise" })
@@ -66,7 +74,7 @@ describe("ProgressDashboardView", () => {
 
     await userEvent.click(screen.getByRole("button", { name: "Copy report" }));
 
-    expect(writeText).toHaveBeenCalledWith(buildProgressBrief(data));
+    expect(writeText).toHaveBeenCalledWith(buildProgressBrief(progressFixture));
     expect(
       await screen.findByRole("button", { name: "Copied" })
     ).toBeInTheDocument();

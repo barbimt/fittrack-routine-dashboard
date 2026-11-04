@@ -3,12 +3,16 @@ import { parseProgressDashboard, type ProgressLoadResult } from "./schema";
 
 export type { ProgressLoadResult };
 
-export async function loadProgressDashboard(
-  from: string
-): Promise<ProgressLoadResult> {
+export async function loadProgressDashboard(input: {
+  weeks?: number;
+  from?: string;
+  to?: string;
+}): Promise<ProgressLoadResult> {
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("progress_dashboard", {
-    p_from: from,
+    p_weeks: input.weeks ?? 12,
+    p_from: input.from ?? null,
+    p_to: input.to ?? null,
   });
 
   if (error) {

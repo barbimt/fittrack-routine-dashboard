@@ -58,8 +58,10 @@ import {
   type ProgressLoadResult,
 } from "@/features/progress/schema";
 import {
-  progressMonthHref,
+  PROGRESS_RANGES,
+  progressRangeHref,
   type ProgressMonth,
+  type ProgressRangeId,
 } from "@/features/progress/range";
 import { muscleGroupLabel } from "@/features/routines/muscleGroups";
 import { cn } from "@/lib/utils";
@@ -97,11 +99,13 @@ function downloadJson(data: ProgressDashboard) {
 export function ProgressDashboardView({
   result,
   months = [],
-  selectedFrom,
+  selectedMonthId,
+  selectedRangeId,
 }: {
   result: ProgressLoadResult;
   months?: ProgressMonth[];
-  selectedFrom?: string;
+  selectedMonthId?: string;
+  selectedRangeId?: ProgressRangeId;
 }) {
   return (
     <AppShell>
@@ -110,7 +114,8 @@ export function ProgressDashboardView({
           <ProgressBody
             data={result.data}
             months={months}
-            selectedFrom={selectedFrom}
+            selectedMonthId={selectedMonthId}
+            selectedRangeId={selectedRangeId}
           />
         ) : (
           <ProgressMessage
@@ -126,11 +131,13 @@ export function ProgressDashboardView({
 function ProgressBody({
   data,
   months,
-  selectedFrom,
+  selectedMonthId,
+  selectedRangeId,
 }: {
   data: ProgressDashboard;
   months: ProgressMonth[];
-  selectedFrom?: string;
+  selectedMonthId?: string;
+  selectedRangeId?: ProgressRangeId;
 }) {
   const [copied, setCopied] = useState(false);
   const [copyFallback, setCopyFallback] = useState<string | null>(null);
@@ -196,23 +203,15 @@ function ProgressBody({
         </div>
       </header>
 
-      <div className="mb-6 flex items-center gap-3">
-        <span className="text-muted-foreground shrink-0 text-sm font-medium">
-          From
-        </span>
-        <nav
-          aria-label="Time range"
-          className="min-w-0 flex-1 overflow-x-auto"
-        >
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <nav aria-label="Time range" className="min-w-0 overflow-x-auto">
           <div className="flex w-max gap-2 pb-1">
-            {months.map((month) => {
-              const current = selectedFrom
-                ? selectedFrom.startsWith(month.id)
-                : data.window.from.startsWith(month.id);
+            {PROGRESS_RANGES.map((range) => {
+              const current = selectedRangeId === range.id;
               return (
                 <Link
-                  key={month.id}
-                  href={progressMonthHref(month.id)}
+                  key={range.id}
+                  href={progressRangeHref(range.id)}
                   aria-current={current ? "page" : undefined}
                   className={cn(
                     "inline-flex h-11 shrink-0 items-center rounded-full border px-4 text-sm font-medium",
@@ -221,12 +220,32 @@ function ProgressBody({
                       : "border-border text-foreground"
                   )}
                 >
-                  {month.label}
+                  {range.label}
                 </Link>
               );
             })}
           </div>
         </nav>
+        <Select
+          value={selectedMonthId}
+          onValueChange={(month) => {
+            window.location.assign(`/progress?month=${month}`);
+          }}
+        >
+          <SelectTrigger
+            aria-label="Month"
+            className="w-full rounded-full px-4 sm:w-52"
+          >
+            <SelectValue placeholder="Month" />
+          </SelectTrigger>
+          <SelectContent>
+            {months.map((month) => (
+              <SelectItem key={month.id} value={month.id}>
+                {month.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {copyFallback && (

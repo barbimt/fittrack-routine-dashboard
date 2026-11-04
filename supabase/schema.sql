@@ -705,7 +705,8 @@ CREATE INDEX IF NOT EXISTS idx_workout_sessions_user_session_date
 
 CREATE OR REPLACE FUNCTION public.progress_dashboard(
   p_weeks integer DEFAULT 12,
-  p_from date DEFAULT NULL
+  p_from date DEFAULT NULL,
+  p_to date DEFAULT NULL
 )
 RETURNS jsonb
 LANGUAGE plpgsql
@@ -767,27 +768,31 @@ BEGIN
       CASE
         WHEN p_from IS NULL THEN NULL
         ELSE LEAST(CURRENT_DATE, GREATEST(p_from, (CURRENT_DATE - 365)))
-      END AS from_date
+      END AS from_date,
+      CASE
+        WHEN p_to IS NULL THEN NULL
+        ELSE LEAST(CURRENT_DATE, GREATEST(p_to, (CURRENT_DATE - 365)))
+      END AS to_date
   ),
   bounds AS (
     SELECT
       user_id,
       CASE
         WHEN from_date IS NULL THEN weeks
-        ELSE GREATEST(1, ceil((CURRENT_DATE - from_date + 1) / 7.0))::int
+        ELSE GREATEST(1, ceil((COALESCE(to_date, CURRENT_DATE) - from_date + 1) / 7.0))::int
       END AS weeks,
       CASE
         WHEN from_date IS NULL THEN weeks
-        ELSE GREATEST(1, ceil((CURRENT_DATE - from_date + 1) / 7.0))::int
+        ELSE GREATEST(1, ceil((COALESCE(to_date, CURRENT_DATE) - from_date + 1) / 7.0))::int
       END AS comparison_weeks,
       current_week,
       COALESCE(from_date, (current_week - ((weeks - 1) * 7))::date) AS window_start,
-      CURRENT_DATE AS window_end,
+      COALESCE(to_date, CURRENT_DATE) AS window_end,
       COALESCE(from_date, (current_week - ((weeks - 1) * 7))::date) AS recent_start,
       CASE
         WHEN from_date IS NULL
           THEN ((current_week - ((weeks - 1) * 7)) - (weeks * 7))::date
-        ELSE (from_date - (CURRENT_DATE - from_date + 1))::date
+        ELSE (from_date - (COALESCE(to_date, CURRENT_DATE) - from_date + 1))::date
       END AS previous_start
     FROM params
   ),
@@ -800,7 +805,7 @@ BEGIN
   weeks AS (
     SELECT generate_series(
       date_trunc('week', h.window_start)::date,
-      h.current_week,
+      date_trunc('week', h.window_end)::date,
       interval '7 days'
     )::date AS week_start
     FROM history h
@@ -1248,6 +1253,6 @@ BEGIN
 END;
 $function$;
 
-REVOKE ALL ON FUNCTION public.progress_dashboard(integer, date) FROM PUBLIC;
-REVOKE ALL ON FUNCTION public.progress_dashboard(integer, date) FROM anon;
-GRANT EXECUTE ON FUNCTION public.progress_dashboard(integer, date) TO authenticated;
+REVOKE ALL ON FUNCTION public.progress_dashboard(integer, date, date) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.progress_dashboard(integer, date, date) FROM anon;
+GRANT EXECUTE ON FUNCTION public.progress_dashboard(integer, date, date) TO authenticated;
