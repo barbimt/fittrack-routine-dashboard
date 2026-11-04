@@ -35,7 +35,10 @@ function isoDate(date: Date): string {
 }
 
 /** Newest first. Each option is that calendar month, ending today when it is the current one. */
-export function progressMonths(today = new Date(), count = 12): ProgressMonth[] {
+export function progressMonths(
+  today = new Date(),
+  count = 12
+): ProgressMonth[] {
   const year = today.getUTCFullYear();
   const month = today.getUTCMonth();
   const todayUtc = new Date(Date.UTC(year, month, today.getUTCDate()));
