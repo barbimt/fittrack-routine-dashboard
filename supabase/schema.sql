@@ -703,7 +703,11 @@ JOIN workout_sessions s
 CREATE INDEX IF NOT EXISTS idx_workout_sessions_user_session_date
   ON workout_sessions (user_id, session_date DESC);
 
-CREATE OR REPLACE FUNCTION public.progress_dashboard(p_weeks integer DEFAULT 12)
+CREATE OR REPLACE FUNCTION public.progress_dashboard(
+  p_weeks integer DEFAULT 12,
+  p_from date DEFAULT NULL,
+  p_to date DEFAULT NULL
+)
 RETURNS jsonb
 LANGUAGE plpgsql
 STABLE
@@ -760,18 +764,36 @@ BEGIN
     SELECT
       auth.uid() AS user_id,
       LEAST(GREATEST(COALESCE(p_weeks, 12), 4), 52) AS weeks,
-      date_trunc('week', CURRENT_DATE)::date AS current_week
+      date_trunc('week', CURRENT_DATE)::date AS current_week,
+      CASE
+        WHEN p_from IS NULL THEN NULL
+        ELSE LEAST(CURRENT_DATE, GREATEST(p_from, (CURRENT_DATE - 365)))
+      END AS from_date,
+      CASE
+        WHEN p_to IS NULL THEN NULL
+        ELSE LEAST(CURRENT_DATE, GREATEST(p_to, (CURRENT_DATE - 365)))
+      END AS to_date
   ),
   bounds AS (
     SELECT
       user_id,
-      weeks,
-      weeks AS comparison_weeks,
+      CASE
+        WHEN from_date IS NULL THEN weeks
+        ELSE GREATEST(1, ceil((COALESCE(to_date, CURRENT_DATE) - from_date + 1) / 7.0))::int
+      END AS weeks,
+      CASE
+        WHEN from_date IS NULL THEN weeks
+        ELSE GREATEST(1, ceil((COALESCE(to_date, CURRENT_DATE) - from_date + 1) / 7.0))::int
+      END AS comparison_weeks,
       current_week,
-      (current_week - ((weeks - 1) * 7))::date AS window_start,
-      CURRENT_DATE AS window_end,
-      (current_week - ((weeks - 1) * 7))::date AS recent_start,
-      ((current_week - ((weeks - 1) * 7)) - (weeks * 7))::date AS previous_start
+      COALESCE(from_date, (current_week - ((weeks - 1) * 7))::date) AS window_start,
+      COALESCE(to_date, CURRENT_DATE) AS window_end,
+      COALESCE(from_date, (current_week - ((weeks - 1) * 7))::date) AS recent_start,
+      CASE
+        WHEN from_date IS NULL
+          THEN ((current_week - ((weeks - 1) * 7)) - (weeks * 7))::date
+        ELSE (from_date - (COALESCE(to_date, CURRENT_DATE) - from_date + 1))::date
+      END AS previous_start
     FROM params
   ),
   history AS (
@@ -781,7 +803,11 @@ BEGIN
     FROM bounds b
   ),
   weeks AS (
-    SELECT generate_series(h.window_start, h.current_week, interval '7 days')::date AS week_start
+    SELECT generate_series(
+      date_trunc('week', h.window_start)::date,
+      date_trunc('week', h.window_end)::date,
+      interval '7 days'
+    )::date AS week_start
     FROM history h
   ),
   facts AS (
@@ -839,7 +865,10 @@ BEGIN
       COALESCE(sum(f.hard_set), 0)::int AS hard_sets,
       COALESCE(round(sum(f.tonnage_kg), 1), 0) AS tonnage_kg
     FROM weeks w
-    LEFT JOIN facts f ON f.week_start = w.week_start
+    LEFT JOIN facts f
+      ON f.week_start = w.week_start
+     AND f.session_date >= (SELECT window_start FROM history)
+     AND f.session_date <= (SELECT window_end FROM history)
     GROUP BY w.week_start
   ),
   kpi AS (
@@ -1224,6 +1253,6 @@ BEGIN
 END;
 $function$;
 
-REVOKE ALL ON FUNCTION public.progress_dashboard(integer) FROM PUBLIC;
-REVOKE ALL ON FUNCTION public.progress_dashboard(integer) FROM anon;
-GRANT EXECUTE ON FUNCTION public.progress_dashboard(integer) TO authenticated;
+REVOKE ALL ON FUNCTION public.progress_dashboard(integer, date, date) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.progress_dashboard(integer, date, date) FROM anon;
+GRANT EXECUTE ON FUNCTION public.progress_dashboard(integer, date, date) TO authenticated;

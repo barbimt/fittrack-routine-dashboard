@@ -58,9 +58,10 @@ import {
   type ProgressLoadResult,
 } from "@/features/progress/schema";
 import {
-  periodLabel,
   PROGRESS_RANGES,
   progressRangeHref,
+  type ProgressMonth,
+  type ProgressRangeId,
 } from "@/features/progress/range";
 import { muscleGroupLabel } from "@/features/routines/muscleGroups";
 import { cn } from "@/lib/utils";
@@ -97,14 +98,25 @@ function downloadJson(data: ProgressDashboard) {
 
 export function ProgressDashboardView({
   result,
+  months = [],
+  selectedMonthId,
+  selectedRangeId,
 }: {
   result: ProgressLoadResult;
+  months?: ProgressMonth[];
+  selectedMonthId?: string;
+  selectedRangeId?: ProgressRangeId;
 }) {
   return (
     <AppShell>
       <PageContent className="max-w-5xl">
         {result.ok ? (
-          <ProgressBody data={result.data} />
+          <ProgressBody
+            data={result.data}
+            months={months}
+            selectedMonthId={selectedMonthId}
+            selectedRangeId={selectedRangeId}
+          />
         ) : (
           <ProgressMessage
             title="Progress is unavailable"
@@ -116,7 +128,17 @@ export function ProgressDashboardView({
   );
 }
 
-function ProgressBody({ data }: { data: ProgressDashboard }) {
+function ProgressBody({
+  data,
+  months,
+  selectedMonthId,
+  selectedRangeId,
+}: {
+  data: ProgressDashboard;
+  months: ProgressMonth[];
+  selectedMonthId?: string;
+  selectedRangeId?: ProgressRangeId;
+}) {
   const [copied, setCopied] = useState(false);
   const [copyFallback, setCopyFallback] = useState<string | null>(null);
   const [selectedExercise, setSelectedExercise] = useState(
@@ -181,26 +203,50 @@ function ProgressBody({ data }: { data: ProgressDashboard }) {
         </div>
       </header>
 
-      <nav aria-label="Time range" className="mb-6 flex flex-wrap gap-2">
-        {PROGRESS_RANGES.map((range) => {
-          const current = data.window.weeks === range.weeks;
-          return (
-            <Link
-              key={range.id}
-              href={progressRangeHref(range.id)}
-              aria-current={current ? "page" : undefined}
-              className={cn(
-                "rounded-full border px-3 py-1.5 text-sm font-medium",
-                current
-                  ? "border-primary bg-primary text-primary-foreground"
-                  : "border-border text-foreground"
-              )}
-            >
-              {range.label}
-            </Link>
-          );
-        })}
-      </nav>
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <nav aria-label="Time range" className="min-w-0 overflow-x-auto">
+          <div className="flex w-max gap-2 pb-1">
+            {PROGRESS_RANGES.map((range) => {
+              const current = selectedRangeId === range.id;
+              return (
+                <Link
+                  key={range.id}
+                  href={progressRangeHref(range.id)}
+                  aria-current={current ? "page" : undefined}
+                  className={cn(
+                    "inline-flex h-11 shrink-0 items-center rounded-full border px-4 text-sm font-medium",
+                    current
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border text-foreground"
+                  )}
+                >
+                  {range.label}
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
+        <Select
+          value={selectedMonthId}
+          onValueChange={(month) => {
+            window.location.assign(`/progress?month=${month}`);
+          }}
+        >
+          <SelectTrigger
+            aria-label="Month"
+            className="w-full rounded-full px-4 sm:w-52"
+          >
+            <SelectValue placeholder="Month" />
+          </SelectTrigger>
+          <SelectContent>
+            {months.map((month) => (
+              <SelectItem key={month.id} value={month.id}>
+                {month.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
       {copyFallback && (
         <div className="mb-6">
@@ -283,7 +329,7 @@ function ProgressCharts({
           subtitle={
             data.plan.plannedSessions > 0
               ? `Sessions your ${formatCount(data.plan.activeRoutineDays)}-day routine schedules`
-              : periodLabel(data.window.weeks)
+              : "This period"
           }
           icon={<Calendar className="h-4 w-4" />}
         />

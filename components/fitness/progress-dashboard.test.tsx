@@ -4,6 +4,22 @@ import userEvent from "@testing-library/user-event";
 import { ProgressDashboardView } from "./progress-dashboard";
 import { progressFixture } from "@/features/progress/fixture";
 import { buildProgressBrief } from "@/features/progress/brief";
+import type { ProgressMonth } from "@/features/progress/range";
+
+const months: ProgressMonth[] = [
+  {
+    id: "2026-11",
+    label: "November 2026",
+    from: "2026-11-01",
+    to: "2026-11-04",
+  },
+  {
+    id: "2026-10",
+    label: "October 2026",
+    from: "2026-10-01",
+    to: "2026-10-31",
+  },
+];
 
 afterEach(() => {
   cleanup();
@@ -18,7 +34,11 @@ describe("ProgressDashboardView", () => {
     });
 
     render(
-      <ProgressDashboardView result={{ ok: true, data: progressFixture }} />
+      <ProgressDashboardView
+        result={{ ok: true, data: progressFixture }}
+        months={months}
+        selectedRangeId="12w"
+      />
     );
 
     expect(
@@ -32,6 +52,9 @@ describe("ProgressDashboardView", () => {
     expect(screen.getByRole("link", { name: "4 weeks" })).toHaveAttribute(
       "href",
       "/progress?range=4w"
+    );
+    expect(screen.getByRole("combobox", { name: "Month" })).toHaveTextContent(
+      "Month"
     );
     expect(
       screen.getByRole("heading", { name: "One exercise" })
