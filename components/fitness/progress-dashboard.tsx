@@ -58,9 +58,8 @@ import {
   type ProgressLoadResult,
 } from "@/features/progress/schema";
 import {
-  periodLabel,
-  PROGRESS_RANGES,
-  progressRangeHref,
+  progressMonthHref,
+  type ProgressMonth,
 } from "@/features/progress/range";
 import { muscleGroupLabel } from "@/features/routines/muscleGroups";
 import { cn } from "@/lib/utils";
@@ -97,14 +96,22 @@ function downloadJson(data: ProgressDashboard) {
 
 export function ProgressDashboardView({
   result,
+  months = [],
+  selectedFrom,
 }: {
   result: ProgressLoadResult;
+  months?: ProgressMonth[];
+  selectedFrom?: string;
 }) {
   return (
     <AppShell>
       <PageContent className="max-w-5xl">
         {result.ok ? (
-          <ProgressBody data={result.data} />
+          <ProgressBody
+            data={result.data}
+            months={months}
+            selectedFrom={selectedFrom}
+          />
         ) : (
           <ProgressMessage
             title="Progress is unavailable"
@@ -116,7 +123,15 @@ export function ProgressDashboardView({
   );
 }
 
-function ProgressBody({ data }: { data: ProgressDashboard }) {
+function ProgressBody({
+  data,
+  months,
+  selectedFrom,
+}: {
+  data: ProgressDashboard;
+  months: ProgressMonth[];
+  selectedFrom?: string;
+}) {
   const [copied, setCopied] = useState(false);
   const [copyFallback, setCopyFallback] = useState<string | null>(null);
   const [selectedExercise, setSelectedExercise] = useState(
@@ -181,26 +196,38 @@ function ProgressBody({ data }: { data: ProgressDashboard }) {
         </div>
       </header>
 
-      <nav aria-label="Time range" className="mb-6 flex flex-wrap gap-2">
-        {PROGRESS_RANGES.map((range) => {
-          const current = data.window.weeks === range.weeks;
-          return (
-            <Link
-              key={range.id}
-              href={progressRangeHref(range.id)}
-              aria-current={current ? "page" : undefined}
-              className={cn(
-                "rounded-full border px-3 py-1.5 text-sm font-medium",
-                current
-                  ? "border-primary bg-primary text-primary-foreground"
-                  : "border-border text-foreground"
-              )}
-            >
-              {range.label}
-            </Link>
-          );
-        })}
-      </nav>
+      <div className="mb-6 flex items-center gap-3">
+        <span className="text-muted-foreground shrink-0 text-sm font-medium">
+          From
+        </span>
+        <nav
+          aria-label="Time range"
+          className="min-w-0 flex-1 overflow-x-auto"
+        >
+          <div className="flex w-max gap-2 pb-1">
+            {months.map((month) => {
+              const current = selectedFrom
+                ? selectedFrom.startsWith(month.id)
+                : data.window.from.startsWith(month.id);
+              return (
+                <Link
+                  key={month.id}
+                  href={progressMonthHref(month.id)}
+                  aria-current={current ? "page" : undefined}
+                  className={cn(
+                    "inline-flex h-11 shrink-0 items-center rounded-full border px-4 text-sm font-medium",
+                    current
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border text-foreground"
+                  )}
+                >
+                  {month.label}
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
+      </div>
 
       {copyFallback && (
         <div className="mb-6">
@@ -283,7 +310,7 @@ function ProgressCharts({
           subtitle={
             data.plan.plannedSessions > 0
               ? `Sessions your ${formatCount(data.plan.activeRoutineDays)}-day routine schedules`
-              : periodLabel(data.window.weeks)
+              : "This period"
           }
           icon={<Calendar className="h-4 w-4" />}
         />

@@ -1,13 +1,16 @@
 import { redirect } from "next/navigation";
 import { ProgressDashboardView } from "@/components/fitness/progress-dashboard";
 import { loadProgressDashboard } from "@/features/progress/loadProgressDashboard";
-import { progressRangeFromParam } from "@/features/progress/range";
+import {
+  progressMonthFromParam,
+  progressMonths,
+} from "@/features/progress/range";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function ProgressPage({
   searchParams,
 }: {
-  searchParams: Promise<{ range?: string }>;
+  searchParams: Promise<{ from?: string }>;
 }) {
   const supabase = await createClient();
   const {
@@ -18,8 +21,15 @@ export default async function ProgressPage({
     redirect("/login");
   }
 
-  const { range } = await searchParams;
-  const selected = progressRangeFromParam(range);
-  const result = await loadProgressDashboard(selected.weeks);
-  return <ProgressDashboardView result={result} />;
+  const { from } = await searchParams;
+  const today = new Date();
+  const selected = progressMonthFromParam(from, today);
+  const result = await loadProgressDashboard(selected.from);
+  return (
+    <ProgressDashboardView
+      result={result}
+      months={progressMonths(today)}
+      selectedFrom={selected.from}
+    />
+  );
 }

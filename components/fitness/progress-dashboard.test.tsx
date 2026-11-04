@@ -4,6 +4,13 @@ import userEvent from "@testing-library/user-event";
 import { ProgressDashboardView } from "./progress-dashboard";
 import { progressFixture } from "@/features/progress/fixture";
 import { buildProgressBrief } from "@/features/progress/brief";
+import type { ProgressMonth } from "@/features/progress/range";
+
+const months: ProgressMonth[] = [
+  { id: "2026-11", label: "Nov", from: "2026-11-01" },
+  { id: "2026-10", label: "Oct", from: "2026-10-01" },
+  { id: "2026-08", label: "Aug", from: "2026-08-01" },
+];
 
 afterEach(() => {
   cleanup();
@@ -17,21 +24,29 @@ describe("ProgressDashboardView", () => {
       value: { writeText },
     });
 
+    const data = {
+      ...progressFixture,
+      window: { ...progressFixture.window, from: "2026-11-01" },
+    };
     render(
-      <ProgressDashboardView result={{ ok: true, data: progressFixture }} />
+      <ProgressDashboardView
+        result={{ ok: true, data }}
+        months={months}
+        selectedFrom="2026-11-01"
+      />
     );
 
     expect(
       screen.getByRole("heading", { name: "Progress" })
     ).toBeInTheDocument();
     expect(screen.getByText("52")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "12 weeks" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Nov" })).toHaveAttribute(
       "aria-current",
       "page"
     );
-    expect(screen.getByRole("link", { name: "4 weeks" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Oct" })).toHaveAttribute(
       "href",
-      "/progress?range=4w"
+      "/progress?from=2026-10"
     );
     expect(
       screen.getByRole("heading", { name: "One exercise" })
@@ -51,7 +66,7 @@ describe("ProgressDashboardView", () => {
 
     await userEvent.click(screen.getByRole("button", { name: "Copy report" }));
 
-    expect(writeText).toHaveBeenCalledWith(buildProgressBrief(progressFixture));
+    expect(writeText).toHaveBeenCalledWith(buildProgressBrief(data));
     expect(
       await screen.findByRole("button", { name: "Copied" })
     ).toBeInTheDocument();

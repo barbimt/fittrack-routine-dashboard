@@ -1,25 +1,41 @@
-export const PROGRESS_RANGES = [
-  { id: "4w", label: "4 weeks", weeks: 4 },
-  { id: "12w", label: "12 weeks", weeks: 12 },
-  { id: "6m", label: "6 months", weeks: 26 },
-  { id: "1y", label: "1 year", weeks: 52 },
-] as const;
+export type ProgressMonth = {
+  id: string;
+  label: string;
+  from: string;
+};
 
-export type ProgressRangeId = (typeof PROGRESS_RANGES)[number]["id"];
+const monthLabel = new Intl.DateTimeFormat("en", {
+  month: "short",
+  timeZone: "UTC",
+});
 
-export function progressRangeFromParam(value: string | undefined) {
-  return (
-    PROGRESS_RANGES.find((range) => range.id === value) ?? PROGRESS_RANGES[1]
-  );
+/** Newest first. Each option starts on the first day of that month and runs through today. */
+export function progressMonths(
+  today = new Date(),
+  count = 6
+): ProgressMonth[] {
+  const year = today.getUTCFullYear();
+  const month = today.getUTCMonth();
+  return Array.from({ length: count }, (_, index) => {
+    const date = new Date(Date.UTC(year, month - index, 1));
+    const id = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
+    return {
+      id,
+      label: monthLabel.format(date),
+      from: `${id}-01`,
+    };
+  });
 }
 
-export function progressRangeHref(id: ProgressRangeId): string {
-  return id === "12w" ? "/progress" : `/progress?range=${id}`;
+export function progressMonthFromParam(
+  value: string | undefined,
+  today = new Date()
+): ProgressMonth {
+  const months = progressMonths(today);
+  return months.find((month) => month.id === value) ?? months[0];
 }
 
-export function periodLabel(weeks: number): string {
-  return (
-    PROGRESS_RANGES.find((range) => range.weeks === weeks)?.label ??
-    `${weeks} weeks`
-  );
+export function progressMonthHref(id: string, today = new Date()): string {
+  const current = progressMonths(today)[0];
+  return id === current?.id ? "/progress" : `/progress?from=${id}`;
 }
